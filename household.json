@@ -1,0 +1,248 @@
+{
+  "household": {
+    "adults": [
+      {
+        "name": "Mark",
+        "role": "Father",
+        "age": 42,
+        "email": "mark.j.barber@gmail.com"
+      },
+      {
+        "name": "Genevieve",
+        "role": "Mother",
+        "age": 42,
+        "email": "genevievekfoster@gmail.com"
+      }
+    ],
+    "kids": [
+      {
+        "name": "Maddie",
+        "age": 7,
+        "notes": "Mildly lactose intolerant. Picky but improving with age. Dislikes tomatoes and tomato-based sauces. Generally resistant to new foods. Says she dislikes salmon, but parents want to keep offering it."
+      },
+      {
+        "name": "Hamish",
+        "age": 4,
+        "notes": "Picky eater. Loves pasta. Likes rice with soy sauce. Generally resistant to new foods."
+      }
+    ],
+    "allergies_or_restrictions": [
+      "Maddie: mild lactose intolerance"
+    ],
+    "key_principles": [
+      "Favor low-cleanup/one-pan (or one-pan-plus-one-pot) dinners on weeknights",
+      "Lean on 'build-your-own' formats (tacos, pizza, etc.) as a reliable way to introduce variety without a fight",
+      "Keep serving nutrition-forward meals (salmon, roast veg) even when not popular with the kids yet - look for kid-friendlier formats rather than dropping them",
+      "OK to hide vegetables in kid portions when it helps a dish land (e.g. blended into a sauce or mac and cheese)",
+      "Lunches and snacks should have real variety across the week, same as dinners - not a fixed rotation",
+      "No strict repeat-avoidance rule - use judgment on spacing repeats rather than a fixed week count",
+      "Seasonal: household is in Australia - winter (Jun-Aug) prioritise hot dinners/lunches, summer (Dec-Feb) prioritise grilled food and salads",
+      "Maddie: moderate dairy / lactose-free swaps where easy; offer a tomato-free option on build-your-own nights",
+      "Hamish: avoid broccoli-forward mains, salmon patties, roast veg stacks, and pie fillings - all previously flopped; crumbed/fried 'fish finger' shape works for salmon"
+    ],
+    "likes": [
+      "Maddie: grilled/roast chicken, steamed broccoli, potato gems, chicken nuggets with ketchup, rump steak, flathead (fried, kid-style), plain rice",
+      "Hamish: plain/white rice, rice with soy sauce, pasta (plain, non-tomato), build-your-own tacos, chicken nuggets with ketchup, sausages with ketchup, flathead (fried, kid-style), egg and soy fried rice, basic mac and cheese, bacon, cous cous (sometimes)"
+    ],
+    "dislikes": [
+      "Maddie: tomatoes and tomato-based sauces, salmon (stated dislike, still offered), most new/unfamiliar foods",
+      "Hamish: broccoli (often picked at), salmon patties, roast vegetable stack, pie filling (ate pastry only), most new/unfamiliar foods"
+    ],
+    "pantry_staples": [],
+    "use_up_this_week": []
+  },
+  "board_of_advisors": [
+    {
+      "name": "The Weeknight Realist",
+      "philosophy": "Fast, low-fuss, high repeat-rate family recipes; minimal cleanup and pantry staples."
+    },
+    {
+      "name": "The Flavor Explorer",
+      "philosophy": "Bold, unfussy, global flavors; uses whole ingredients; gentle, low-stakes variety."
+    },
+    {
+      "name": "The Veg-Forward Stylist",
+      "philosophy": "Vegetable-forward, herb- and spice-driven; makes vegetables genuinely kid-appealing."
+    },
+    {
+      "name": "The Child Nutritionist",
+      "philosophy": "Realistic picky-eating strategy: repeated low-pressure exposure, pairing new with familiar, no bribery or battles."
+    },
+    {
+      "name": "The Family GP / Dietician",
+      "philosophy": "Whole-week balance check: protein variety, iron/fibre, flags anything relevant to health notes."
+    }
+  ],
+  "last_board_review_date": "2026-08-10",
+  "current_week": {
+    "week_id": "2026-W33",
+    "date_range": "Aug 10 - Aug 16, 2026",
+    "status": "proposed",
+    "proposed_at": "2026-08-10T07:00:00Z",
+    "published_at": null,
+    "board_notes": "The Family GP/Dietician and Child Nutritionist flagged Maddie's tomato dislike and lactose intolerance, so Tuesday's tacos and half of Friday's pizza go tomato-free, and dairy is spread lighter across the week. The Flavor Explorer leaned on Hamish's proven favourite (egg-and-soy fried rice with bacon), and salmon stays in the crumbed 'fish-finger' shape rather than the patty style that didn't land for him before. Winter week - every dinner and lunch stayed hot; no use-up ingredients flagged yet.",
+    "days": [
+      {
+        "day": "Monday",
+        "dinner": {
+          "name": "Soy-glazed baked chicken thighs, rice & steamed broccoli",
+          "new_or_repeat": "new (sauce variant)",
+          "authored_by": "The Weeknight Realist & The Child Nutritionist"
+        },
+        "lunch": {
+          "name": "Cheese quesadillas"
+        },
+        "snack": {
+          "name": "Apple slices with peanut butter"
+        }
+      },
+      {
+        "day": "Tuesday",
+        "dinner": {
+          "name": "Build-your-own soft chicken tacos (tomato-free board)",
+          "new_or_repeat": "new (tomato-free rework)",
+          "authored_by": "The Flavor Explorer & The Child Nutritionist"
+        },
+        "lunch": {
+          "name": "Soy chicken & rice wraps (Monday's leftovers)"
+        },
+        "snack": {
+          "name": "Banana"
+        }
+      },
+      {
+        "day": "Wednesday",
+        "dinner": {
+          "name": "One-pan sausage & rice bake",
+          "new_or_repeat": "new (replaces creamy gnocchi, lighter dairy)",
+          "authored_by": "The Weeknight Realist"
+        },
+        "lunch": {
+          "name": "Taco filling wraps (Tuesday's leftovers)"
+        },
+        "snack": {
+          "name": "Mandarins"
+        }
+      },
+      {
+        "day": "Thursday",
+        "dinner": {
+          "name": "Egg & soy fried rice with bacon",
+          "new_or_repeat": "repeat of known favorite format",
+          "authored_by": "The Flavor Explorer & The Weeknight Realist"
+        },
+        "lunch": {
+          "name": "Sausage rice bake (Wednesday's leftovers)"
+        },
+        "snack": {
+          "name": "Popcorn"
+        }
+      },
+      {
+        "day": "Friday",
+        "dinner": {
+          "name": "Build-your-own pizza night (tomato-free option)",
+          "new_or_repeat": "new (tomato-free base added)",
+          "authored_by": "The Weeknight Realist & The Child Nutritionist"
+        },
+        "lunch": {
+          "name": "Fried rice (Thursday's leftovers)"
+        },
+        "snack": {
+          "name": "Rice crackers"
+        }
+      },
+      {
+        "day": "Saturday",
+        "dinner": {
+          "name": "Crumbed salmon 'fish fingers', potato gems & peas",
+          "new_or_repeat": "repeat (2nd week of this format)",
+          "authored_by": "The Family GP/Dietician & The Child Nutritionist"
+        },
+        "lunch": {
+          "name": "Pizza slices (Friday's leftovers)"
+        },
+        "snack": {
+          "name": "Lactose-free yoghurt pouch (or fresh fruit if unavailable)"
+        }
+      },
+      {
+        "day": "Sunday",
+        "dinner": {
+          "name": "Roast chicken, roast potatoes, broccoli & gravy",
+          "new_or_repeat": "repeat",
+          "authored_by": "The Weeknight Realist"
+        },
+        "lunch": {
+          "name": "Salmon finger wraps (Saturday's leftovers)"
+        },
+        "snack": {
+          "name": "Cheese and crackers"
+        }
+      }
+    ],
+    "shopping_list": {
+      "produce": [
+        "Broccoli (2 heads)",
+        "Avocados (2)",
+        "Shredded lettuce (1 bag)",
+        "Corn kernels (1 cup, fresh or tinned)",
+        "Onion (2)",
+        "Garlic (1 bulb)",
+        "Ginger (small knob)",
+        "Lemon (1)",
+        "Fresh thyme",
+        "Spring onions (2)",
+        "Bananas (1 bunch)",
+        "Apples (4)",
+        "Mandarins (1 bag)",
+        "Potatoes (1.5kg)"
+      ],
+      "meat_deli": [
+        "Chicken thighs, boneless skinless (8, ~1.2kg)",
+        "Chicken breast (700g)",
+        "Sausages (6, ~500g)",
+        "Bacon (4 rashers)",
+        "Salmon fillets, skinless (600g)",
+        "Whole chicken (~1.8kg)",
+        "Sliced ham"
+      ],
+      "dairy": [
+        "Grated cheese (block) + a lactose-free block for Maddie's portions",
+        "Sour cream",
+        "Mozzarella",
+        "Parmesan (small wedge, adults only)",
+        "Butter",
+        "Eggs (1 dozen)",
+        "Lactose-free yoghurt pouches x2-4"
+      ],
+      "pantry": [
+        "Jasmine or long-grain rice (2kg bag)",
+        "Soy sauce",
+        "Honey",
+        "Rice vinegar",
+        "Cornstarch",
+        "Soft flour tortillas (12)",
+        "Ground cumin",
+        "Smoked paprika",
+        "Garlic powder",
+        "Plain flour",
+        "Instant yeast",
+        "Panko breadcrumbs",
+        "Chicken stock",
+        "Pizza sauce (tomato, rest of the family)",
+        "Rice crackers",
+        "Popcorn kernels",
+        "Peanut butter",
+        "Ketchup"
+      ],
+      "frozen": [
+        "Peas",
+        "Frozen peas & corn mix",
+        "Potato gems"
+      ],
+      "other": []
+    },
+    "feedback": []
+  }
+}
