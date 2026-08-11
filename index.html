@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>This Week's Menu — Family Menu Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF5EC;
+    --ink:#2E2A22;
+    --sage:#54634C;
+    --sage-dark:#3B4636;
+    --ochre:#C08A2E;
+    --line:#E4DAC6;
+    --card:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);}
+  #hub{
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    background:var(--paper);
+    max-width:480px;
+    margin:0 auto;
+    padding:20px 16px 40px;
+    min-height:100vh;
+  }
+  #hub h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:26px;
+    margin:4px 0 2px;
+    letter-spacing:-0.01em;
+  }
+  #hub .subtitle{
+    font-size:13px;
+    color:var(--sage-dark);
+    margin-bottom:18px;
+    opacity:0.85;
+  }
+  #hub .tabs{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    padding-bottom:8px;
+    margin-bottom:14px;
+    border-bottom:1px solid var(--line);
+  }
+  #hub .tab{
+    flex:0 0 auto;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    padding:7px 13px;
+    border-radius:20px;
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--sage-dark);
+    cursor:pointer;
+  }
+  #hub .tab.active{
+    background:var(--sage);
+    border-color:var(--sage);
+    color:#fff;
+  }
+  #hub .panel{display:none;}
+  #hub .panel.active{display:block;}
+  #hub .day-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:12px;
+  }
+  #hub .day-title{
+    font-family:'Fraunces',serif;
+    font-size:17px;
+    font-weight:600;
+    margin-bottom:10px;
+    color:var(--sage-dark);
+  }
+  #hub .meal-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    padding:8px 0;
+    border-top:1px solid var(--line);
+    gap:10px;
+  }
+  #hub .meal-row:first-of-type{border-top:none;}
+  #hub .meal-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ochre);
+    font-weight:700;
+    width:56px;
+    flex:0 0 56px;
+    padding-top:2px;
+  }
+  #hub .meal-name{font-size:14.5px;font-weight:500;flex:1;}
+  #hub .badge-new{
+    font-size:10px;
+    background:var(--ochre);
+    color:#fff;
+    padding:2px 6px;
+    border-radius:8px;
+    margin-left:6px;
+    vertical-align:middle;
+  }
+  #hub .section-title{
+    font-family:'Fraunces',serif;
+    font-size:15px;
+    font-weight:600;
+    margin:18px 0 8px;
+    color:var(--sage-dark);
+  }
+  #hub .shop-section{margin-bottom:10px;}
+  #hub .shop-cat{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ochre);
+    font-weight:700;
+    margin:10px 0 4px;
+  }
+  #hub .shop-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:5px 0;
+    font-size:14px;
+  }
+  #hub .shop-item input{width:16px;height:16px;accent-color:var(--sage);}
+  #hub .shop-item.checked span{text-decoration:line-through;opacity:0.5;}
+  #hub .export-btn{
+    margin-top:18px;width:100%;background:transparent;border:1.5px solid var(--sage);
+    color:var(--sage-dark);border-radius:10px;padding:10px;font-weight:600;font-size:13px;cursor:pointer;
+  }
+  #hub .status-pill{
+    display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;
+    background:#F1EEE3;color:var(--sage-dark);margin-bottom:14px;
+  }
+  #hub .recipe-link-btn{
+    font-size:11px;font-weight:700;color:var(--sage);background:none;border:none;
+    text-decoration:underline;cursor:pointer;padding:0;margin-left:4px;
+  }
+  #hub .recipe-page{
+    position:fixed;inset:0;background:var(--paper);z-index:60;overflow-y:auto;
+  }
+  #hub .recipe-page-inner{
+    max-width:480px;margin:0 auto;padding:20px 16px 40px;
+  }
+  #hub .recipe-close{
+    font-size:13px;font-weight:600;color:var(--sage-dark);background:none;border:none;
+    cursor:pointer;padding:0;margin-bottom:16px;
+  }
+  #hub .recipe-title{
+    font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:var(--ink);margin-bottom:4px;
+  }
+  #hub .recipe-author{
+    font-size:12px;color:var(--ochre);font-weight:600;margin-bottom:18px;
+  }
+  #hub .recipe-section-h{
+    font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--sage-dark);
+    margin:18px 0 8px;
+  }
+  #hub .recipe-list{
+    margin:0;padding-left:20px;font-size:14px;line-height:1.6;
+  }
+  #hub .recipe-list li{margin-bottom:6px;}
+  #hub .recipe-method li{margin-bottom:10px;}
+  #hub .principles-link{
+    display:inline-block;font-size:12px;font-weight:600;color:var(--sage-dark);
+    background:#F1EEE3;border:none;border-radius:20px;padding:5px 12px;cursor:pointer;
+    margin-bottom:14px;margin-left:8px;
+  }
+  #hub .principles-page-inner .principles-static{
+    font-size:14px;line-height:1.7;white-space:pre-wrap;background:var(--card);
+    border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px;
+  }
+  #hub .copy-shop-btn{
+    width:100%;background:var(--sage);color:#fff;border:none;border-radius:10px;
+    padding:11px;font-weight:700;font-size:13px;cursor:pointer;margin-top:16px;
+  }
+  #hub .copy-shop-btn.copied{background:var(--sage-dark);}
+  #hub .feedback-note{
+    background:var(--card);border:1.5px solid var(--ochre);border-radius:14px;
+    padding:16px;margin-bottom:16px;font-size:13px;line-height:1.6;
+  }
+  #hub .feedback-note .review-title{
+    font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:var(--sage-dark);margin-bottom:6px;
+  }
+  #hub .feedback-note a{color:var(--sage-dark);font-weight:700;}
+  #hub .dietary-note{
+    font-size:12px;color:var(--sage-dark);background:#F1EEE3;border-radius:10px;padding:10px 12px;margin-bottom:14px;
+  }
+  #hub .footer-note{
+    font-size:11px;color:var(--sage-dark);opacity:0.6;text-align:center;margin-top:24px;
+  }
+</style>
+</head>
+<body>
+
+<div id="hub">
+  <div class="status-pill" id="statusPill">loading…</div>
+  <h1>This Week's Menu</h1>
+  <div class="subtitle" id="dateRange">—</div>
+  <button class="principles-link" id="principlesLinkBtn">📋 Meal planning principles</button>
+
+  <div id="reviewBoxContainer"></div>
+
+  <div class="tabs">
+    <button class="tab active" data-panel="plan">Plan</button>
+    <button class="tab" data-panel="shop">Shopping list</button>
+  </div>
+
+  <div class="panel active" id="panel-plan"></div>
+  <div class="panel" id="panel-shop"></div>
+
+  <div class="footer-note">Published by the Family Menu Planner · updated weekly</div>
+</div>
+
+<script>
+(function(){
+  // ---- Claude replaces WEEK_DATA, PRINCIPLES_TEXT and FEEDBACK_EMAIL each week ----
+  const FEEDBACK_EMAIL = "mark.j.barber@gmail.com";
+
+  const WEEK_DATA = {
+    week_id: "2026-W33",
+    date_range: "Aug 10 – Aug 16, 2026",
+    status: "proposed",
+    days: [
+      {day:"Monday", dinner:{name:"Soy-glazed baked chicken thighs, rice & steamed broccoli", new:true, authored_by:"The Weeknight Realist & The Child Nutritionist", recipe:{ingredients:["8 boneless, skinless chicken thighs","1/3 cup soy sauce","2 tbsp honey","1 tbsp rice vinegar (or lemon juice)","2 cloves garlic, minced","1 tsp grated ginger","1 tbsp cornstarch mixed with 2 tbsp water","1.5 cups jasmine rice","2 heads broccoli, cut into florets"], method:["Preheat oven to 200°C (400°F).","Whisk soy sauce, honey, rice vinegar, garlic and ginger in a small saucepan; simmer 2-3 min.","Stir in the cornstarch slurry and simmer until glossy and slightly thickened, about 1 min.","Lay chicken thighs in a baking dish, spoon over half the sauce, and bake 20 min.","Brush on the remaining sauce and bake a further 10 min until sticky and cooked through.","Meanwhile cook the rice according to packet directions, steaming the broccoli for the last 5-6 min.","Serve chicken over rice with broccoli alongside — a splash of extra plain soy sauce on the side for Hamish's rice if he wants it saucier."]}}, lunch:{name:"Cheese quesadillas", authored_by:"The Weeknight Realist", recipe:{ingredients:["4 flour tortillas","1.5 cups grated cheese (swap in a lactose-free block for Maddie's portion if you have it)","Butter for the pan"], method:["Scatter cheese over half of each tortilla, fold over.","Cook in a lightly buttered pan over medium heat, 2-3 min per side, until golden and the cheese is melted.","Cut into wedges to serve."]}}, snack:{name:"Apple slices with peanut butter"}},
+      {day:"Tuesday", dinner:{name:"Build-your-own soft chicken tacos (tomato-free board)", new:true, authored_by:"The Flavor Explorer & The Child Nutritionist", recipe:{ingredients:["700g chicken breast, diced small","1 tbsp ground cumin","1 tsp smoked paprika","1/2 tsp garlic powder","Pinch of salt","8 soft flour tortillas","1 cup grated cheese","1/2 cup sour cream","2 avocados, mashed","1 cup shredded lettuce","1/2 cup corn kernels, warmed"], method:["Toss diced chicken with cumin, smoked paprika, garlic powder and salt.","Cook in a splash of oil over medium-high heat until browned through, about 8 min.","Warm the tortillas.","Set out chicken, cheese, sour cream, mashed avocado, lettuce and warm corn separately and let everyone build their own — no tomato salsa on the board this week for Maddie's sake, though the adults can add hot sauce."]}}, lunch:{name:"Soy chicken & rice wraps (Monday's leftovers)"}, snack:{name:"Banana"}},
+      {day:"Wednesday", dinner:{name:"One-pan sausage & rice bake", new:true, authored_by:"The Weeknight Realist", recipe:{ingredients:["6 sausages, casings removed","1.5 cups long-grain rice","1 onion, diced","2 cloves garlic, minced","3 cups chicken stock","1 cup frozen peas","1/2 cup grated parmesan (adults' portion, served on the side)"], method:["Brown sausage meat in a large oven-proof pan, breaking it into small pieces, about 6 min.","Add onion and garlic, cook until soft, 3 min.","Stir in rice, then pour in stock and bring to a simmer.","Cover and cook 15-18 min until rice is tender and the liquid is absorbed, stirring in the peas for the last 5 min.","Serve as-is for the kids; pass parmesan separately for anyone who wants it — kept light on dairy for Maddie."]}}, lunch:{name:"Taco filling wraps (Tuesday's leftovers)"}, snack:{name:"Mandarins"}},
+      {day:"Thursday", dinner:{name:"Egg & soy fried rice with bacon", new:false, authored_by:"The Flavor Explorer & The Weeknight Realist", recipe:{ingredients:["4 cups cold cooked rice (day-old if possible)","4 rashers bacon, diced","3 eggs, beaten","3 tbsp soy sauce","1 cup frozen peas and corn mix","2 spring onions, sliced","2 tbsp neutral oil"], method:["Heat oil in a large pan or wok over high heat; cook bacon until crisp, about 4 min.","Push bacon to one side, pour in the beaten egg and scramble until just set.","Add the rice, breaking up clumps, and stir-fry 3-4 min.","Add the peas and corn, soy sauce and spring onions; toss until heated through and everything is coated.","Serve as-is — a proven favourite for Hamish (rice with soy sauce, egg), easy to portion small for Maddie."]}}, lunch:{name:"Sausage rice bake (Wednesday's leftovers)"}, snack:{name:"Popcorn"}},
+      {day:"Friday", dinner:{name:"Build-your-own pizza night (tomato-free option)", new:true, authored_by:"The Weeknight Realist & The Child Nutritionist", recipe:{ingredients:["3 cups flour","1 packet (2.25 tsp) instant yeast","1 tsp sugar","1 tsp salt","1 cup warm water","2 tbsp olive oil, plus extra + 1 clove garlic minced for the tomato-free base","Regular pizza sauce (for everyone except Maddie)","Mozzarella and toppings of choice (plain ham & cheese for the kids)"], method:["Mix yeast, sugar and warm water; let sit 5 min until foamy.","Stir in flour, salt and olive oil until a shaggy dough forms, then knead 5 min until smooth.","Rest, covered, 20-30 min.","Divide into 4 portions and stretch each into a base.","Top Maddie's base with a garlic-oil mix instead of tomato sauce; everyone else uses regular pizza sauce. Cheese and toppings as preferred — kids get plain ham and cheese.","Bake at the highest oven setting (or in the pizza oven) until golden and bubbling, 6-10 min."]}}, lunch:{name:"Fried rice (Thursday's leftovers)"}, snack:{name:"Rice crackers"}},
+      {day:"Saturday", dinner:{name:"Crumbed salmon 'fish fingers', potato gems & peas", new:false, authored_by:"The Family GP/Dietician & The Child Nutritionist", recipe:{ingredients:["600g skinless salmon fillets, cut into finger-width strips","1/2 cup flour","2 eggs, beaten","1.5 cups panko breadcrumbs","Frozen potato gems and peas to serve","Ketchup to serve"], method:["Preheat oven to 200°C (400°F) and line a tray.","Set up three shallow bowls: flour, beaten egg, and panko.","Coat each salmon strip in flour, then egg, then panko, pressing the crumbs on firmly.","Lay on the tray, spray lightly with oil, and bake 12-15 min, turning once, until golden and just cooked through.","Bake potato gems on a separate tray alongside, and steam or microwave the peas.","Serve with ketchup — same crumbed-and-fried approach that worked well with flathead, in a different shape to the patty style that didn't land with Hamish before."]}}, lunch:{name:"Pizza slices (Friday's leftovers)"}, snack:{name:"Lactose-free yoghurt pouch (or fresh fruit if unavailable)"}},
+      {day:"Sunday", dinner:{name:"Roast chicken, roast potatoes, broccoli & gravy", new:false, authored_by:"The Weeknight Realist", recipe:{ingredients:["1 whole chicken (~1.8kg)","1.5kg potatoes, quartered","2 tbsp olive oil","2 cloves garlic","1 lemon, halved","A few sprigs thyme","2 tbsp flour","2 cups chicken stock (for gravy)","1 head broccoli, steamed"], method:["Preheat oven to 200°C (400°F).","Pat the chicken dry, rub with oil, salt and pepper; stuff the cavity with garlic, lemon and thyme.","Place chicken in a large roasting tray, scatter potatoes around it tossed in oil, salt and pepper.","Roast 70-80 min until juices run clear and potatoes are golden, basting once halfway.","Rest chicken 10 min. Skim fat from the pan juices, whisk in flour over heat, then gradually add stock, simmering until thickened, for the gravy.","Steam broccoli and serve alongside — Maddie's favourite way to have it."]}}, lunch:{name:"Salmon finger wraps (Saturday's leftovers)"}, snack:{name:"Cheese and crackers"}}
+    ],
+    shopping_list: {
+      "Produce": ["Broccoli (2 heads)", "Avocados (2)", "Shredded lettuce (1 bag)", "Corn kernels (1 cup, fresh or tinned)", "Onion (2)", "Garlic (1 bulb)", "Ginger (small knob)", "Lemon (1)", "Fresh thyme", "Spring onions (2)", "Bananas (1 bunch)", "Apples (4)", "Mandarins (1 bag)", "Potatoes (1.5kg)"],
+      "Meat & deli": ["Chicken thighs, boneless skinless (8, ~1.2kg)", "Chicken breast (700g)", "Sausages (6, ~500g)", "Bacon (4 rashers)", "Salmon fillets, skinless (600g)", "Whole chicken (~1.8kg)", "Sliced ham"],
+      "Dairy": ["Grated cheese (block) + a lactose-free block for Maddie's portions", "Sour cream", "Mozzarella", "Parmesan (small wedge, adults only)", "Butter", "Eggs (1 dozen)", "Lactose-free yoghurt pouches x2-4"],
+      "Pantry": ["Jasmine or long-grain rice (2kg bag)", "Soy sauce", "Honey", "Rice vinegar", "Cornstarch", "Soft flour tortillas (12)", "Ground cumin", "Smoked paprika", "Garlic powder", "Plain flour", "Instant yeast", "Panko breadcrumbs", "Chicken stock", "Pizza sauce (tomato, rest of the family)", "Rice crackers", "Popcorn kernels", "Peanut butter", "Ketchup"],
+      "Frozen": ["Peas", "Frozen peas & corn mix", "Potato gems"],
+      "Other": []
+    }
+  };
+
+  const PRINCIPLES_TEXT = `- Favor low-cleanup/one-pan (or one-pan-plus-one-pot) dinners on weeknights
+- Lean on 'build-your-own' formats (tacos, pizza, etc.) as a reliable way to introduce variety without a fight
+- Keep serving nutrition-forward meals (salmon, roast veg) even when not popular with the kids yet - look for kid-friendlier formats rather than dropping them
+- OK to hide vegetables in kid portions when it helps a dish land (e.g. blended into a sauce or mac and cheese)
+- Lunches and snacks should have real variety across the week, same as dinners - not a fixed rotation
+- No strict repeat-avoidance rule - use judgment on spacing repeats rather than a fixed week count
+- Seasonal: household is in Australia - winter (Jun-Aug) prioritise hot dinners/lunches, summer (Dec-Feb) prioritise grilled food and salads
+- Maddie: mildly lactose intolerant (moderate dairy, lactose-free swaps where easy) and dislikes tomatoes/tomato sauce (offer a tomato-free option on build-your-own nights); states she dislikes salmon but keep gently offering it in kid-friendly formats
+- Hamish: avoid broccoli-forward dishes as the main event, salmon patties (crumbed 'fish finger' shape works better), roast veg stacks, and pie fillings — all previously flopped
+
+To change these: edit this list and tell Claude what changed next time it plans a week (this page doesn't sync back automatically — it's a display only).`;
+
+  function key(day, meal){ return day + "-" + meal; }
+
+  function render(){
+    document.getElementById("dateRange").textContent = WEEK_DATA.date_range;
+    document.getElementById("statusPill").textContent = WEEK_DATA.status === "proposed"
+      ? "Draft — open for feedback"
+      : "Published";
+
+    const reviewContainer = document.getElementById("reviewBoxContainer");
+    if(WEEK_DATA.status === "proposed"){
+      const subject = encodeURIComponent("Feedback on this week's menu (" + WEEK_DATA.date_range + ")");
+      const body = encodeURIComponent("Plan feedback / swaps:\n\n\nIngredients to use up this week:\n\n");
+      reviewContainer.innerHTML = `
+        <div class="dietary-note">Built around Maddie's mild lactose intolerance + tomato dislike, and Hamish's known dislikes (broccoli-forward mains, salmon patties, roast veg stacks, pie filling).</div>
+        <div class="feedback-note">
+          <div class="review-title">Got feedback on this plan?</div>
+          Reply to this week's email, or <a href="mailto:${FEEDBACK_EMAIL}?subject=${subject}&body=${body}">send a quick email</a> with any swaps or ingredients that need using up — we'll fold it in before this publishes.
+        </div>`;
+    } else {
+      reviewContainer.innerHTML = "";
+    }
+
+    const plan = document.getElementById("panel-plan");
+    plan.innerHTML = WEEK_DATA.days.map(d => {
+      const meals = ["lunch","snack","dinner"];
+      return `<div class="day-card">
+        <div class="day-title">${d.day}</div>
+        ${meals.map(m => {
+          const info = d[m];
+          if(!info) return "";
+          return `<div class="meal-row">
+            <div class="meal-label">${m}</div>
+            <div class="meal-name">${info.name}${info.new ? '<span class="badge-new">new</span>':''}${info.recipe ? ` <button class="recipe-link-btn" data-day="${d.day}" data-meal="${m}">View recipe</button>`:''}</div>
+          </div>`;
+        }).join("")}
+      </div>`;
+    }).join("");
+
+    const shop = document.getElementById("panel-shop");
+    shop.innerHTML = Object.entries(WEEK_DATA.shopping_list)
+      .filter(([cat, items]) => items.length)
+      .map(([cat, items]) => `
+        <div class="shop-section">
+          <div class="shop-cat">${cat}</div>
+          ${items.map((it,i) => `
+            <label class="shop-item" data-id="${cat}-${i}">
+              <input type="checkbox">
+              <span>${it}</span>
+            </label>`).join("")}
+        </div>`).join("") + `<button class="copy-shop-btn" id="copyShopBtn">Copy shopping list to clipboard</button>`;
+
+    plan.querySelectorAll(".recipe-link-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=> openRecipePage(btn.dataset.day, btn.dataset.meal));
+    });
+    shop.querySelectorAll(".shop-item").forEach(row=>{
+      row.querySelector("input").addEventListener("change", (e)=>{
+        row.classList.toggle("checked", e.target.checked);
+      });
+    });
+    document.getElementById("copyShopBtn").addEventListener("click", async (e)=>{
+      const lines = [];
+      shop.querySelectorAll(".shop-section").forEach(section=>{
+        lines.push(section.querySelector(".shop-cat").textContent);
+        section.querySelectorAll(".shop-item").forEach(row=>{
+          const checked = row.querySelector("input").checked;
+          const text = row.querySelector("span").textContent;
+          lines.push(`${checked ? "[x]" : "[ ]"} ${text}`);
+        });
+        lines.push("");
+      });
+      const text = lines.join("\n").trim();
+      try{
+        await navigator.clipboard.writeText(text);
+        e.target.textContent = "Copied ✓";
+        e.target.classList.add("copied");
+        setTimeout(()=>{ e.target.textContent = "Copy shopping list to clipboard"; e.target.classList.remove("copied"); }, 2000);
+      }catch(err){
+        e.target.textContent = "Couldn't copy — select and copy manually";
+      }
+    });
+  }
+
+  function openRecipePage(day, meal){
+    const dayData = WEEK_DATA.days.find(d => d.day === day);
+    const info = dayData && dayData[meal];
+    if(!info || !info.recipe) return;
+
+    const page = document.createElement("div");
+    page.className = "recipe-page";
+    page.innerHTML = `
+      <div class="recipe-page-inner">
+        <button class="recipe-close" id="recipeCloseBtn">← Back</button>
+        <div class="recipe-title">${info.name}</div>
+        ${info.authored_by ? `<div class="recipe-author">Recipe by ${info.authored_by}</div>` : ''}
+        <div class="recipe-section-h">Ingredients</div>
+        <ul class="recipe-list">
+          ${info.recipe.ingredients.map(i => `<li>${i}</li>`).join("")}
+        </ul>
+        <div class="recipe-section-h">Method</div>
+        <ol class="recipe-list recipe-method">
+          ${info.recipe.method.map(s => `<li>${s}</li>`).join("")}
+        </ol>
+      </div>`;
+    document.getElementById("hub").appendChild(page);
+    page.querySelector("#recipeCloseBtn").addEventListener("click", ()=> page.remove());
+  }
+
+  function openPrinciplesPage(){
+    const page = document.createElement("div");
+    page.className = "recipe-page";
+    page.innerHTML = `
+      <div class="recipe-page-inner principles-page-inner">
+        <button class="recipe-close" id="principlesCloseBtn">← Back</button>
+        <div class="recipe-title">Meal Planning Principles</div>
+        <div class="principles-static">${PRINCIPLES_TEXT}</div>
+      </div>`;
+    document.getElementById("hub").appendChild(page);
+    page.querySelector("#principlesCloseBtn").addEventListener("click", ()=> page.remove());
+  }
+
+  document.getElementById("principlesLinkBtn").addEventListener("click", openPrinciplesPage);
+
+  document.querySelectorAll("#hub .tab").forEach(tab=>{
+    tab.addEventListener("click", ()=>{
+      document.querySelectorAll("#hub .tab").forEach(t=>t.classList.remove("active"));
+      document.querySelectorAll("#hub .panel").forEach(p=>p.classList.remove("active"));
+      tab.classList.add("active");
+      document.getElementById("panel-"+tab.dataset.panel).classList.add("active");
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
