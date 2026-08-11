@@ -80,7 +80,7 @@
     "status": "proposed",
     "proposed_at": "2026-08-10T07:00:00Z",
     "published_at": null,
-    "board_notes": "The Family GP/Dietician and Child Nutritionist flagged Maddie's tomato dislike and lactose intolerance, so Tuesday's tacos and half of Friday's pizza go tomato-free, and dairy is spread lighter across the week. The Flavor Explorer leaned on Hamish's proven favourite (egg-and-soy fried rice with bacon), and salmon stays in the crumbed 'fish-finger' shape rather than the patty style that didn't land for him before. Winter week - every dinner and lunch stayed hot; no use-up ingredients flagged yet.",
+    "board_notes": "The Family GP/Dietician and Child Nutritionist flagged Maddie's tomato dislike and lactose intolerance, so Tuesday's tacos and half of Friday's pizza go tomato-free, and dairy is spread lighter across the week. The Flavor Explorer leaned on Hamish's proven favourite (egg-and-soy fried rice with bacon), and salmon stays in the crumbed 'fish-finger' shape rather than the patty style that didn't land for him before. Winter week - every dinner and lunch stayed hot; no use-up ingredients flagged yet. UPDATE (Aug 11 feedback): Tuesday's dinner swapped to what the family is actually having - Old El Paso hard-shell tacos with seasoned beef instead of soft chicken tacos - keeping a build-your-own format with a tomato-free lane for Maddie. Diced tomato added as an optional topping and a tomato & cucumber side salad added to Wednesday's sausage bake (adults; kids get plain cucumber) to use up the 10 tomatoes on hand. Genevieve flagged that rich food is giving her indigestion, so excess fat is now drained from the beef and sausage before serving, and Sunday's gravy has been lightened (less oil/flour, extra fat skimmed, served sparingly) - worth keeping portions of richer dishes modest generally.",
     "days": [
       {
         "day": "Monday",
@@ -99,9 +99,9 @@
       {
         "day": "Tuesday",
         "dinner": {
-          "name": "Build-your-own soft chicken tacos (tomato-free board)",
-          "new_or_repeat": "new (tomato-free rework)",
-          "authored_by": "The Flavor Explorer & The Child Nutritionist"
+          "name": "Build-your-own hard-shell tacos (Old El Paso), seasoned beef & toppings bar",
+          "new_or_repeat": "new (swapped to match the family's actual Tuesday - hard shells & beef, tomato-free lane kept for Maddie)",
+          "authored_by": "The Weeknight Realist & The Child Nutritionist"
         },
         "lunch": {
           "name": "Soy chicken & rice wraps (Monday's leftovers)"
@@ -113,12 +113,12 @@
       {
         "day": "Wednesday",
         "dinner": {
-          "name": "One-pan sausage & rice bake",
-          "new_or_repeat": "new (replaces creamy gnocchi, lighter dairy)",
+          "name": "One-pan sausage & rice bake, with a tomato & cucumber side salad",
+          "new_or_repeat": "new (replaces creamy gnocchi, lighter dairy; excess sausage fat drained; tomato-cucumber side added to use up tomatoes)",
           "authored_by": "The Weeknight Realist"
         },
         "lunch": {
-          "name": "Taco filling wraps (Tuesday's leftovers)"
+          "name": "Beef taco filling wraps (Tuesday's leftovers)"
         },
         "snack": {
           "name": "Mandarins"
@@ -169,9 +169,9 @@
       {
         "day": "Sunday",
         "dinner": {
-          "name": "Roast chicken, roast potatoes, broccoli & gravy",
-          "new_or_repeat": "repeat",
-          "authored_by": "The Weeknight Realist"
+          "name": "Roast chicken, roast potatoes, broccoli & a lighter gravy",
+          "new_or_repeat": "repeat (gravy lightened after indigestion feedback)",
+          "authored_by": "The Weeknight Realist & The Family GP/Dietician"
         },
         "lunch": {
           "name": "Salmon finger wraps (Saturday's leftovers)"
@@ -196,11 +196,12 @@
         "Bananas (1 bunch)",
         "Apples (4)",
         "Mandarins (1 bag)",
-        "Potatoes (1.5kg)"
+        "Potatoes (1.5kg)",
+        "Cucumber (1)"
       ],
       "meat_deli": [
         "Chicken thighs, boneless skinless (8, ~1.2kg)",
-        "Chicken breast (700g)",
+        "Beef mince, lean (500g)",
         "Sausages (6, ~500g)",
         "Bacon (4 rashers)",
         "Salmon fillets, skinless (600g)",
@@ -222,10 +223,8 @@
         "Honey",
         "Rice vinegar",
         "Cornstarch",
-        "Soft flour tortillas (12)",
-        "Ground cumin",
-        "Smoked paprika",
-        "Garlic powder",
+        "Hard taco shells (Old El Paso, 12)",
+        "Taco seasoning (Old El Paso packet)",
         "Plain flour",
         "Instant yeast",
         "Panko breadcrumbs",
