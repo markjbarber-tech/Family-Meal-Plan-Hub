@@ -222,9 +222,13 @@
     background:#F1EEE3;border:none;border-radius:20px;padding:5px 12px;cursor:pointer;
     margin-bottom:14px;margin-left:8px;
   }
-  #hub .principles-page-inner .principles-static{
-    font-size:14px;line-height:1.7;white-space:pre-wrap;background:var(--card);
-    border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px;
+  #hub .principles-page-inner textarea{
+    width:100%;min-height:280px;font-size:13.5px;line-height:1.6;font-family:inherit;
+    background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:14px;margin-bottom:8px;resize:vertical;
+  }
+  #hub .principles-page-inner .principles-status-note{
+    font-size:12px;color:var(--sage);font-weight:600;height:16px;margin-bottom:8px;
   }
   #hub .copy-shop-btn{
     width:100%;background:var(--sage);color:#fff;border:none;border-radius:10px;
@@ -314,8 +318,7 @@
 - Seasonal: household is in Australia - winter (Jun-Aug) prioritise hot dinners/lunches, summer (Dec-Feb) prioritise grilled food and salads
 - Maddie: mildly lactose intolerant (moderate dairy, lactose-free swaps where easy) and dislikes tomatoes/tomato sauce (offer a tomato-free option on build-your-own nights); states she dislikes salmon but keep gently offering it in kid-friendly formats
 - Hamish: avoid broccoli-forward dishes as the main event, salmon patties (crumbed 'fish finger' shape works better), roast veg stacks, and pie fillings — all previously flopped
-
-To change these: edit this list and tell Claude what changed next time it plans a week (this page doesn't sync back automatically — it's a display only).`;
+- Genevieve: prone to indigestion from rich/heavy food - go easy on cream, butter, deep-frying, and heavy cheese where possible`;
 
   // Which meals have been logged on THIS device (cosmetic only — the real record is the Sheet)
   let loggedLocally = {};
@@ -556,10 +559,25 @@ To change these: edit this list and tell Claude what changed next time it plans 
       <div class="recipe-page-inner principles-page-inner">
         <button class="recipe-close" id="principlesCloseBtn">← Back</button>
         <div class="recipe-title">Meal Planning Principles</div>
-        <div class="principles-static">${PRINCIPLES_TEXT}</div>
+        <textarea id="principlesTextarea" rows="14"></textarea>
+        <div class="principles-status-note" id="principlesStatusNote"></div>
+        <button class="save-btn" id="principlesUpdateBtn">Update</button>
       </div>`;
     document.getElementById("hub").appendChild(page);
+    page.querySelector("#principlesTextarea").value = PRINCIPLES_TEXT;
     page.querySelector("#principlesCloseBtn").addEventListener("click", ()=> page.remove());
+    page.querySelector("#principlesUpdateBtn").addEventListener("click", async ()=>{
+      const text = page.querySelector("#principlesTextarea").value;
+      const note = page.querySelector("#principlesStatusNote");
+      if(!text.trim()){ note.textContent = "Add some text first"; return; }
+      note.textContent = "Sending…";
+      try{
+        await sendToSheet({type: "principles_update", week_id: WEEK_DATA.week_id, plan_feedback: text});
+        note.textContent = "Saved ✓ — applies next time the planner runs";
+      }catch(e){
+        note.textContent = "Couldn't send — try again in a moment";
+      }
+    });
   }
 
   document.getElementById("principlesLinkBtn").addEventListener("click", openPrinciplesPage);

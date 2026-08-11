@@ -1,11 +1,12 @@
 # Family Menu Hub — automation
 
-This file is instructions for Claude Code to follow every time it's run on a schedule in this repo. It does TWO jobs, both fully automatic, both ending in a `git push` straight to GitHub Pages — no manual upload, ever.
+This file is instructions for Claude Code to follow every time it's run on a schedule in this repo. It does THREE jobs, all fully automatic, all ending in a `git push` straight to GitHub Pages — no manual upload, ever.
 
 - **Job A — weekly proposal**: once a week, draft next week's meal plan and push it live.
 - **Job B — feedback watch**: any time, check whether the family has left "changes/concerns" or "use up these ingredients" feedback on the Hub, and if so, revise the current plan and push the update.
+- **Job C — principles update watch**: any time, check whether the family has edited the meal planning principles directly on the Hub's principles page, and if so, apply the edit to `household.json` and push the update.
 
-Run both jobs, every time this file is invoked (every 3 hours). Each is independent — do Job A's check first, then Job B's check, regardless of what happened in the other.
+Run all three jobs, every time this file is invoked (every 3 hours). Each is independent — do Job A's check first, then Job B's, then Job C's, regardless of what happened in the others.
 
 ## Shared setup
 
@@ -41,7 +42,7 @@ Run `git pull` first, in case anything changed since last time.
    curl -s "https://script.google.com/macros/s/AKfycbwQXFwbeGLuhF8XA08NpEiWmCRscGNjxTt0wN3lGc73Pk-7PXLPMwU4dexHaRbQDRAWMw/exec?action=feedback&key=family-menu-2026"
    ```
    Returns `{"status":"ok","rows":[...]}` — each row has `timestamp`, `type`, `week_id`, `plan_feedback`, `use_up_ingredients`, etc.
-2. Read `.menu-state.json` (create it with `{"last_processed_feedback_at": null}` if missing). Keep only rows where: `type` is exactly `"review_feedback"` (never `"meal_feedback"` — those are per-meal post-cook logs from the Hub's "Log" buttons and must never trigger a rewrite), `week_id` matches `current_week.week_id` (re-read `household.json` fresh if Job A just changed it), `current_week.status` is `"proposed"`, and `timestamp` is newer than `last_processed_feedback_at`.
+2. Read `.menu-state.json` (create it with `{"last_processed_feedback_at": null}` if missing). Keep only rows where: `type` is exactly `"review_feedback"` (never `"meal_feedback"` — those are per-meal post-cook logs from the Hub's "Log" buttons — and never `"principles_update"`, which Job C handles instead; none of these should ever trigger a plan rewrite), `week_id` matches `current_week.week_id` (re-read `household.json` fresh if Job A just changed it), `current_week.status` is `"proposed"`, and `timestamp` is newer than `last_processed_feedback_at`.
 3. **If nothing new:** update `.menu-state.json`'s `last_processed_feedback_at` to the newest timestamp seen (so old rows are never re-checked), commit that alone if it changed, and stop. Most runs end here — not a failure.
 4. **If there's new feedback:** combine the `plan_feedback` and `use_up_ingredients` text from all new rows (oldest to newest) and:
    - Revise `current_week`'s affected day(s) to address it, respecting `household`'s preferences throughout.
@@ -52,12 +53,24 @@ Run `git pull` first, in case anything changed since last time.
    - Update `.menu-state.json`.
    - `git add household.json index.html .menu-state.json`, commit with a message describing what changed, `git push`.
 
+## Job C — principles update watch
+
+1. Fetch the feedback sheet as JSON (same endpoint and shape as Job B step 1 — reuse the response from this run if Job B already fetched it, otherwise fetch it fresh).
+2. Read `.menu-state.json` (add `"last_processed_principles_update_at": null` if missing). Keep only rows where `type` is exactly `"principles_update"` and `timestamp` is newer than `last_processed_principles_update_at`.
+3. **If nothing new:** update `.menu-state.json`'s `last_processed_principles_update_at` to the newest timestamp seen (so old rows are never re-checked), commit that alone if it changed (combine into the same commit as Job B's watermark update if both changed this run), and stop. Most runs end here — not a failure.
+4. **If there's a new update:** take the single newest matching row's `plan_feedback` field — it holds the *entire* edited principles text as submitted from the Hub's principles page, and it fully replaces `household.key_principles`, it is not merged with the old list:
+   - Split it into lines, strip any leading `"- "` from each, drop blank lines, and set the resulting array as `household.key_principles`.
+   - Regenerate `index.html`'s `PRINCIPLES_TEXT` from the new list (one `"- "`-prefixed line per principle, same format as before), keeping everything else in the file exactly as-is, and validate with `node --check` the same way as Job A step 8.
+   - Update `.menu-state.json`.
+   - `git add household.json index.html .menu-state.json`, commit with a message like "Update meal planning principles per family edit", and `git push`.
+
 ## Always finish with
 
-One short summary line covering both jobs, e.g. "No proposal due, no new feedback." or "Proposed week of Aug 17–23. No new feedback." or "No proposal due. Updated Tuesday & Wednesday dinners per feedback, pushed."
+One short summary line covering all three jobs, e.g. "No proposal due, no new feedback, no principles update." or "Proposed week of Aug 17–23." or "No proposal due. Updated Tuesday & Wednesday dinners per feedback, pushed." or "Updated meal planning principles per family edit."
 
 ## Notes
 
 - `household.json` is the single source of truth. `index.html` is always generated from it, never edited by hand.
-- The Google Sheet is the permanent record of every feedback submission ever made — `.menu-state.json` only needs the watermark.
-- Only `review_feedback` triggers a rewrite, never `meal_feedback`.
+- The Google Sheet is the permanent record of every feedback submission ever made — `.menu-state.json` only needs the watermarks.
+- Only `review_feedback` triggers a plan rewrite (Job B); only `principles_update` triggers a principles rewrite (Job C); `meal_feedback` never triggers either.
+- The principles page on the Hub is directly editable by the family (textarea + "Update" button) — edits post a `principles_update` row to the same feedback sheet Job B reads, which Job C then applies. There is deliberately no separate approval step; whatever is submitted there replaces `household.key_principles` outright next time this file runs.
