@@ -15,6 +15,9 @@
     --ochre:#C08A2E;
     --line:#E4DAC6;
     --card:#FFFFFF;
+    --no:#B5524B;
+    --mostly:#C08A2E;
+    --yes:#54634C;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--paper);}
@@ -110,6 +113,18 @@
     margin-left:6px;
     vertical-align:middle;
   }
+  #hub .feedback-btn{
+    font-size:12px;
+    font-weight:600;
+    color:var(--sage);
+    background:#F1EEE3;
+    border:none;
+    border-radius:8px;
+    padding:6px 10px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  #hub .feedback-btn.logged{background:var(--sage);color:#fff;}
   #hub .section-title{
     font-family:'Fraunces',serif;
     font-size:15px;
@@ -135,9 +150,39 @@
   }
   #hub .shop-item input{width:16px;height:16px;accent-color:var(--sage);}
   #hub .shop-item.checked span{text-decoration:line-through;opacity:0.5;}
-  #hub .export-btn{
-    margin-top:18px;width:100%;background:transparent;border:1.5px solid var(--sage);
-    color:var(--sage-dark);border-radius:10px;padding:10px;font-weight:600;font-size:13px;cursor:pointer;
+  #hub .modal-backdrop{
+    position:fixed;inset:0;background:rgba(46,42,34,0.45);
+    display:flex;align-items:flex-end;justify-content:center;z-index:50;
+  }
+  #hub .modal{
+    background:var(--card);
+    width:100%;max-width:480px;
+    border-radius:18px 18px 0 0;
+    padding:20px;
+  }
+  #hub .modal h3{font-family:'Fraunces',serif;margin:0 0 4px;font-size:18px;}
+  #hub .modal .meal-sub{font-size:13px;color:var(--sage-dark);margin-bottom:16px;}
+  #hub .btn-row{display:flex;gap:8px;margin-bottom:16px;}
+  #hub .choice-btn{
+    flex:1;padding:10px 4px;border-radius:10px;border:1.5px solid var(--line);
+    background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink);
+  }
+  #hub .choice-btn.sel-yes{background:var(--yes);border-color:var(--yes);color:#fff;}
+  #hub .choice-btn.sel-mostly{background:var(--mostly);border-color:var(--mostly);color:#fff;}
+  #hub .choice-btn.sel-no{background:var(--no);border-color:var(--no);color:#fff;}
+  #hub .stars{display:flex;gap:6px;margin-bottom:16px;}
+  #hub .star{font-size:26px;cursor:pointer;color:var(--line);}
+  #hub .star.on{color:var(--ochre);}
+  #hub textarea{
+    width:100%;border:1px solid var(--line);border-radius:10px;
+    padding:10px;font-family:inherit;font-size:13px;resize:none;margin-bottom:14px;
+  }
+  #hub .save-btn{
+    width:100%;background:var(--sage-dark);color:#fff;border:none;
+    border-radius:10px;padding:12px;font-weight:700;font-size:14px;cursor:pointer;
+  }
+  #hub .cancel-link{
+    display:block;text-align:center;margin-top:10px;font-size:12px;color:var(--sage-dark);opacity:0.7;
   }
   #hub .status-pill{
     display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;
@@ -186,14 +231,22 @@
     padding:11px;font-weight:700;font-size:13px;cursor:pointer;margin-top:16px;
   }
   #hub .copy-shop-btn.copied{background:var(--sage-dark);}
-  #hub .feedback-note{
+  #hub .review-box{
     background:var(--card);border:1.5px solid var(--ochre);border-radius:14px;
-    padding:16px;margin-bottom:16px;font-size:13px;line-height:1.6;
+    padding:16px;margin-bottom:16px;
   }
-  #hub .feedback-note .review-title{
-    font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:var(--sage-dark);margin-bottom:6px;
+  #hub .review-box .review-title{
+    font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:var(--sage-dark);margin-bottom:4px;
   }
-  #hub .feedback-note a{color:var(--sage-dark);font-weight:700;}
+  #hub .review-box .review-sub{font-size:12px;color:var(--ink);opacity:0.75;margin-bottom:14px;}
+  #hub .review-box label{
+    display:block;font-size:12px;font-weight:600;color:var(--sage-dark);margin-bottom:6px;
+  }
+  #hub .review-box textarea{
+    width:100%;min-height:60px;border:1px solid var(--line);border-radius:10px;
+    padding:10px;font-family:'Inter',sans-serif;font-size:13px;resize:vertical;margin-bottom:14px;
+  }
+  #hub .review-box .review-saved-note{font-size:12px;color:var(--sage);font-weight:600;height:16px;margin-bottom:4px;}
   #hub .dietary-note{
     font-size:12px;color:var(--sage-dark);background:#F1EEE3;border-radius:10px;padding:10px 12px;margin-bottom:14px;
   }
@@ -225,7 +278,8 @@
 
 <script>
 (function(){
-  // ---- Claude replaces WEEK_DATA, PRINCIPLES_TEXT and FEEDBACK_EMAIL each week ----
+  // ---- Claude replaces WEEK_DATA, PRINCIPLES_TEXT, and (rarely) FEEDBACK_ENDPOINT each week ----
+  const FEEDBACK_ENDPOINT = "https://script.google.com/macros/s/AKfycbwQXFwbeGLuhF8XA08NpEiWmCRscGNjxTt0wN3lGc73Pk-7PXLPMwU4dexHaRbQDRAWMw/exec";
   const FEEDBACK_EMAIL = "mark.j.barber@gmail.com";
 
   const WEEK_DATA = {
@@ -263,24 +317,65 @@
 
 To change these: edit this list and tell Claude what changed next time it plans a week (this page doesn't sync back automatically — it's a display only).`;
 
+  // Which meals have been logged on THIS device (cosmetic only — the real record is the Sheet)
+  let loggedLocally = {};
+  try { loggedLocally = JSON.parse(localStorage.getItem('menu-hub-logged:' + WEEK_DATA.week_id) || '{}'); } catch(e) { loggedLocally = {}; }
+  function markLoggedLocally(day, meal){
+    loggedLocally[key(day,meal)] = true;
+    try { localStorage.setItem('menu-hub-logged:' + WEEK_DATA.week_id, JSON.stringify(loggedLocally)); } catch(e){}
+  }
+
   function key(day, meal){ return day + "-" + meal; }
+
+  // Fire-and-forget POST to the Apps Script endpoint. Uses no-cors + text/plain so it
+  // doesn't trigger a CORS preflight (Apps Script web apps don't handle preflight well).
+  // That also means we can't read a real success/failure response — this always resolves
+  // once the request is sent, not once it's confirmed received.
+  function sendToSheet(payload){
+    if(!FEEDBACK_ENDPOINT || FEEDBACK_ENDPOINT.indexOf('PASTE_') === 0){
+      return Promise.reject(new Error('Feedback endpoint not configured yet'));
+    }
+    return fetch(FEEDBACK_ENDPOINT, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify(payload)
+    });
+  }
 
   function render(){
     document.getElementById("dateRange").textContent = WEEK_DATA.date_range;
     document.getElementById("statusPill").textContent = WEEK_DATA.status === "proposed"
       ? "Draft — open for feedback"
-      : "Published";
+      : "Tap any meal to log how it went";
 
     const reviewContainer = document.getElementById("reviewBoxContainer");
     if(WEEK_DATA.status === "proposed"){
-      const subject = encodeURIComponent("Feedback on this week's menu (" + WEEK_DATA.date_range + ")");
-      const body = encodeURIComponent("Plan feedback / swaps:\n\n\nIngredients to use up this week:\n\n");
       reviewContainer.innerHTML = `
         <div class="dietary-note">Built around Maddie's mild lactose intolerance + tomato dislike, and Hamish's known dislikes (broccoli-forward mains, salmon patties, roast veg stacks, pie filling).</div>
-        <div class="feedback-note">
+        <div class="review-box">
           <div class="review-title">Got feedback on this plan?</div>
-          Reply to this week's email, or <a href="mailto:${FEEDBACK_EMAIL}?subject=${subject}&body=${body}">send a quick email</a> with any swaps or ingredients that need using up — we'll fold it in before this publishes.
+          <div class="review-sub">Send it straight from here — it lands in the same log Claude reads before planning next week.</div>
+          <label>Feedback on this week's plan (swaps, concerns, anything)</label>
+          <textarea id="planFeedbackInput" placeholder="e.g. can we swap Wednesday's sausage bake for something else?"></textarea>
+          <label>Ingredients to use up this week</label>
+          <textarea id="useUpInput" placeholder="e.g. half a bag of spinach, leftover ham"></textarea>
+          <div class="review-saved-note" id="reviewSavedNote"></div>
+          <button class="save-btn" id="saveReviewBtn">Send feedback</button>
         </div>`;
+      reviewContainer.querySelector("#saveReviewBtn").addEventListener("click", async ()=>{
+        const plan_feedback = reviewContainer.querySelector("#planFeedbackInput").value;
+        const use_up = reviewContainer.querySelector("#useUpInput").value;
+        const note = reviewContainer.querySelector("#reviewSavedNote");
+        if(!plan_feedback && !use_up){ note.textContent = "Add something in one of the boxes first"; return; }
+        note.textContent = "Sending…";
+        try{
+          await sendToSheet({type:"review_feedback", week_id: WEEK_DATA.week_id, plan_feedback, use_up});
+          note.textContent = "Sent ✓";
+        }catch(e){
+          note.textContent = "Couldn't send — reply to our email instead";
+        }
+      });
     } else {
       reviewContainer.innerHTML = "";
     }
@@ -293,9 +388,13 @@ To change these: edit this list and tell Claude what changed next time it plans 
         ${meals.map(m => {
           const info = d[m];
           if(!info) return "";
+          const logged = !!loggedLocally[key(d.day,m)];
           return `<div class="meal-row">
             <div class="meal-label">${m}</div>
             <div class="meal-name">${info.name}${info.new ? '<span class="badge-new">new</span>':''}${info.recipe ? ` <button class="recipe-link-btn" data-day="${d.day}" data-meal="${m}">View recipe</button>`:''}</div>
+            <button class="feedback-btn ${logged?'logged':''}" data-day="${d.day}" data-meal="${m}" data-name="${info.name}">
+              ${logged ? '✓ logged' : 'Log'}
+            </button>
           </div>`;
         }).join("")}
       </div>`;
@@ -314,6 +413,9 @@ To change these: edit this list and tell Claude what changed next time it plans 
             </label>`).join("")}
         </div>`).join("") + `<button class="copy-shop-btn" id="copyShopBtn">Copy shopping list to clipboard</button>`;
 
+    plan.querySelectorAll(".feedback-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=> openModal(btn.dataset.day, btn.dataset.meal, btn.dataset.name));
+    });
     plan.querySelectorAll(".recipe-link-btn").forEach(btn=>{
       btn.addEventListener("click", ()=> openRecipePage(btn.dataset.day, btn.dataset.meal));
     });
@@ -368,6 +470,83 @@ To change these: edit this list and tell Claude what changed next time it plans 
       </div>`;
     document.getElementById("hub").appendChild(page);
     page.querySelector("#recipeCloseBtn").addEventListener("click", ()=> page.remove());
+  }
+
+  let modalState = {day:null, meal:null, kids_ate_it:null, parent_rating:0, note:""};
+
+  function openModal(day, meal, name){
+    modalState = {day, meal, kids_ate_it: null, parent_rating: 0, note: ""};
+
+    const backdrop = document.createElement("div");
+    backdrop.className = "modal-backdrop";
+    backdrop.innerHTML = `
+      <div class="modal">
+        <h3>${name}</h3>
+        <div class="meal-sub">${day} · ${meal}</div>
+
+        <div style="font-size:12px;font-weight:600;color:var(--sage-dark);margin-bottom:8px;">Did the kids eat it?</div>
+        <div class="btn-row" id="kidsRow">
+          <button class="choice-btn" data-v="yes">Yes</button>
+          <button class="choice-btn" data-v="mostly">Mostly</button>
+          <button class="choice-btn" data-v="no">Not really</button>
+        </div>
+
+        <div style="font-size:12px;font-weight:600;color:var(--sage-dark);margin-bottom:8px;">How'd the grown-ups rate it?</div>
+        <div class="stars" id="starsRow">
+          ${[1,2,3,4,5].map(n=>`<span class="star" data-n="${n}">★</span>`).join("")}
+        </div>
+
+        <textarea rows="2" placeholder="Optional note (e.g. 'add more sauce next time')" id="noteInput"></textarea>
+
+        <div class="review-saved-note" id="modalStatusNote"></div>
+        <button class="save-btn" id="saveFeedbackBtn">Save</button>
+        <span class="cancel-link" id="cancelBtn">Cancel</span>
+      </div>`;
+    document.getElementById("hub").appendChild(backdrop);
+
+    const kidsRow = backdrop.querySelector("#kidsRow");
+    kidsRow.querySelectorAll(".choice-btn").forEach(b=>{
+      b.addEventListener("click", ()=>{
+        modalState.kids_ate_it = b.dataset.v;
+        kidsRow.querySelectorAll(".choice-btn").forEach(x=>x.className="choice-btn");
+        b.classList.add("sel-"+b.dataset.v);
+      });
+    });
+
+    const starsRow = backdrop.querySelector("#starsRow");
+    function paintStars(){
+      starsRow.querySelectorAll(".star").forEach(s=>{
+        s.classList.toggle("on", Number(s.dataset.n) <= modalState.parent_rating);
+      });
+    }
+    starsRow.querySelectorAll(".star").forEach(s=>{
+      s.addEventListener("click", ()=>{ modalState.parent_rating = Number(s.dataset.n); paintStars(); });
+    });
+
+    backdrop.querySelector("#noteInput").addEventListener("input", (e)=> modalState.note = e.target.value);
+
+    backdrop.querySelector("#cancelBtn").addEventListener("click", ()=> backdrop.remove());
+    backdrop.querySelector("#saveFeedbackBtn").addEventListener("click", async ()=>{
+      const statusNote = backdrop.querySelector("#modalStatusNote");
+      statusNote.textContent = "Sending…";
+      try{
+        await sendToSheet({
+          type: "meal_feedback",
+          week_id: WEEK_DATA.week_id,
+          day: modalState.day,
+          meal: modalState.meal,
+          meal_name: name,
+          kids_ate_it: modalState.kids_ate_it || "",
+          parent_rating: modalState.parent_rating || "",
+          note: modalState.note || ""
+        });
+        markLoggedLocally(modalState.day, modalState.meal);
+        backdrop.remove();
+        render();
+      }catch(e){
+        statusNote.textContent = "Couldn't send — try again in a moment";
+      }
+    });
   }
 
   function openPrinciplesPage(){
