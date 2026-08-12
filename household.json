@@ -77,7 +77,23 @@
     }
   ],
   "last_board_review_date": "2026-08-10",
-  "favourites": [],
+  "favourites": [
+    {
+      "id": "js-diagnostic-test-2",
+      "name": "JS Diagnostic Test 2",
+      "authored_by": "Test",
+      "recipe": {
+        "ingredients": [
+          "a"
+        ],
+        "method": [
+          "b"
+        ]
+      },
+      "saved_at": "2026-08-12T04:58:06.943Z",
+      "requested_for_next_week": false
+    }
+  ],
   "current_week": {
     "week_id": "2026-W33",
     "date_range": "Aug 10 - Aug 16, 2026",
