@@ -234,6 +234,17 @@
     font-size:11px;color:var(--sage-dark);opacity:0.75;margin:-8px 0 14px;min-height:14px;
   }
   #hub #refreshPlanBtn:disabled{opacity:0.6;cursor:default;}
+  #hub .favourite-btn{
+    display:block;font-size:13px;font-weight:700;color:var(--sage-dark);
+    background:#F1EEE3;border:none;border-radius:20px;padding:7px 14px;cursor:pointer;
+    margin-bottom:4px;
+  }
+  #hub .favourite-btn.saved{background:var(--sage);color:#fff;cursor:default;}
+  #hub .favourite-btn:disabled{opacity:0.85;}
+  #hub .favourite-status-note{font-size:12px;color:var(--sage);font-weight:600;margin-bottom:14px;min-height:14px;}
+  #hub .favourite-request-btn{margin-top:10px;}
+  #hub .favourite-request-btn.requested{background:var(--sage);}
+  #hub .favourite-card{margin-bottom:8px;}
   #hub .copy-shop-btn{
     width:100%;background:var(--sage);color:#fff;border:none;border-radius:10px;
     padding:11px;font-weight:700;font-size:13px;cursor:pointer;margin-top:16px;
@@ -271,6 +282,7 @@
   <div class="subtitle" id="dateRange">—</div>
   <button class="principles-link" id="principlesLinkBtn">📋 Meal planning principles</button>
   <button class="principles-link" id="refreshPlanBtn">🔄 Refresh plan</button>
+  <button class="principles-link" id="favouritesLinkBtn">❤️ Favourites</button>
   <div class="refresh-status-note" id="refreshStatusNote"></div>
 
   <div id="reviewBoxContainer"></div>
@@ -583,6 +595,8 @@
 - Hamish: avoid broccoli-forward dishes as the main event, salmon patties (crumbed 'fish finger' shape works better), roast veg stacks, and pie fillings — all previously flopped
 - Genevieve: prone to indigestion from rich/heavy food - go easy on cream, butter, deep-frying, and heavy cheese where possible`;
 
+  let FAVOURITES = [];
+
   // Which meals have been logged on THIS device (cosmetic only — the real record is the Sheet)
   let loggedLocally = {};
   try { loggedLocally = JSON.parse(localStorage.getItem('menu-hub-logged:' + WEEK_DATA.week_id) || '{}'); } catch(e) { loggedLocally = {}; }
@@ -717,25 +731,131 @@
     const dayData = WEEK_DATA.days.find(d => d.day === day);
     const info = dayData && dayData[meal];
     if(!info || !info.recipe) return;
+    renderRecipeDetail(info.name, info.authored_by, info.recipe, {showSaveButton:true});
+  }
 
+  function slugify(name){
+    return String(name).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  }
+
+  function renderRecipeDetail(name, authored_by, recipe, opts){
+    opts = opts || {};
     const page = document.createElement("div");
     page.className = "recipe-page";
+    const favId = slugify(name);
+    const alreadySaved = FAVOURITES.some(f => f.id === favId);
     page.innerHTML = `
       <div class="recipe-page-inner">
         <button class="recipe-close" id="recipeCloseBtn">← Back</button>
-        <div class="recipe-title">${info.name}</div>
-        ${info.authored_by ? `<div class="recipe-author">Recipe by ${info.authored_by}</div>` : ''}
+        <div class="recipe-title">${name}</div>
+        ${authored_by ? `<div class="recipe-author">Recipe by ${authored_by}</div>` : ''}
+        ${opts.showSaveButton ? `
+          <button class="favourite-btn ${alreadySaved?'saved':''}" id="saveFavouriteBtn" ${alreadySaved?'disabled':''}>${alreadySaved ? '★ Saved to favourites' : '☆ Save to favourites'}</button>
+          <div class="favourite-status-note" id="favouriteStatusNote"></div>` : ''}
         <div class="recipe-section-h">Ingredients</div>
         <ul class="recipe-list">
-          ${info.recipe.ingredients.map(i => `<li>${i}</li>`).join("")}
+          ${recipe.ingredients.map(i => `<li>${i}</li>`).join("")}
         </ul>
         <div class="recipe-section-h">Method</div>
         <ol class="recipe-list recipe-method">
-          ${info.recipe.method.map(s => `<li>${s}</li>`).join("")}
+          ${recipe.method.map(s => `<li>${s}</li>`).join("")}
         </ol>
       </div>`;
     document.getElementById("hub").appendChild(page);
     page.querySelector("#recipeCloseBtn").addEventListener("click", ()=> page.remove());
+
+    if(opts.showSaveButton){
+      page.querySelector("#saveFavouriteBtn").addEventListener("click", async ()=>{
+        const btn = page.querySelector("#saveFavouriteBtn");
+        const note = page.querySelector("#favouriteStatusNote");
+        btn.disabled = true;
+        note.textContent = "Saving…";
+        try{
+          const resp = await fetch(FEEDBACK_ENDPOINT, {
+            method: "POST",
+            headers: {"Content-Type": "text/plain;charset=utf-8"},
+            body: JSON.stringify({type: "save_favourite", name, authored_by, recipe})
+          });
+          const result = await resp.json();
+          if(result.status === "ok"){
+            FAVOURITES = result.favourites;
+            btn.textContent = "★ Saved to favourites";
+            btn.classList.add("saved");
+            note.textContent = "Saved ✓ — find it under ❤️ Favourites";
+          } else {
+            note.textContent = "Couldn't save: " + (result.message || "unknown error");
+            btn.disabled = false;
+          }
+        }catch(e){
+          note.textContent = "Couldn't reach the server — try again in a moment.";
+          btn.disabled = false;
+        }
+      });
+    }
+  }
+
+  function openFavouritesPage(){
+    const page = document.createElement("div");
+    page.className = "recipe-page";
+    page.innerHTML = `
+      <div class="recipe-page-inner">
+        <button class="recipe-close" id="favouritesCloseBtn">← Back</button>
+        <div class="recipe-title">Favourites</div>
+        <div class="meal-sub" style="margin-bottom:16px;">Save a recipe from any week's dinners, then request it here to guarantee it appears in next week's plan.</div>
+        <div id="favouritesListInner"></div>
+      </div>`;
+    document.getElementById("hub").appendChild(page);
+    page.querySelector("#favouritesCloseBtn").addEventListener("click", ()=> page.remove());
+    renderFavouritesList(page);
+  }
+
+  function renderFavouritesList(page){
+    const container = page.querySelector("#favouritesListInner");
+    if(!FAVOURITES.length){
+      container.innerHTML = `<div class="dietary-note">No favourites saved yet — open any dinner's recipe and tap "Save to favourites".</div>`;
+      return;
+    }
+    container.innerHTML = FAVOURITES.map(f => `
+      <div class="day-card favourite-card">
+        <div class="day-title">${f.name}</div>
+        ${f.authored_by ? `<div class="recipe-author">Recipe by ${f.authored_by}</div>` : ''}
+        <button class="recipe-link-btn" data-id="${f.id}" data-action="view">View recipe</button>
+        <button class="save-btn favourite-request-btn ${f.requested_for_next_week?'requested':''}" data-id="${f.id}" data-requested="${f.requested_for_next_week?'1':'0'}">
+          ${f.requested_for_next_week ? "✓ Requested for next week's plan — tap to cancel" : "Request for next week's plan"}
+        </button>
+      </div>`).join("");
+    container.querySelectorAll('[data-action="view"]').forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const f = FAVOURITES.find(x => x.id === btn.dataset.id);
+        if(f) renderRecipeDetail(f.name, f.authored_by, f.recipe, {showSaveButton:false});
+      });
+    });
+    container.querySelectorAll(".favourite-request-btn").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        const id = btn.dataset.id;
+        const newRequested = btn.dataset.requested !== "1";
+        btn.disabled = true;
+        btn.textContent = "Updating…";
+        try{
+          const resp = await fetch(FEEDBACK_ENDPOINT, {
+            method: "POST",
+            headers: {"Content-Type": "text/plain;charset=utf-8"},
+            body: JSON.stringify({type: "toggle_favourite_request", id, requested: newRequested})
+          });
+          const result = await resp.json();
+          if(result.status === "ok"){
+            FAVOURITES = result.favourites;
+            renderFavouritesList(page);
+          } else {
+            btn.textContent = "Couldn't update — try again";
+            btn.disabled = false;
+          }
+        }catch(e){
+          btn.textContent = "Couldn't reach the server — try again";
+          btn.disabled = false;
+        }
+      });
+    });
   }
 
   let modalState = {day:null, meal:null, kids_ate_it:null, parent_rating:0, note:""};
@@ -878,6 +998,7 @@
 
   document.getElementById("principlesLinkBtn").addEventListener("click", openPrinciplesPage);
   document.getElementById("refreshPlanBtn").addEventListener("click", requestRegenerate);
+  document.getElementById("favouritesLinkBtn").addEventListener("click", openFavouritesPage);
 
   document.querySelectorAll("#hub .tab").forEach(tab=>{
     tab.addEventListener("click", ()=>{
