@@ -3,581 +3,270 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>This Week's Menu — Family Menu Hub</title>
+<title>This Week — Family Menu Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.46.0/tabler-icons.min.css">
 <style>
-  :root{
-    --paper:#FAF5EC;
-    --ink:#2E2A22;
-    --sage:#54634C;
-    --sage-dark:#3B4636;
-    --ochre:#C08A2E;
-    --line:#E4DAC6;
-    --card:#FFFFFF;
-    --no:#B5524B;
-    --mostly:#C08A2E;
-    --yes:#54634C;
-  }
-  *{box-sizing:border-box;}
-  body{margin:0;background:var(--paper);}
-  #hub{
-    font-family:'Inter',sans-serif;
-    color:var(--ink);
-    background:var(--paper);
-    max-width:480px;
-    margin:0 auto;
-    padding:20px 16px 40px;
-    min-height:100vh;
-  }
-  #hub h1{
-    font-family:'Fraunces',serif;
-    font-weight:600;
-    font-size:26px;
-    margin:4px 0 2px;
-    letter-spacing:-0.01em;
-  }
-  #hub .subtitle{
-    font-size:13px;
-    color:var(--sage-dark);
-    margin-bottom:18px;
-    opacity:0.85;
-  }
-  #hub .tabs{
-    display:flex;
-    gap:6px;
-    overflow-x:auto;
-    padding-bottom:8px;
-    margin-bottom:14px;
-    border-bottom:1px solid var(--line);
-  }
-  #hub .tab{
-    flex:0 0 auto;
-    font-family:'Inter',sans-serif;
-    font-size:13px;
-    font-weight:600;
-    padding:7px 13px;
-    border-radius:20px;
-    background:transparent;
-    border:1px solid var(--line);
-    color:var(--sage-dark);
-    cursor:pointer;
-  }
-  #hub .tab.active{
-    background:var(--sage);
-    border-color:var(--sage);
-    color:#fff;
-  }
-  #hub .panel{display:none;}
-  #hub .panel.active{display:block;}
-  #hub .day-card{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:16px;
-    margin-bottom:12px;
-  }
-  #hub .day-title{
-    font-family:'Fraunces',serif;
-    font-size:17px;
-    font-weight:600;
-    margin-bottom:10px;
-    color:var(--sage-dark);
-  }
-  #hub .meal-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    padding:8px 0;
-    border-top:1px solid var(--line);
-    gap:10px;
-  }
-  #hub .meal-row:first-of-type{border-top:none;}
-  #hub .meal-label{
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:.06em;
-    color:var(--ochre);
-    font-weight:700;
-    width:56px;
-    flex:0 0 56px;
-    padding-top:2px;
-  }
-  #hub .meal-name{font-size:14.5px;font-weight:500;flex:1;}
-  #hub .badge-new{
-    font-size:10px;
-    background:var(--ochre);
-    color:#fff;
-    padding:2px 6px;
-    border-radius:8px;
-    margin-left:6px;
-    vertical-align:middle;
-  }
-  #hub .feedback-btn{
-    font-size:12px;
-    font-weight:600;
-    color:var(--sage);
-    background:#F1EEE3;
-    border:none;
-    border-radius:8px;
-    padding:6px 10px;
-    cursor:pointer;
-    white-space:nowrap;
-  }
-  #hub .feedback-btn.logged{background:var(--sage);color:#fff;}
-  #hub .section-title{
-    font-family:'Fraunces',serif;
-    font-size:15px;
-    font-weight:600;
-    margin:18px 0 8px;
-    color:var(--sage-dark);
-  }
-  #hub .shop-section{margin-bottom:10px;}
-  #hub .shop-cat{
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:.06em;
-    color:var(--ochre);
-    font-weight:700;
-    margin:10px 0 4px;
-  }
-  #hub .shop-item{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    padding:5px 0;
-    font-size:14px;
-  }
-  #hub .shop-item input{width:16px;height:16px;accent-color:var(--sage);}
-  #hub .shop-item.checked span{text-decoration:line-through;opacity:0.5;}
-  #hub .modal-backdrop{
-    position:fixed;inset:0;background:rgba(46,42,34,0.45);
-    display:flex;align-items:flex-end;justify-content:center;z-index:50;
-  }
-  #hub .modal{
-    background:var(--card);
-    width:100%;max-width:480px;
-    border-radius:18px 18px 0 0;
-    padding:20px;
-  }
-  #hub .modal h3{font-family:'Fraunces',serif;margin:0 0 4px;font-size:18px;}
-  #hub .modal .meal-sub{font-size:13px;color:var(--sage-dark);margin-bottom:16px;}
-  #hub .btn-row{display:flex;gap:8px;margin-bottom:16px;}
-  #hub .choice-btn{
-    flex:1;padding:10px 4px;border-radius:10px;border:1.5px solid var(--line);
-    background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink);
-  }
-  #hub .choice-btn.sel-yes{background:var(--yes);border-color:var(--yes);color:#fff;}
-  #hub .choice-btn.sel-mostly{background:var(--mostly);border-color:var(--mostly);color:#fff;}
-  #hub .choice-btn.sel-no{background:var(--no);border-color:var(--no);color:#fff;}
-  #hub .stars{display:flex;gap:6px;margin-bottom:16px;}
-  #hub .star{font-size:26px;cursor:pointer;color:var(--line);}
-  #hub .star.on{color:var(--ochre);}
-  #hub textarea{
-    width:100%;border:1px solid var(--line);border-radius:10px;
-    padding:10px;font-family:inherit;font-size:13px;resize:none;margin-bottom:14px;
-  }
-  #hub .save-btn{
-    width:100%;background:var(--sage-dark);color:#fff;border:none;
-    border-radius:10px;padding:12px;font-weight:700;font-size:14px;cursor:pointer;
-  }
-  #hub .cancel-link{
-    display:block;text-align:center;margin-top:10px;font-size:12px;color:var(--sage-dark);opacity:0.7;
-  }
-  #hub .status-pill{
-    display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;
-    background:#F1EEE3;color:var(--sage-dark);margin-bottom:14px;
-  }
-  #hub .recipe-link-btn{
-    font-size:11px;font-weight:700;color:var(--sage);background:none;border:none;
-    text-decoration:underline;cursor:pointer;padding:0;margin-left:4px;
-  }
-  #hub .recipe-page{
-    position:fixed;inset:0;background:var(--paper);z-index:60;overflow-y:auto;
-  }
-  #hub .recipe-page-inner{
-    max-width:480px;margin:0 auto;padding:20px 16px 40px;
-  }
-  #hub .recipe-close{
-    font-size:13px;font-weight:600;color:var(--sage-dark);background:none;border:none;
-    cursor:pointer;padding:0;margin-bottom:16px;
-  }
-  #hub .recipe-title{
-    font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:var(--ink);margin-bottom:4px;
-  }
-  #hub .recipe-author{
-    font-size:12px;color:var(--ochre);font-weight:600;margin-bottom:18px;
-  }
-  #hub .recipe-section-h{
-    font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--sage-dark);
-    margin:18px 0 8px;
-  }
-  #hub .recipe-list{
-    margin:0;padding-left:20px;font-size:14px;line-height:1.6;
-  }
-  #hub .recipe-list li{margin-bottom:6px;}
-  #hub .recipe-method li{margin-bottom:10px;}
-  #hub .principles-link{
-    display:inline-block;font-size:12px;font-weight:600;color:var(--sage-dark);
-    background:#F1EEE3;border:none;border-radius:20px;padding:5px 12px;cursor:pointer;
-    margin-bottom:14px;margin-left:8px;
-  }
-  #hub .principles-page-inner textarea{
-    width:100%;min-height:280px;font-size:13.5px;line-height:1.6;font-family:inherit;
-    background:var(--card);border:1px solid var(--line);border-radius:10px;
-    padding:14px;margin-bottom:8px;resize:vertical;
-  }
-  #hub .principles-page-inner .principles-status-note{
-    font-size:12px;color:var(--sage);font-weight:600;height:16px;margin-bottom:8px;
-  }
-  #hub .refresh-status-note{
-    font-size:11px;color:var(--sage-dark);opacity:0.75;margin:-8px 0 14px;min-height:14px;
-  }
-  #hub #refreshPlanBtn:disabled{opacity:0.6;cursor:default;}
-  #hub .favourite-btn{
-    display:block;font-size:13px;font-weight:700;color:var(--sage-dark);
-    background:#F1EEE3;border:none;border-radius:20px;padding:7px 14px;cursor:pointer;
-    margin-bottom:4px;
-  }
-  #hub .favourite-btn.saved{background:var(--sage);color:#fff;cursor:default;}
-  #hub .favourite-btn:disabled{opacity:0.85;}
-  #hub .favourite-status-note{font-size:12px;color:var(--sage);font-weight:600;margin-bottom:14px;min-height:14px;}
-  #hub .favourite-request-btn{margin-top:10px;}
-  #hub .favourite-request-btn.requested{background:var(--sage);}
-  #hub .favourite-card{margin-bottom:8px;}
-  #hub .copy-shop-btn{
-    width:100%;background:var(--sage);color:#fff;border:none;border-radius:10px;
-    padding:11px;font-weight:700;font-size:13px;cursor:pointer;margin-top:16px;
-  }
-  #hub .copy-shop-btn.copied{background:var(--sage-dark);}
-  #hub .review-box{
-    background:var(--card);border:1.5px solid var(--ochre);border-radius:14px;
-    padding:16px;margin-bottom:16px;
-  }
-  #hub .review-box .review-title{
-    font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:var(--sage-dark);margin-bottom:4px;
-  }
-  #hub .review-box .review-sub{font-size:12px;color:var(--ink);opacity:0.75;margin-bottom:14px;}
-  #hub .review-box label{
-    display:block;font-size:12px;font-weight:600;color:var(--sage-dark);margin-bottom:6px;
-  }
-  #hub .review-box textarea{
-    width:100%;min-height:60px;border:1px solid var(--line);border-radius:10px;
-    padding:10px;font-family:'Inter',sans-serif;font-size:13px;resize:vertical;margin-bottom:14px;
-  }
-  #hub .review-box .review-saved-note{font-size:12px;color:var(--sage);font-weight:600;height:16px;margin-bottom:4px;}
-  #hub .dietary-note{
-    font-size:12px;color:var(--sage-dark);background:#F1EEE3;border-radius:10px;padding:10px 12px;margin-bottom:14px;
-  }
-  #hub .footer-note{
-    font-size:11px;color:var(--sage-dark);opacity:0.6;text-align:center;margin-top:24px;
-  }
+:root{
+  --font-head:'Sora',-apple-system,'Helvetica Neue',Arial,sans-serif;
+  --font-body:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,'SF Mono','Roboto Mono',Consolas,monospace;
+  --ink:#2A3B4C;
+  --ink-soft:#5C6B7A;
+  --ink-faint:#8B9AA8;
+  --glass:rgba(255,255,255,0.55);
+  --glass-strong:rgba(255,255,255,0.78);
+  --glass-border:rgba(255,255,255,0.65);
+  --teal:#2F8F8A;
+  --teal-dark:#236b67;
+  --status-proven:#3D8B86;
+  --status-new:#C98A3E;
+  --status-caution:#C15A4A;
+  --white:#ffffff;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:var(--font-body);
+  color:var(--ink);
+  min-height:100vh;
+  background:linear-gradient(160deg,#CFE0EC 0%,#BFE6E0 45%,#EAF4E6 100%);
+  background-attachment:fixed;
+  padding-bottom:40px;
+}
+.wrap{max-width:640px;margin:0 auto;padding:26px 16px 0;}
+
+/* Header */
+.header{text-align:center;margin-bottom:16px;}
+.header h1{font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;font-size:1.7rem;margin:0 0 3px;}
+.header .sub{font-family:var(--font-mono);font-size:0.72rem;color:var(--ink-soft);letter-spacing:0.03em;}
+
+/* Utility row */
+.util-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:6px;}
+.util-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--font-head);font-weight:600;font-size:0.78rem;letter-spacing:-0.005em;
+  color:var(--teal-dark);
+  background:var(--glass);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:1px solid var(--glass-border);
+  border-radius:20px;padding:7px 13px;cursor:pointer;
+}
+.util-btn:hover{background:var(--glass-strong);}
+.util-btn:disabled{opacity:0.6;cursor:default;}
+.util-btn i{font-size:15px;}
+.util-btn:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.refresh-status-note{text-align:center;font-family:var(--font-mono);font-size:0.68rem;color:var(--ink-soft);margin-bottom:14px;min-height:14px;}
+
+/* Tabs */
+.tabs{display:flex;gap:6px;background:rgba(255,255,255,0.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);border-radius:16px;padding:5px;margin-bottom:18px;}
+.tab{flex:1;font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;font-size:0.85rem;text-align:center;padding:9px 4px;background:transparent;color:var(--ink-soft);border:none;border-radius:12px;cursor:pointer;transition:background .15s ease, color .15s ease, box-shadow .15s ease;display:flex;align-items:center;justify-content:center;}
+.tab:hover{color:var(--ink);}
+.tab.active{background:var(--white);color:var(--teal-dark);box-shadow:0 3px 10px rgba(42,59,76,0.15);}
+.tab:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.hidden{display:none;}
+
+/* Review box */
+.review-box{background:rgba(255,255,255,0.65);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--glass-border);border-radius:14px;padding:14px 16px;margin-bottom:16px;font-size:0.85rem;}
+.review-box .rb-title{font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;font-size:1rem;margin-bottom:4px;}
+.review-box .rb-sub{font-size:0.78rem;color:var(--ink-soft);margin-bottom:12px;}
+.review-box label{display:block;font-family:var(--font-mono);font-size:0.62rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-faint);margin-bottom:5px;}
+.review-box textarea{width:100%;min-height:52px;border:1px solid var(--glass-border);border-radius:10px;padding:9px 10px;font-family:var(--font-body);font-size:0.85rem;resize:vertical;margin-bottom:10px;background:rgba(255,255,255,0.6);color:var(--ink);}
+.review-box textarea:focus-visible{outline:3px solid var(--teal);outline-offset:1px;}
+.review-saved-note{font-family:var(--font-mono);font-size:0.68rem;color:var(--status-proven);font-weight:600;min-height:14px;margin-bottom:6px;}
+.review-submit-btn{width:100%;font-family:var(--font-head);font-weight:600;background:var(--teal);color:var(--white);border:none;padding:10px;border-radius:12px;font-size:0.85rem;cursor:pointer;}
+.review-submit-btn:hover{background:var(--teal-dark);}
+.review-submit-btn:focus-visible{outline:3px solid var(--status-new);outline-offset:2px;}
+
+/* Scoreboard */
+.scoreboard{font-family:var(--font-mono);font-size:0.74rem;color:var(--ink-soft);background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);border-radius:12px;padding:9px 14px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+.dot.proven{background:var(--status-proven);}
+.dot.new{background:var(--status-new);}
+
+/* Day cards */
+.days{display:flex;flex-direction:column;gap:14px;}
+.day-card{position:relative;background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:18px;padding:16px 18px;}
+.glow{position:absolute;top:16px;right:16px;width:9px;height:9px;border-radius:50%;}
+.glow.proven{background:var(--status-proven);box-shadow:0 0 9px 2px rgba(61,139,134,0.55);}
+.glow.new{background:var(--status-new);box-shadow:0 0 9px 2px rgba(201,138,62,0.55);}
+.day-head{display:flex;align-items:baseline;gap:8px;margin-bottom:8px;}
+.day-name{font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;font-size:1.1rem;}
+.day-status{font-family:var(--font-mono);font-size:0.62rem;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.04em;}
+.meal-row{display:flex;align-items:flex-start;gap:10px;font-size:0.86rem;padding:6px 0;border-top:1px solid rgba(42,59,76,0.08);}
+.meal-row:first-of-type{border-top:none;}
+.meal-label{font-family:var(--font-mono);font-size:0.62rem;text-transform:uppercase;color:var(--ink-faint);width:44px;flex-shrink:0;padding-top:3px;letter-spacing:0.04em;}
+.meal-name{flex:1;}
+.badge-new{font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.03em;color:var(--status-new);font-weight:600;margin-left:5px;}
+.by-line{font-size:0.72rem;color:var(--ink-soft);font-style:italic;display:block;margin-top:1px;}
+.log-btn{font-family:var(--font-head);font-size:0.68rem;font-weight:600;color:var(--teal-dark);background:rgba(255,255,255,0.6);border:1px solid var(--glass-border);border-radius:10px;padding:5px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.log-btn.logged{background:var(--teal);color:var(--white);border-color:var(--teal);}
+.log-btn:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+
+/* Shopping */
+.shop-card{background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:18px;padding:20px 18px 22px;}
+.shop-card h2{font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;font-size:1.25rem;margin:0 0 2px;text-align:center;}
+.shop-sub{text-align:center;font-family:var(--font-mono);font-size:0.68rem;color:var(--ink-soft);margin-bottom:16px;}
+.cat{font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--teal-dark);margin:16px 0 6px;border-bottom:1px solid rgba(42,59,76,0.12);padding-bottom:3px;}
+.shop-cat-block:first-of-type .cat{margin-top:0;}
+.item{display:flex;align-items:flex-start;gap:9px;padding:4px 0;font-size:0.85rem;cursor:pointer;}
+.item input{margin-top:3px;accent-color:var(--teal);width:15px;height:15px;flex-shrink:0;}
+.item span{flex:1;}
+.item.checked span{text-decoration:line-through;opacity:0.5;}
+.copy-btn{display:block;width:100%;margin:18px auto 0;font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;background:var(--teal);color:var(--white);border:none;padding:11px 22px;border-radius:12px;font-size:0.9rem;cursor:pointer;}
+.copy-btn:hover{background:var(--teal-dark);}
+.copy-btn.copied{background:var(--teal-dark);}
+.copy-btn:focus-visible{outline:3px solid var(--status-new);outline-offset:2px;}
+
+/* Recipe tab */
+.recipe-picker{display:flex;gap:6px;overflow-x:auto;margin-bottom:16px;padding-bottom:4px;}
+.rp-btn{font-family:var(--font-mono);font-size:0.68rem;white-space:nowrap;background:rgba(255,255,255,0.5);border:1px solid var(--glass-border);padding:7px 12px;border-radius:10px;cursor:pointer;color:var(--ink-soft);}
+.rp-btn.active{background:var(--teal);color:var(--white);border-color:var(--teal);}
+.rp-btn:focus-visible{outline:3px solid var(--status-new);outline-offset:2px;}
+.recipe-card{background:var(--glass-strong);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--glass-border);border-radius:18px;padding:20px 20px 22px;}
+.recipe-card h3{font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;font-size:1.2rem;margin:0 0 2px;}
+.recipe-card .by{font-size:0.75rem;font-style:italic;color:var(--ink-soft);margin-bottom:12px;}
+.recipe-card h4{font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--teal-dark);margin:14px 0 6px;}
+.recipe-card ul, .recipe-card ol{margin:0;padding-left:22px;font-size:0.86rem;line-height:1.65;}
+.recipe-card li{margin-bottom:3px;}
+.recipe-card .no-recipe{font-size:0.85rem;color:var(--ink-soft);}
+
+/* Favourite save button (recipe card + favourites list) */
+.favourite-btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-head);font-weight:600;font-size:0.78rem;color:var(--teal-dark);background:rgba(255,255,255,0.6);border:1px solid var(--glass-border);border-radius:20px;padding:7px 14px;cursor:pointer;margin-bottom:2px;}
+.favourite-btn.saved{background:var(--teal);color:var(--white);border-color:var(--teal);cursor:default;}
+.favourite-btn:disabled{opacity:0.7;}
+.favourite-btn:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.favourite-status-note{font-family:var(--font-mono);font-size:0.68rem;color:var(--status-proven);margin:4px 0 6px;min-height:14px;}
+
+/* Full-page overlays (Principles / Favourites / Favourite recipe detail) */
+.overlay-page{position:fixed;inset:0;background:linear-gradient(160deg,#CFE0EC 0%,#BFE6E0 45%,#EAF4E6 100%);background-attachment:fixed;z-index:60;overflow-y:auto;}
+.overlay-inner{max-width:640px;margin:0 auto;padding:26px 16px 40px;}
+.overlay-close{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-head);font-size:0.8rem;font-weight:600;color:var(--teal-dark);background:none;border:none;cursor:pointer;padding:0;margin-bottom:16px;}
+.overlay-close:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.overlay-title{font-family:var(--font-head);letter-spacing:-0.01em;font-size:1.4rem;font-weight:600;color:var(--ink);margin:0 0 4px;}
+.overlay-sub{font-size:0.82rem;color:var(--ink-soft);margin-bottom:16px;}
+
+/* Principles page */
+.principles-card{background:var(--glass-strong);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:18px;padding:18px;}
+.principles-card textarea{width:100%;min-height:280px;font-size:0.85rem;line-height:1.6;font-family:var(--font-body);background:rgba(255,255,255,0.7);border:1px solid var(--glass-border);border-radius:10px;padding:14px;margin-bottom:10px;resize:vertical;color:var(--ink);}
+.principles-card textarea:focus-visible{outline:3px solid var(--teal);outline-offset:1px;}
+.principles-status-note{font-family:var(--font-mono);font-size:0.7rem;color:var(--status-proven);font-weight:600;min-height:14px;margin-bottom:10px;}
+.primary-btn{width:100%;font-family:var(--font-head);font-weight:600;background:var(--teal);color:var(--white);border:none;padding:11px;border-radius:12px;font-size:0.88rem;cursor:pointer;}
+.primary-btn:hover{background:var(--teal-dark);}
+.primary-btn:disabled{opacity:0.6;cursor:default;}
+.primary-btn:focus-visible{outline:3px solid var(--status-new);outline-offset:2px;}
+
+/* Favourites list */
+.favourite-card{background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:18px;padding:16px 18px;margin-bottom:12px;}
+.favourite-card .fav-name{font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;font-size:1.05rem;margin-bottom:2px;}
+.favourite-card .by{font-size:0.75rem;font-style:italic;color:var(--ink-soft);margin-bottom:10px;}
+.favourite-card .fav-actions{display:flex;flex-direction:column;align-items:flex-start;gap:8px;}
+.link-btn{font-family:var(--font-head);font-size:0.75rem;font-weight:700;color:var(--teal-dark);background:none;border:none;text-decoration:underline;cursor:pointer;padding:0;}
+.link-btn:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.request-btn{width:100%;font-family:var(--font-head);font-weight:600;font-size:0.78rem;color:var(--ink-soft);background:rgba(255,255,255,0.6);border:1px solid var(--glass-border);border-radius:20px;padding:8px 13px;cursor:pointer;}
+.request-btn.requested{background:var(--status-proven);color:var(--white);border-color:var(--status-proven);}
+.request-btn:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.empty-note{background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--glass-border);border-radius:14px;padding:16px;font-size:0.85rem;color:var(--ink-soft);}
+
+/* Feedback modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(42,59,76,0.35);display:flex;align-items:flex-end;justify-content:center;z-index:70;}
+.modal{background:var(--glass-strong);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);width:100%;max-width:640px;border-radius:20px 20px 0 0;padding:22px 20px;border:1px solid var(--glass-border);border-bottom:none;}
+.modal h3{font-family:var(--font-head);letter-spacing:-0.01em;margin:0 0 3px;font-size:1.15rem;font-weight:600;}
+.modal .meal-sub{font-family:var(--font-mono);font-size:0.7rem;color:var(--ink-soft);margin-bottom:16px;text-transform:uppercase;letter-spacing:0.03em;}
+.modal-label{font-family:var(--font-mono);font-size:0.62rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-faint);margin-bottom:8px;}
+.btn-row{display:flex;gap:8px;margin-bottom:16px;}
+.stamp{flex:1;font-family:var(--font-mono);font-size:0.72rem;text-align:center;border:1.5px solid var(--ink-faint);color:var(--ink-soft);background:transparent;border-radius:10px;padding:9px 4px;cursor:pointer;text-transform:uppercase;letter-spacing:0.03em;}
+.stamp:hover{border-color:var(--ink);color:var(--ink);}
+.stamp.sel-yes{border-color:var(--status-proven);color:var(--status-proven);background:rgba(61,139,134,0.12);}
+.stamp.sel-mostly{border-color:var(--status-new);color:var(--status-new);background:rgba(201,138,62,0.12);}
+.stamp.sel-no{border-color:var(--status-caution);color:var(--status-caution);background:rgba(193,90,74,0.12);}
+.stamp:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.stars{display:flex;gap:6px;margin-bottom:16px;}
+.star{font-size:26px;cursor:pointer;color:var(--glass-border);line-height:1;background:none;border:none;padding:0;}
+.star.on{color:var(--status-new);}
+.star:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.modal textarea{width:100%;border:1px solid var(--glass-border);border-radius:10px;padding:10px;font-family:var(--font-body);font-size:0.85rem;resize:none;margin-bottom:14px;background:rgba(255,255,255,0.6);color:var(--ink);}
+.modal textarea:focus-visible{outline:3px solid var(--teal);outline-offset:1px;}
+.modal-status-note{font-family:var(--font-mono);font-size:0.7rem;color:var(--status-proven);font-weight:600;height:16px;margin-bottom:4px;}
+.cancel-link{display:block;width:100%;text-align:center;margin-top:10px;font-family:var(--font-body);font-size:0.75rem;color:var(--ink-soft);opacity:0.8;background:none;border:none;cursor:pointer;}
+
+.footer-note{font-family:var(--font-mono);font-size:0.66rem;color:var(--ink-soft);opacity:0.65;text-align:center;margin-top:26px;}
+
+@media (prefers-reduced-motion:reduce){*{transition:none !important;}}
 </style>
 </head>
 <body>
+<div class="wrap" id="hub">
 
-<div id="hub">
-  <div class="status-pill" id="statusPill">loading…</div>
-  <h1>This Week's Menu</h1>
-  <div class="subtitle" id="dateRange">—</div>
-  <button class="principles-link" id="principlesLinkBtn">📋 Meal planning principles</button>
-  <button class="principles-link" id="refreshPlanBtn">🔄 Refresh plan</button>
-  <button class="principles-link" id="favouritesLinkBtn">❤️ Favourites</button>
-  <div class="refresh-status-note" id="refreshStatusNote"></div>
-
-  <div id="reviewBoxContainer"></div>
-
-  <div class="tabs">
-    <button class="tab active" data-panel="plan">Plan</button>
-    <button class="tab" data-panel="shop">Shopping list</button>
+  <div class="header">
+    <h1 id="headerTitle">This week</h1>
+    <div class="sub" id="headerSub">—</div>
   </div>
 
-  <div class="panel active" id="panel-plan"></div>
-  <div class="panel" id="panel-shop"></div>
+  <div class="util-row">
+    <button class="util-btn" id="principlesLinkBtn"><i class="ti ti-clipboard-list"></i>Principles</button>
+    <button class="util-btn" id="refreshPlanBtn"><i class="ti ti-refresh"></i>Refresh plan</button>
+    <button class="util-btn" id="favouritesLinkBtn"><i class="ti ti-heart"></i>Favourites</button>
+  </div>
+  <div class="refresh-status-note" id="refreshStatusNote"></div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" role="tab" data-tab="plan">Plan</button>
+    <button class="tab" role="tab" data-tab="shopping"><i class="ti ti-shopping-cart" style="margin-right:5px;"></i>Shopping</button>
+    <button class="tab" role="tab" data-tab="recipe"><i class="ti ti-tools-kitchen-2" style="margin-right:5px;"></i>Recipe</button>
+  </div>
+
+  <div class="panel" id="panel-plan">
+    <div id="reviewBoxContainer"></div>
+    <div class="scoreboard" id="scoreboard"></div>
+    <div class="days" id="days-list"></div>
+  </div>
+
+  <div class="panel hidden" id="panel-shopping">
+    <div class="shop-card">
+      <h2>Shopping list</h2>
+      <div class="shop-sub" id="shopSub">—</div>
+      <div id="shopping-list"></div>
+      <button class="copy-btn" id="copy-btn">Copy list</button>
+    </div>
+  </div>
+
+  <div class="panel hidden" id="panel-recipe">
+    <div class="recipe-picker" id="recipe-picker"></div>
+    <div class="recipe-card" id="recipe-card"></div>
+  </div>
 
   <div class="footer-note">Published by the Family Menu Planner · updated weekly</div>
 </div>
 
 <script>
 (function(){
-  // ---- Claude replaces WEEK_DATA, PRINCIPLES_TEXT, and (rarely) FEEDBACK_ENDPOINT each week ----
+  // ---- Claude replaces WEEK_DATA, PRINCIPLES_TEXT, FAVOURITES, and (rarely) FEEDBACK_ENDPOINT ----
   const FEEDBACK_ENDPOINT = "https://script.google.com/macros/s/AKfycbwQXFwbeGLuhF8XA08NpEiWmCRscGNjxTt0wN3lGc73Pk-7PXLPMwU4dexHaRbQDRAWMw/exec";
   const FEEDBACK_EMAIL = "mark.j.barber@gmail.com";
+  const READ_KEY = "family-menu-2026"; // must match Apps Script's READ_KEY — it's a light lock, not real security
 
   const WEEK_DATA = {
-    "week_id": "2026-W33",
-    "date_range": "Aug 10 - Aug 16, 2026",
-    "status": "proposed",
-    "days": [
-        {
-            "day": "Monday",
-            "dinner": {
-                "name": "Soy-glazed baked chicken thighs, rice & steamed broccoli",
-                "new": true,
-                "authored_by": "The Weeknight Realist & The Child Nutritionist",
-                "recipe": {
-                    "ingredients": [
-                        "Chicken thighs (boneless, skinless)",
-                        "Soy sauce",
-                        "Honey",
-                        "Garlic",
-                        "Ginger",
-                        "Jasmine rice",
-                        "Broccoli"
-                    ],
-                    "method": [
-                        "Whisk soy, honey, garlic and ginger; toss chicken to coat.",
-                        "Bake chicken on a lined tray at 200°C for ~25 min, basting once.",
-                        "Cook rice; steam broccoli until just tender.",
-                        "Serve chicken over rice with broccoli on the side."
-                    ]
-                }
-            },
-            "lunch": {
-                "name": "Cheese quesadillas"
-            },
-            "snack": {
-                "name": "Apple slices with peanut butter"
-            }
-        },
-        {
-            "day": "Tuesday",
-            "dinner": {
-                "name": "Build-your-own hard-shell tacos (Old El Paso), seasoned beef & toppings bar",
-                "new": true,
-                "authored_by": "The Weeknight Realist & The Child Nutritionist",
-                "recipe": {
-                    "ingredients": [
-                        "Beef mince",
-                        "Old El Paso taco seasoning",
-                        "Hard taco shells",
-                        "Shredded lettuce",
-                        "Grated cheese (+ lactose-free block)",
-                        "Sour cream",
-                        "Avocado",
-                        "Diced tomato (optional topping)",
-                        "Cucumber (tomato-free lane)"
-                    ],
-                    "method": [
-                        "Brown beef, drain excess fat, stir in seasoning and a splash of water.",
-                        "Warm taco shells.",
-                        "Set out toppings bar with tomato-free lane (lettuce, cheese, cucumber, avocado, sour cream) alongside diced tomato for those who want it."
-                    ]
-                }
-            },
-            "lunch": {
-                "name": "Soy chicken & rice wraps (Monday's leftovers)"
-            },
-            "snack": {
-                "name": "Banana"
-            }
-        },
-        {
-            "day": "Wednesday",
-            "dinner": {
-                "name": "One-pan sausage & rice bake, with a tomato & cucumber side salad",
-                "new": true,
-                "authored_by": "The Weeknight Realist",
-                "recipe": {
-                    "ingredients": [
-                        "Sausages",
-                        "Rice",
-                        "Onion",
-                        "Garlic",
-                        "Chicken stock",
-                        "Frozen peas & corn mix",
-                        "Tomato",
-                        "Cucumber"
-                    ],
-                    "method": [
-                        "Brown sausages, remove and drain excess fat, slice.",
-                        "Sauté onion and garlic, add rice and stock, simmer covered until rice is tender.",
-                        "Stir in peas/corn and sliced sausage.",
-                        "Serve with a tomato-cucumber side salad for adults; plain cucumber for kids."
-                    ]
-                }
-            },
-            "lunch": {
-                "name": "Beef taco filling wraps (Tuesday's leftovers)"
-            },
-            "snack": {
-                "name": "Mandarins"
-            }
-        },
-        {
-            "day": "Thursday",
-            "dinner": {
-                "name": "Egg & soy fried rice with bacon",
-                "new": false,
-                "authored_by": "The Flavor Explorer & The Weeknight Realist",
-                "recipe": {
-                    "ingredients": [
-                        "Rice (day-old, cooked)",
-                        "Eggs",
-                        "Bacon",
-                        "Soy sauce",
-                        "Spring onion",
-                        "Frozen peas & corn mix"
-                    ],
-                    "method": [
-                        "Cook bacon until crisp, set aside.",
-                        "Scramble eggs in the same pan, remove.",
-                        "Fry rice with peas/corn, return bacon and egg, splash with soy sauce.",
-                        "Toss through spring onion and serve."
-                    ]
-                }
-            },
-            "lunch": {
-                "name": "Sausage rice bake (Wednesday's leftovers)"
-            },
-            "snack": {
-                "name": "Popcorn"
-            }
-        },
-        {
-            "day": "Friday",
-            "dinner": {
-                "name": "Oven-tray chicken nuggets, wedges & corn (with a side salad for the grown-ups)",
-                "new": true,
-                "authored_by": "The Weeknight Realist",
-                "recipe": {
-                    "ingredients": [
-                        "Frozen chicken nuggets/tenders",
-                        "Frozen potato wedges",
-                        "Corn kernels",
-                        "Salad greens (adults)"
-                    ],
-                    "method": [
-                        "Arrange nuggets, wedges and corn on a lined tray.",
-                        "Bake at 200°C for ~20-25 min, turning once.",
-                        "Toss a quick side salad for the adults."
-                    ]
-                }
-            },
-            "lunch": {
-                "name": "Chicken nugget & wedge wraps (Friday's leftovers)"
-            },
-            "snack": {
-                "name": "Rice crackers"
-            }
-        },
-        {
-            "day": "Saturday",
-            "dinner": {
-                "name": "Crumbed salmon 'fish fingers', oven-baked fries & peas",
-                "new": true,
-                "authored_by": "The Family GP/Dietician & The Child Nutritionist",
-                "recipe": {
-                    "ingredients": [
-                        "Salmon fillets (skinless)",
-                        "Panko breadcrumbs",
-                        "Egg",
-                        "Plain flour",
-                        "Frozen fries",
-                        "Peas"
-                    ],
-                    "method": [
-                        "Cut salmon into finger shapes; coat in flour, egg, then panko.",
-                        "Bake fish fingers at 200°C for ~15 min until golden and cooked through.",
-                        "Bake frozen fries alongside on a separate tray per packet instructions.",
-                        "Steam peas and serve alongside."
-                    ]
-                }
-            },
-            "lunch": {
-                "name": "Chicken nugget & wedge wraps (Friday's leftovers)"
-            },
-            "snack": {
-                "name": "Lactose-free yoghurt pouch (or fresh fruit if unavailable)"
-            }
-        },
-        {
-            "day": "Sunday",
-            "dinner": {
-                "name": "Roast chicken, roast potatoes, broccoli & a lighter gravy",
-                "new": false,
-                "authored_by": "The Weeknight Realist & The Family GP/Dietician",
-                "recipe": {
-                    "ingredients": [
-                        "Whole chicken",
-                        "Potatoes",
-                        "Broccoli",
-                        "Chicken stock",
-                        "Plain flour",
-                        "Fresh thyme"
-                    ],
-                    "method": [
-                        "Roast chicken with thyme at 190°C until cooked through; roast potatoes alongside.",
-                        "Steam broccoli.",
-                        "Skim excess fat from pan juices, make a light gravy with a little flour and stock, season and serve sparingly."
-                    ]
-                }
-            },
-            "lunch": {
-                "name": "Salmon finger wraps (Saturday's leftovers)"
-            },
-            "snack": {
-                "name": "Cheese and crackers"
-            }
-        }
+    week_id: "2026-W33",
+    date_range: "Aug 10 – Aug 16, 2026",
+    status: "proposed",
+    days: [
+      {day:"Monday", dinner:{name:"Soy-glazed baked chicken thighs, rice & steamed broccoli", new:true, authored_by:"The Weeknight Realist & The Child Nutritionist", recipe:{ingredients:["8 boneless, skinless chicken thighs","1/3 cup soy sauce","2 tbsp honey","1 tbsp rice vinegar (or lemon juice)","2 cloves garlic, minced","1 tsp grated ginger","1 tbsp cornstarch mixed with 2 tbsp water","1.5 cups jasmine rice","2 heads broccoli, cut into florets"], method:["Preheat oven to 200°C (400°F).","Whisk soy sauce, honey, rice vinegar, garlic and ginger in a small saucepan; simmer 2-3 min.","Stir in the cornstarch slurry and simmer until glossy and slightly thickened, about 1 min.","Lay chicken thighs in a baking dish, spoon over half the sauce, and bake 20 min.","Brush on the remaining sauce and bake a further 10 min until sticky and cooked through.","Meanwhile cook the rice according to packet directions, steaming the broccoli for the last 5-6 min.","Serve chicken over rice with broccoli alongside — a splash of extra plain soy sauce on the side for Hamish's rice if he wants it saucier."]}}, lunch:{name:"Cheese quesadillas"}, snack:{name:"Apple slices with peanut butter"}},
+      {day:"Tuesday", dinner:{name:"Build-your-own hard-shell tacos (Old El Paso), seasoned beef & toppings bar", new:true, authored_by:"The Weeknight Realist & The Child Nutritionist", recipe:{ingredients:["600g beef mince","1 tbsp ground cumin","1 tbsp smoked paprika","1 tsp garlic powder","1/2 tsp salt","1/4 cup water","12 Old El Paso hard taco shells","1 cup shredded lettuce","1 cup grated cheese (+ lactose-free block for Maddie)","1/2 cup sour cream","1 avocado, sliced","4 tomatoes, diced (topping — kept off Maddie's plate)","1 cucumber, sliced (tomato-free lane)"], method:["Brown beef mince in a large pan over medium-high heat, breaking it up, 6-8 min.","Stir in cumin, paprika, garlic powder and salt, then the water; simmer 3-4 min until thickened.","Warm the taco shells according to packet directions.","Set out beef, lettuce, cheese, sour cream, avocado, diced tomato and cucumber separately.","Everyone builds their own — keep diced tomato and heavy cheese/sour cream light or off Maddie's plate, cucumber slices in its place."]}}, lunch:{name:"Soy chicken & rice wraps (Monday's leftovers)"}, snack:{name:"Banana"}},
+      {day:"Wednesday", dinner:{name:"One-pan sausage & rice bake, with a tomato & cucumber side salad", new:true, authored_by:"The Weeknight Realist", recipe:{ingredients:["6 sausages, leaner variety, casings removed","1.5 cups long-grain rice","1 onion, diced","2 cloves garlic, minced","3 cups chicken stock","1 cup frozen peas","6 tomatoes, sliced (side salad — kept off Maddie's plate)","1 cucumber, sliced","Olive oil & a pinch of salt, to dress"], method:["Brown sausage meat in a large oven-proof pan, breaking it into small pieces, about 6 min; drain any excess fat.","Add onion and garlic, cook until soft, 3 min.","Stir in rice, then pour in stock and bring to a simmer.","Cover and cook 15-18 min until rice is tender and the liquid is absorbed, stirring in the peas for the last 5 min.","While the bake cooks, toss the sliced tomato and cucumber with a little olive oil and salt for a light side salad.","Serve as-is for the kids; pass the tomato-cucumber salad separately for the adults and Hamish — kept off Maddie's plate for the tomato, and light on any extra dairy for Genevieve."]}}, lunch:{name:"Beef taco filling wraps (Tuesday's leftovers)"}, snack:{name:"Mandarins"}},
+      {day:"Thursday", dinner:{name:"Egg & soy fried rice with bacon", new:false, authored_by:"The Flavor Explorer & The Weeknight Realist", recipe:{ingredients:["4 cups cold cooked rice (day-old if possible)","4 rashers bacon, diced","3 eggs, beaten","3 tbsp soy sauce","1 cup frozen peas and corn mix","2 spring onions, sliced","2 tbsp neutral oil"], method:["Heat oil in a large pan or wok over high heat; cook bacon until crisp, about 4 min.","Push bacon to one side, pour in the beaten egg and scramble until just set.","Add the rice, breaking up clumps, and stir-fry 3-4 min.","Add the peas and corn, soy sauce and spring onions; toss until heated through and everything is coated.","Serve as-is — a proven favourite for Hamish (rice with soy sauce, egg), easy to portion small for Maddie."]}}, lunch:{name:"Sausage rice bake (Wednesday's leftovers)"}, snack:{name:"Popcorn"}},
+      {day:"Friday", dinner:{name:"Oven-tray chicken nuggets, wedges & corn (with a side salad for the grown-ups)", new:true, authored_by:"The Weeknight Realist", recipe:{ingredients:["1 bag frozen chicken nuggets or tenders (~700g)","1 bag frozen potato wedges (~750g)","2 cups corn kernels, fresh or tinned","Olive oil spray","Salad greens, cucumber and dressing (adults only)"], method:["Preheat oven to the temperature on the nugget/wedge packets (usually 200°C).","Spread nuggets and wedges across one large tray (or two if crowded), spray lightly with oil.","Bake according to packet directions, turning once, until golden and cooked through — usually 18-22 min.","Steam or microwave the corn for the last 5 min.","Toss a quick side salad for the adults while everything else bakes.","Serve straight from the tray — the lowest-effort dinner of the week."]}}, lunch:{name:"Fried rice (Thursday's leftovers)"}, snack:{name:"Rice crackers"}},
+      {day:"Saturday", dinner:{name:"Crumbed salmon 'fish fingers', oven-baked fries & peas", new:true, authored_by:"The Family GP/Dietician & The Child Nutritionist", recipe:{ingredients:["600g skinless salmon fillets, cut into finger-width strips","1/2 cup flour","2 eggs, beaten","1.5 cups panko breadcrumbs","1 bag frozen oven-baked fries","Frozen peas to serve","Ketchup to serve"], method:["Preheat oven to 200°C (400°F) and line a tray.","Set up three shallow bowls: flour, beaten egg, and panko.","Coat each salmon strip in flour, then egg, then panko, pressing the crumbs on firmly.","Lay on the tray, spray lightly with oil, and bake 12-15 min, turning once, until golden and just cooked through.","Bake the fries on a separate tray alongside per packet directions, and steam or microwave the peas.","Serve with ketchup — same crumbed-and-fried approach that worked well before, oven fries in place of potato gems this week."]}}, lunch:{name:"Chicken nugget & wedge wraps (Friday's leftovers)"}, snack:{name:"Lactose-free yoghurt pouch (or fresh fruit if unavailable)"}},
+      {day:"Sunday", dinner:{name:"Roast chicken, roast potatoes, broccoli & a lighter gravy", new:false, authored_by:"The Weeknight Realist & The Family GP/Dietician", recipe:{ingredients:["1 whole chicken (~1.8kg)","1.5kg potatoes, quartered","2 tbsp olive oil","2 cloves garlic","1 lemon, halved","A few sprigs thyme","1 tbsp flour","2 cups chicken stock (for gravy)","1 head broccoli, steamed"], method:["Preheat oven to 200°C (400°F).","Pat the chicken dry, rub with oil, salt and pepper; stuff the cavity with garlic, lemon and thyme.","Place chicken in a large roasting tray, scatter potatoes around it tossed in oil, salt and pepper.","Roast 70-80 min until juices run clear and potatoes are golden, basting once halfway.","Rest chicken 10 min. Skim excess fat from the pan juices, whisk in flour over heat, then gradually add stock, simmering until thickened — go light on the flour/fat for a lighter gravy.","Steam broccoli and serve alongside."]}}, lunch:{name:"Salmon finger wraps (Saturday's leftovers)"}, snack:{name:"Cheese and crackers"}}
     ],
-    "shopping_list": {
-        "Produce": [
-            "Broccoli (2 heads)",
-            "Avocados (2)",
-            "Shredded lettuce (1 bag)",
-            "Corn kernels (2 cups, fresh or tinned)",
-            "Onion (2)",
-            "Garlic (1 bulb)",
-            "Ginger (small knob)",
-            "Lemon (1)",
-            "Fresh thyme",
-            "Spring onions (2)",
-            "Bananas (1 bunch)",
-            "Apples (4)",
-            "Mandarins (1 bag)",
-            "Potatoes (1.5kg)",
-            "Cucumber (2)"
-        ],
-        "Meat & deli": [
-            "Chicken thighs, boneless skinless (8, ~1.2kg)",
-            "Beef mince, lean (500g)",
-            "Sausages (6, ~500g)",
-            "Bacon (4 rashers)",
-            "Salmon fillets, skinless (600g)",
-            "Whole chicken (~1.8kg)"
-        ],
-        "Dairy": [
-            "Grated cheese (block) + a lactose-free block for Maddie's portions",
-            "Sour cream",
-            "Parmesan (small wedge, adults only)",
-            "Butter",
-            "Eggs (1 dozen)",
-            "Lactose-free yoghurt pouches x2-4"
-        ],
-        "Pantry": [
-            "Jasmine or long-grain rice (2kg bag)",
-            "Soy sauce",
-            "Honey",
-            "Rice vinegar",
-            "Cornstarch",
-            "Hard taco shells (Old El Paso, 12)",
-            "Taco seasoning (Old El Paso packet)",
-            "Plain flour",
-            "Panko breadcrumbs",
-            "Chicken stock",
-            "Rice crackers",
-            "Popcorn kernels",
-            "Peanut butter",
-            "Ketchup"
-        ],
-        "Frozen": [
-            "Peas",
-            "Frozen peas & corn mix",
-            "Frozen fries (~500g)",
-            "Chicken nuggets or tenders, frozen (~700g)",
-            "Potato wedges, frozen (~750g)"
-        ],
+    shopping_list: {
+        "Produce": ["Broccoli (2 heads)", "Avocados (2)", "Shredded lettuce (1 bag)", "Corn kernels (2 cups, fresh or tinned)", "Onion (2)", "Garlic (1 bulb)", "Ginger (small knob)", "Lemon (1)", "Fresh thyme", "Spring onions (2)", "Bananas (1 bunch)", "Apples (4)", "Mandarins (1 bag)", "Potatoes (1.5kg)", "Cucumber (2)"],
+        "Meat & deli": ["Chicken thighs, boneless skinless (8, ~1.2kg)", "Beef mince, lean (500g)", "Sausages (6, ~500g)", "Bacon (4 rashers)", "Salmon fillets, skinless (600g)", "Whole chicken (~1.8kg)"],
+        "Dairy": ["Grated cheese (block) + a lactose-free block for Maddie's portions", "Sour cream", "Parmesan (small wedge, adults only)", "Butter", "Eggs (1 dozen)", "Lactose-free yoghurt pouches x2-4"],
+        "Pantry": ["Jasmine or long-grain rice (2kg bag)", "Soy sauce", "Honey", "Rice vinegar", "Cornstarch", "Hard taco shells (Old El Paso, 12)", "Taco seasoning (Old El Paso packet)", "Plain flour", "Panko breadcrumbs", "Chicken stock", "Rice crackers", "Popcorn kernels", "Peanut butter", "Ketchup"],
+        "Frozen": ["Peas", "Frozen peas & corn mix", "Frozen fries (~500g)", "Chicken nuggets or tenders, frozen (~700g)", "Potato wedges, frozen (~750g)"],
         "Other": []
     }
 };
@@ -622,6 +311,15 @@
   }
 ];
 
+  let dishStats = {};
+  let shoppingState = {};
+  let recipeTabIndex = 0;
+  let recipeTabInitialized = false;
+
+  function slugify(name){ return String(name).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+  function shopItemKey(cat, item){ return cat + '::' + item; }
+  function key(day, meal){ return day + "-" + meal; }
+
   // Which meals have been logged on THIS device (cosmetic only — the real record is the Sheet)
   let loggedLocally = {};
   try { loggedLocally = JSON.parse(localStorage.getItem('menu-hub-logged:' + WEEK_DATA.week_id) || '{}'); } catch(e) { loggedLocally = {}; }
@@ -630,12 +328,11 @@
     try { localStorage.setItem('menu-hub-logged:' + WEEK_DATA.week_id, JSON.stringify(loggedLocally)); } catch(e){}
   }
 
-  function key(day, meal){ return day + "-" + meal; }
-
   // Fire-and-forget POST to the Apps Script endpoint. Uses no-cors + text/plain so it
   // doesn't trigger a CORS preflight (Apps Script web apps don't handle preflight well).
   // That also means we can't read a real success/failure response — this always resolves
-  // once the request is sent, not once it's confirmed received.
+  // once the request is sent, not once it's confirmed received. Used only for write-only,
+  // no-response-needed submissions (review feedback, per-meal Log).
   function sendToSheet(payload){
     if(!FEEDBACK_ENDPOINT || FEEDBACK_ENDPOINT.indexOf('PASTE_') === 0){
       return Promise.reject(new Error('Feedback endpoint not configured yet'));
@@ -648,30 +345,57 @@
     });
   }
 
-  function render(){
-    document.getElementById("dateRange").textContent = WEEK_DATA.date_range;
-    document.getElementById("statusPill").textContent = WEEK_DATA.status === "proposed"
-      ? "Draft — open for feedback"
-      : "Tap any meal to log how it went";
+  // Regular (readable-response) POST — used wherever we need the server's JSON back
+  // (refresh, favourites, shopping sync). Content-Type text/plain keeps this a "simple
+  // request" so it still avoids a CORS preflight, but WITHOUT no-cors so the response
+  // body is actually readable.
+  function postJSON(payload){
+    return fetch(FEEDBACK_ENDPOINT, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify(payload)
+    }).then(r => r.json());
+  }
 
-    const reviewContainer = document.getElementById("reviewBoxContainer");
+  async function fetchDishStats(){
+    try{
+      const resp = await fetch(FEEDBACK_ENDPOINT + '?action=dish_stats&key=' + encodeURIComponent(READ_KEY));
+      const result = await resp.json();
+      if(result.status === 'ok') dishStats = result.stats || {};
+    }catch(e){ /* leave dishStats empty — everything just renders as "new attempt" */ }
+  }
+
+  async function fetchShoppingState(){
+    try{
+      const resp = await fetch(FEEDBACK_ENDPOINT + '?action=shopping_state&week_id=' + encodeURIComponent(WEEK_DATA.week_id) + '&key=' + encodeURIComponent(READ_KEY));
+      const result = await resp.json();
+      if(result.status === 'ok') shoppingState = result.state || {};
+    }catch(e){ shoppingState = {}; }
+  }
+
+  function dishStatus(name){
+    const s = dishStats[name];
+    return (s && s.status === 'proven') ? 'proven' : 'new';
+  }
+
+  function renderReviewBox(){
+    const container = document.getElementById("reviewBoxContainer");
     if(WEEK_DATA.status === "proposed"){
-      reviewContainer.innerHTML = `
-        <div class="dietary-note">Built around Maddie's mild lactose intolerance + tomato dislike, and Hamish's known dislikes (broccoli-forward mains, salmon patties, roast veg stacks, pie filling).</div>
+      container.innerHTML = `
         <div class="review-box">
-          <div class="review-title">Got feedback on this plan?</div>
-          <div class="review-sub">Send it straight from here — it lands in the same log Claude reads before planning next week.</div>
-          <label>Feedback on this week's plan (swaps, concerns, anything)</label>
+          <div class="rb-title">Anything to flag before this plan goes out?</div>
+          <div class="rb-sub">Note plan changes or fridge/pantry items that need using up — this lands in the same log read before next week's planning.</div>
+          <label>Plan feedback</label>
           <textarea id="planFeedbackInput" placeholder="e.g. can we swap Wednesday's sausage bake for something else?"></textarea>
-          <label>Ingredients to use up this week</label>
+          <label>Ingredients to use up</label>
           <textarea id="useUpInput" placeholder="e.g. half a bag of spinach, leftover ham"></textarea>
           <div class="review-saved-note" id="reviewSavedNote"></div>
-          <button class="save-btn" id="saveReviewBtn">Send feedback</button>
+          <button class="review-submit-btn" id="saveReviewBtn">Send feedback</button>
         </div>`;
-      reviewContainer.querySelector("#saveReviewBtn").addEventListener("click", async ()=>{
-        const plan_feedback = reviewContainer.querySelector("#planFeedbackInput").value;
-        const use_up = reviewContainer.querySelector("#useUpInput").value;
-        const note = reviewContainer.querySelector("#reviewSavedNote");
+      container.querySelector("#saveReviewBtn").addEventListener("click", async ()=>{
+        const plan_feedback = container.querySelector("#planFeedbackInput").value;
+        const use_up = container.querySelector("#useUpInput").value;
+        const note = container.querySelector("#reviewSavedNote");
         if(!plan_feedback && !use_up){ note.textContent = "Add something in one of the boxes first"; return; }
         note.textContent = "Sending…";
         try{
@@ -682,205 +406,166 @@
         }
       });
     } else {
-      reviewContainer.innerHTML = "";
+      container.innerHTML = "";
     }
+  }
 
-    const plan = document.getElementById("panel-plan");
-    plan.innerHTML = WEEK_DATA.days.map(d => {
+  function renderScoreboard(){
+    const el = document.getElementById("scoreboard");
+    let proven = 0, fresh = 0;
+    WEEK_DATA.days.forEach(d=>{
+      if(!d.dinner) return;
+      if(dishStatus(d.dinner.name) === 'proven') proven++; else fresh++;
+    });
+    el.innerHTML = `
+      <span><span class="dot proven"></span>proven winner &nbsp;&nbsp;<span class="dot new"></span>new attempt</span>
+      <span>${proven} proven · ${fresh} new this week</span>`;
+  }
+
+  function renderDays(){
+    const list = document.getElementById('days-list');
+    list.innerHTML = WEEK_DATA.days.map(d => {
+      const status = d.dinner ? dishStatus(d.dinner.name) : 'new';
       const meals = ["lunch","snack","dinner"];
       return `<div class="day-card">
-        <div class="day-title">${d.day}</div>
-        ${meals.map(m => {
+        <div class="glow ${status}"></div>
+        <div class="day-head">
+          <span class="day-name">${d.day}</span>
+          <span class="day-status">${status === 'proven' ? 'proven' : 'new attempt'}</span>
+        </div>
+        ${meals.map(m=>{
           const info = d[m];
           if(!info) return "";
           const logged = !!loggedLocally[key(d.day,m)];
           return `<div class="meal-row">
-            <div class="meal-label">${m}</div>
-            <div class="meal-name">${info.name}${info.new ? '<span class="badge-new">new</span>':''}${info.recipe ? ` <button class="recipe-link-btn" data-day="${d.day}" data-meal="${m}">View recipe</button>`:''}</div>
-            <button class="feedback-btn ${logged?'logged':''}" data-day="${d.day}" data-meal="${m}" data-name="${info.name}">
-              ${logged ? '✓ logged' : 'Log'}
-            </button>
+            <span class="meal-label">${m}</span>
+            <span class="meal-name">${info.name}${info.new ? '<span class="badge-new">new</span>':''}${m==='dinner' && info.authored_by ? `<span class="by-line">${info.authored_by}</span>` : ''}</span>
+            <button class="log-btn ${logged?'logged':''}" data-day="${d.day}" data-meal="${m}" data-name="${info.name}">${logged ? '✓ Logged' : 'Log'}</button>
           </div>`;
         }).join("")}
       </div>`;
     }).join("");
+    list.querySelectorAll(".log-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=> openModal(btn.dataset.day, btn.dataset.meal, btn.dataset.name));
+    });
+  }
 
-    const shop = document.getElementById("panel-shop");
+  function renderPlan(){
+    renderReviewBox();
+    renderScoreboard();
+    renderDays();
+  }
+
+  function renderShopping(){
+    document.getElementById("shopSub").textContent = "WEEK OF " + WEEK_DATA.date_range.toUpperCase();
+    const shop = document.getElementById("shopping-list");
     shop.innerHTML = Object.entries(WEEK_DATA.shopping_list)
       .filter(([cat, items]) => items.length)
       .map(([cat, items]) => `
-        <div class="shop-section">
-          <div class="shop-cat">${cat}</div>
-          ${items.map((it,i) => `
-            <label class="shop-item" data-id="${cat}-${i}">
-              <input type="checkbox">
+        <div class="shop-cat-block">
+          <div class="cat">${cat}</div>
+          ${items.map((it) => {
+            const ik = shopItemKey(cat, it);
+            const checked = !!shoppingState[ik];
+            return `
+            <label class="item ${checked?'checked':''}" data-key="${ik}">
+              <input type="checkbox" ${checked?'checked':''}>
               <span>${it}</span>
-            </label>`).join("")}
-        </div>`).join("") + `<button class="copy-shop-btn" id="copyShopBtn">Copy shopping list to clipboard</button>`;
-
-    plan.querySelectorAll(".feedback-btn").forEach(btn=>{
-      btn.addEventListener("click", ()=> openModal(btn.dataset.day, btn.dataset.meal, btn.dataset.name));
-    });
-    plan.querySelectorAll(".recipe-link-btn").forEach(btn=>{
-      btn.addEventListener("click", ()=> openRecipePage(btn.dataset.day, btn.dataset.meal));
-    });
-    shop.querySelectorAll(".shop-item").forEach(row=>{
-      row.querySelector("input").addEventListener("change", (e)=>{
-        row.classList.toggle("checked", e.target.checked);
-      });
-    });
-    document.getElementById("copyShopBtn").addEventListener("click", async (e)=>{
-      const lines = [];
-      shop.querySelectorAll(".shop-section").forEach(section=>{
-        lines.push(section.querySelector(".shop-cat").textContent);
-        section.querySelectorAll(".shop-item").forEach(row=>{
-          const checked = row.querySelector("input").checked;
-          const text = row.querySelector("span").textContent;
-          lines.push(`${checked ? "[x]" : "[ ]"} ${text}`);
-        });
-        lines.push("");
-      });
-      const text = lines.join("\n").trim();
-      try{
-        await navigator.clipboard.writeText(text);
-        e.target.textContent = "Copied ✓";
-        e.target.classList.add("copied");
-        setTimeout(()=>{ e.target.textContent = "Copy shopping list to clipboard"; e.target.classList.remove("copied"); }, 2000);
-      }catch(err){
-        e.target.textContent = "Couldn't copy — select and copy manually";
-      }
-    });
-  }
-
-  function openRecipePage(day, meal){
-    const dayData = WEEK_DATA.days.find(d => d.day === day);
-    const info = dayData && dayData[meal];
-    if(!info || !info.recipe) return;
-    renderRecipeDetail(info.name, info.authored_by, info.recipe, {showSaveButton:true});
-  }
-
-  function slugify(name){
-    return String(name).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-  }
-
-  function renderRecipeDetail(name, authored_by, recipe, opts){
-    opts = opts || {};
-    const page = document.createElement("div");
-    page.className = "recipe-page";
-    const favId = slugify(name);
-    const alreadySaved = FAVOURITES.some(f => f.id === favId);
-    page.innerHTML = `
-      <div class="recipe-page-inner">
-        <button class="recipe-close" id="recipeCloseBtn">← Back</button>
-        <div class="recipe-title">${name}</div>
-        ${authored_by ? `<div class="recipe-author">Recipe by ${authored_by}</div>` : ''}
-        ${opts.showSaveButton ? `
-          <button class="favourite-btn ${alreadySaved?'saved':''}" id="saveFavouriteBtn" ${alreadySaved?'disabled':''}>${alreadySaved ? '★ Saved to favourites' : '☆ Save to favourites'}</button>
-          <div class="favourite-status-note" id="favouriteStatusNote"></div>` : ''}
-        <div class="recipe-section-h">Ingredients</div>
-        <ul class="recipe-list">
-          ${recipe.ingredients.map(i => `<li>${i}</li>`).join("")}
-        </ul>
-        <div class="recipe-section-h">Method</div>
-        <ol class="recipe-list recipe-method">
-          ${recipe.method.map(s => `<li>${s}</li>`).join("")}
-        </ol>
-      </div>`;
-    document.getElementById("hub").appendChild(page);
-    page.querySelector("#recipeCloseBtn").addEventListener("click", ()=> page.remove());
-
-    if(opts.showSaveButton){
-      page.querySelector("#saveFavouriteBtn").addEventListener("click", async ()=>{
-        const btn = page.querySelector("#saveFavouriteBtn");
-        const note = page.querySelector("#favouriteStatusNote");
-        btn.disabled = true;
-        note.textContent = "Saving…";
+            </label>`;
+          }).join("")}
+        </div>`).join("") ;
+    shop.querySelectorAll(".item").forEach(row=>{
+      row.querySelector("input").addEventListener("change", async (e)=>{
+        const checked = e.target.checked;
+        row.classList.toggle("checked", checked);
+        const itemKey = row.dataset.key;
+        shoppingState[itemKey] = checked;
         try{
-          const resp = await fetch(FEEDBACK_ENDPOINT, {
-            method: "POST",
-            headers: {"Content-Type": "text/plain;charset=utf-8"},
-            body: JSON.stringify({type: "save_favourite", name, authored_by, recipe})
-          });
-          const result = await resp.json();
-          if(result.status === "ok"){
-            FAVOURITES = result.favourites;
-            btn.textContent = "★ Saved to favourites";
-            btn.classList.add("saved");
-            note.textContent = "Saved ✓ — find it under ❤️ Favourites";
-          } else {
-            note.textContent = "Couldn't save: " + (result.message || "unknown error");
-            btn.disabled = false;
-          }
-        }catch(e){
-          note.textContent = "Couldn't reach the server — try again in a moment.";
-          btn.disabled = false;
-        }
+          await postJSON({type:"toggle_shopping_item", week_id: WEEK_DATA.week_id, item_key: itemKey, checked: checked});
+        }catch(err){ /* optimistic UI already applied; next reload resyncs from the server */ }
       });
+    });
+  }
+
+  document.getElementById("copy-btn").addEventListener("click", async (e)=>{
+    const lines = [];
+    Object.entries(WEEK_DATA.shopping_list).forEach(([cat, items])=>{
+      if(!items.length) return;
+      lines.push(cat.toUpperCase());
+      items.forEach(it => lines.push('- ' + it));
+      lines.push("");
+    });
+    const text = lines.join("\n").trim();
+    try{
+      await navigator.clipboard.writeText(text);
+      e.target.textContent = "Copied ✓";
+      e.target.classList.add("copied");
+      setTimeout(()=>{ e.target.textContent = "Copy list"; e.target.classList.remove("copied"); }, 2000);
+    }catch(err){
+      e.target.textContent = "Couldn't copy — select and copy manually";
     }
+  });
+
+  function renderRecipeTab(){
+    const picker = document.getElementById('recipe-picker');
+    picker.innerHTML = WEEK_DATA.days.map((d,i) => `<button class="rp-btn ${i===recipeTabIndex?'active':''}" data-i="${i}">${d.day.slice(0,3)}</button>`).join('');
+    picker.querySelectorAll('.rp-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        picker.querySelectorAll('.rp-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        renderRecipeCard(parseInt(btn.dataset.i, 10));
+      });
+    });
+    renderRecipeCard(recipeTabIndex);
   }
 
-  function openFavouritesPage(){
-    const page = document.createElement("div");
-    page.className = "recipe-page";
-    page.innerHTML = `
-      <div class="recipe-page-inner">
-        <button class="recipe-close" id="favouritesCloseBtn">← Back</button>
-        <div class="recipe-title">Favourites</div>
-        <div class="meal-sub" style="margin-bottom:16px;">Save a recipe from any week's dinners, then request it here to guarantee it appears in next week's plan.</div>
-        <div id="favouritesListInner"></div>
-      </div>`;
-    document.getElementById("hub").appendChild(page);
-    page.querySelector("#favouritesCloseBtn").addEventListener("click", ()=> page.remove());
-    renderFavouritesList(page);
-  }
-
-  function renderFavouritesList(page){
-    const container = page.querySelector("#favouritesListInner");
-    if(!FAVOURITES.length){
-      container.innerHTML = `<div class="dietary-note">No favourites saved yet — open any dinner's recipe and tap "Save to favourites".</div>`;
+  function renderRecipeCard(i){
+    recipeTabIndex = i;
+    const d = WEEK_DATA.days[i];
+    const card = document.getElementById('recipe-card');
+    const info = d.dinner;
+    if(!info || !info.recipe){
+      card.innerHTML = `<div class="no-recipe">No recipe on file for ${d.day}'s dinner.</div>`;
       return;
     }
-    container.innerHTML = FAVOURITES.map(f => `
-      <div class="day-card favourite-card">
-        <div class="day-title">${f.name}</div>
-        ${f.authored_by ? `<div class="recipe-author">Recipe by ${f.authored_by}</div>` : ''}
-        <button class="recipe-link-btn" data-id="${f.id}" data-action="view">View recipe</button>
-        <button class="save-btn favourite-request-btn ${f.requested_for_next_week?'requested':''}" data-id="${f.id}" data-requested="${f.requested_for_next_week?'1':'0'}">
-          ${f.requested_for_next_week ? "✓ Requested for next week's plan — tap to cancel" : "Request for next week's plan"}
-        </button>
-      </div>`).join("");
-    container.querySelectorAll('[data-action="view"]').forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const f = FAVOURITES.find(x => x.id === btn.dataset.id);
-        if(f) renderRecipeDetail(f.name, f.authored_by, f.recipe, {showSaveButton:false});
-      });
-    });
-    container.querySelectorAll(".favourite-request-btn").forEach(btn=>{
-      btn.addEventListener("click", async ()=>{
-        const id = btn.dataset.id;
-        const newRequested = btn.dataset.requested !== "1";
-        btn.disabled = true;
-        btn.textContent = "Updating…";
-        try{
-          const resp = await fetch(FEEDBACK_ENDPOINT, {
-            method: "POST",
-            headers: {"Content-Type": "text/plain;charset=utf-8"},
-            body: JSON.stringify({type: "toggle_favourite_request", id, requested: newRequested})
-          });
-          const result = await resp.json();
-          if(result.status === "ok"){
-            FAVOURITES = result.favourites;
-            renderFavouritesList(page);
-          } else {
-            btn.textContent = "Couldn't update — try again";
-            btn.disabled = false;
-          }
-        }catch(e){
-          btn.textContent = "Couldn't reach the server — try again";
-          btn.disabled = false;
-        }
-      });
-    });
+    const favId = slugify(info.name);
+    const alreadySaved = FAVOURITES.some(f => f.id === favId);
+    card.innerHTML = `
+      <h3>${info.name}</h3>
+      ${info.authored_by ? `<div class="by">${info.authored_by}</div>` : ''}
+      <button class="favourite-btn ${alreadySaved?'saved':''}" id="recipeSaveFavBtn" ${alreadySaved?'disabled':''}>
+        <i class="ti ti-heart"></i>${alreadySaved ? 'Saved to favourites' : 'Save to favourites'}
+      </button>
+      <div class="favourite-status-note" id="recipeSaveFavNote"></div>
+      <h4>Ingredients</h4>
+      <ul>${info.recipe.ingredients.map(x=>`<li>${x}</li>`).join('')}</ul>
+      <h4>Method</h4>
+      <ol>${info.recipe.method.map(x=>`<li>${x}</li>`).join('')}</ol>
+    `;
+    if(!alreadySaved){
+      card.querySelector("#recipeSaveFavBtn").addEventListener("click", ()=>
+        saveFavouriteFlow(info.name, info.authored_by, info.recipe, card.querySelector("#recipeSaveFavBtn"), card.querySelector("#recipeSaveFavNote")));
+    }
+  }
+
+  async function saveFavouriteFlow(name, authored_by, recipe, btn, note){
+    btn.disabled = true;
+    note.textContent = "Saving…";
+    try{
+      const result = await postJSON({type: "save_favourite", name: name, authored_by: authored_by, recipe: recipe});
+      if(result.status === "ok"){
+        FAVOURITES = result.favourites;
+        btn.innerHTML = '<i class="ti ti-heart"></i>Saved to favourites';
+        btn.classList.add("saved");
+        note.textContent = "Saved ✓ — find it under Favourites";
+      } else {
+        note.textContent = "Couldn't save: " + (result.message || "unknown error");
+        btn.disabled = false;
+      }
+    }catch(e){
+      note.textContent = "Couldn't reach the server — try again in a moment.";
+      btn.disabled = false;
+    }
   }
 
   let modalState = {day:null, meal:null, kids_ate_it:null, parent_rating:0, note:""};
@@ -895,31 +580,31 @@
         <h3>${name}</h3>
         <div class="meal-sub">${day} · ${meal}</div>
 
-        <div style="font-size:12px;font-weight:600;color:var(--sage-dark);margin-bottom:8px;">Did the kids eat it?</div>
+        <div class="modal-label">Did the kids eat it?</div>
         <div class="btn-row" id="kidsRow">
-          <button class="choice-btn" data-v="yes">Yes</button>
-          <button class="choice-btn" data-v="mostly">Mostly</button>
-          <button class="choice-btn" data-v="no">Not really</button>
+          <button class="stamp" data-v="yes">Yes</button>
+          <button class="stamp" data-v="mostly">Mostly</button>
+          <button class="stamp" data-v="no">Not really</button>
         </div>
 
-        <div style="font-size:12px;font-weight:600;color:var(--sage-dark);margin-bottom:8px;">How'd the grown-ups rate it?</div>
+        <div class="modal-label">How'd the grown-ups rate it?</div>
         <div class="stars" id="starsRow">
-          ${[1,2,3,4,5].map(n=>`<span class="star" data-n="${n}">★</span>`).join("")}
+          ${[1,2,3,4,5].map(n=>`<button type="button" class="star" data-n="${n}">★</button>`).join("")}
         </div>
 
         <textarea rows="2" placeholder="Optional note (e.g. 'add more sauce next time')" id="noteInput"></textarea>
 
-        <div class="review-saved-note" id="modalStatusNote"></div>
-        <button class="save-btn" id="saveFeedbackBtn">Save</button>
-        <span class="cancel-link" id="cancelBtn">Cancel</span>
+        <div class="modal-status-note" id="modalStatusNote"></div>
+        <button class="review-submit-btn" id="saveFeedbackBtn">Save</button>
+        <button class="cancel-link" id="cancelBtn">Cancel</button>
       </div>`;
     document.getElementById("hub").appendChild(backdrop);
 
     const kidsRow = backdrop.querySelector("#kidsRow");
-    kidsRow.querySelectorAll(".choice-btn").forEach(b=>{
+    kidsRow.querySelectorAll(".stamp").forEach(b=>{
       b.addEventListener("click", ()=>{
         modalState.kids_ate_it = b.dataset.v;
-        kidsRow.querySelectorAll(".choice-btn").forEach(x=>x.className="choice-btn");
+        kidsRow.querySelectorAll(".stamp").forEach(x=>x.className="stamp");
         b.classList.add("sel-"+b.dataset.v);
       });
     });
@@ -953,7 +638,7 @@
         });
         markLoggedLocally(modalState.day, modalState.meal);
         backdrop.remove();
-        render();
+        renderDays();
       }catch(e){
         statusNote.textContent = "Couldn't send — try again in a moment";
       }
@@ -962,14 +647,16 @@
 
   function openPrinciplesPage(){
     const page = document.createElement("div");
-    page.className = "recipe-page";
+    page.className = "overlay-page";
     page.innerHTML = `
-      <div class="recipe-page-inner principles-page-inner">
-        <button class="recipe-close" id="principlesCloseBtn">← Back</button>
-        <div class="recipe-title">Meal Planning Principles</div>
-        <textarea id="principlesTextarea" rows="14"></textarea>
-        <div class="principles-status-note" id="principlesStatusNote"></div>
-        <button class="save-btn" id="principlesUpdateBtn">Update</button>
+      <div class="overlay-inner">
+        <button class="overlay-close" id="principlesCloseBtn"><i class="ti ti-arrow-left"></i>Back</button>
+        <div class="overlay-title">Meal planning principles</div>
+        <div class="principles-card">
+          <textarea id="principlesTextarea" rows="14"></textarea>
+          <div class="principles-status-note" id="principlesStatusNote"></div>
+          <button class="primary-btn" id="principlesUpdateBtn">Update</button>
+        </div>
       </div>`;
     document.getElementById("hub").appendChild(page);
     page.querySelector("#principlesTextarea").value = PRINCIPLES_TEXT;
@@ -988,26 +675,104 @@
     });
   }
 
+  function openRecipeOverlay(name, authored_by, recipe){
+    const page = document.createElement("div");
+    page.className = "overlay-page";
+    page.innerHTML = `
+      <div class="overlay-inner">
+        <button class="overlay-close" id="favRecipeCloseBtn"><i class="ti ti-arrow-left"></i>Back</button>
+        <div class="recipe-card">
+          <h3>${name}</h3>
+          ${authored_by ? `<div class="by">${authored_by}</div>` : ''}
+          <h4>Ingredients</h4>
+          <ul>${recipe.ingredients.map(x=>`<li>${x}</li>`).join('')}</ul>
+          <h4>Method</h4>
+          <ol>${recipe.method.map(x=>`<li>${x}</li>`).join('')}</ol>
+        </div>
+      </div>`;
+    document.getElementById("hub").appendChild(page);
+    page.querySelector("#favRecipeCloseBtn").addEventListener("click", ()=> page.remove());
+  }
+
+  function openFavouritesPage(){
+    const page = document.createElement("div");
+    page.className = "overlay-page";
+    page.innerHTML = `
+      <div class="overlay-inner">
+        <button class="overlay-close" id="favouritesCloseBtn"><i class="ti ti-arrow-left"></i>Back</button>
+        <div class="overlay-title">Favourites</div>
+        <div class="overlay-sub">Save a recipe from the Recipe tab, then request it here to guarantee it appears in next week's plan.</div>
+        <div id="favouritesListInner"></div>
+      </div>`;
+    document.getElementById("hub").appendChild(page);
+    page.querySelector("#favouritesCloseBtn").addEventListener("click", ()=> page.remove());
+    renderFavouritesList(page);
+  }
+
+  function renderFavouritesList(page){
+    const container = page.querySelector("#favouritesListInner");
+    if(!FAVOURITES.length){
+      container.innerHTML = `<div class="empty-note">No favourites saved yet — open a dinner's recipe on the Recipe tab and tap "Save to favourites".</div>`;
+      return;
+    }
+    container.innerHTML = FAVOURITES.map(f => `
+      <div class="favourite-card">
+        <div class="fav-name">${f.name}</div>
+        ${f.authored_by ? `<div class="by">${f.authored_by}</div>` : ''}
+        <div class="fav-actions">
+          <button class="link-btn" data-id="${f.id}" data-action="view">View recipe</button>
+          <button class="request-btn ${f.requested_for_next_week?'requested':''}" data-id="${f.id}" data-requested="${f.requested_for_next_week?'1':'0'}">
+            ${f.requested_for_next_week ? "✓ Requested for next week — tap to cancel" : "Request for next week's plan"}
+          </button>
+        </div>
+      </div>`).join("");
+    container.querySelectorAll('[data-action="view"]').forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const f = FAVOURITES.find(x => x.id === btn.dataset.id);
+        if(f) openRecipeOverlay(f.name, f.authored_by, f.recipe);
+      });
+    });
+    container.querySelectorAll(".request-btn").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        const id = btn.dataset.id;
+        const newRequested = btn.dataset.requested !== "1";
+        btn.disabled = true;
+        btn.textContent = "Updating…";
+        try{
+          const result = await postJSON({type: "toggle_favourite_request", id: id, requested: newRequested});
+          if(result.status === "ok"){
+            FAVOURITES = result.favourites;
+            renderFavouritesList(page);
+          } else {
+            btn.textContent = "Couldn't update — try again";
+            btn.disabled = false;
+          }
+        }catch(e){
+          btn.textContent = "Couldn't reach the server — try again";
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
   async function requestRegenerate(){
     const btn = document.getElementById("refreshPlanBtn");
     const note = document.getElementById("refreshStatusNote");
     if(btn.disabled) return;
     btn.disabled = true;
-    const originalLabel = btn.textContent;
-    btn.textContent = "🔄 Refreshing… (up to a minute)";
+    const originalLabel = btn.innerHTML;
+    btn.innerHTML = '<i class="ti ti-refresh"></i>Refreshing… (up to a minute)';
     note.textContent = "";
     try{
-      const resp = await fetch(FEEDBACK_ENDPOINT, {
-        method: "POST",
-        headers: {"Content-Type": "text/plain;charset=utf-8"},
-        body: JSON.stringify({type: "regenerate_now", week_id: WEEK_DATA.week_id})
-      });
-      const result = await resp.json();
+      const result = await postJSON({type: "regenerate_now", week_id: WEEK_DATA.week_id});
       if(result.status === "ok"){
         Object.assign(WEEK_DATA, result.week_data);
         PRINCIPLES_TEXT = result.principles_text;
         note.textContent = "Updated ✓" + (result.summary ? " — " + result.summary : "");
-        render();
+        await fetchShoppingState();
+        renderPlan();
+        renderShopping();
+        if(recipeTabInitialized) renderRecipeTab();
       } else if(result.status === "no_changes"){
         note.textContent = "Nothing new to incorporate — plan is already up to date.";
       } else {
@@ -1017,7 +782,7 @@
       note.textContent = "Couldn't reach the refresh service — try again in a moment.";
     }finally{
       btn.disabled = false;
-      btn.textContent = originalLabel;
+      btn.innerHTML = originalLabel;
     }
   }
 
@@ -1025,16 +790,28 @@
   document.getElementById("refreshPlanBtn").addEventListener("click", requestRegenerate);
   document.getElementById("favouritesLinkBtn").addEventListener("click", openFavouritesPage);
 
-  document.querySelectorAll("#hub .tab").forEach(tab=>{
+  document.querySelectorAll(".tab").forEach(tab=>{
     tab.addEventListener("click", ()=>{
-      document.querySelectorAll("#hub .tab").forEach(t=>t.classList.remove("active"));
-      document.querySelectorAll("#hub .panel").forEach(p=>p.classList.remove("active"));
+      document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach(p=>p.classList.add("hidden"));
       tab.classList.add("active");
-      document.getElementById("panel-"+tab.dataset.panel).classList.add("active");
+      document.getElementById("panel-" + tab.dataset.tab).classList.remove("hidden");
+      if(tab.dataset.tab === "recipe" && !recipeTabInitialized){
+        renderRecipeTab();
+        recipeTabInitialized = true;
+      }
     });
   });
 
-  render();
+  async function init(){
+    document.getElementById("headerTitle").textContent = "This week";
+    document.getElementById("headerSub").textContent = (WEEK_DATA.date_range || "—").toUpperCase();
+    await Promise.all([fetchDishStats(), fetchShoppingState()]);
+    renderPlan();
+    renderShopping();
+  }
+
+  init();
 })();
 </script>
 </body>
