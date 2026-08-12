@@ -230,6 +230,10 @@
   #hub .principles-page-inner .principles-status-note{
     font-size:12px;color:var(--sage);font-weight:600;height:16px;margin-bottom:8px;
   }
+  #hub .refresh-status-note{
+    font-size:11px;color:var(--sage-dark);opacity:0.75;margin:-8px 0 14px;min-height:14px;
+  }
+  #hub #refreshPlanBtn:disabled{opacity:0.6;cursor:default;}
   #hub .copy-shop-btn{
     width:100%;background:var(--sage);color:#fff;border:none;border-radius:10px;
     padding:11px;font-weight:700;font-size:13px;cursor:pointer;margin-top:16px;
@@ -266,6 +270,8 @@
   <h1>This Week's Menu</h1>
   <div class="subtitle" id="dateRange">—</div>
   <button class="principles-link" id="principlesLinkBtn">📋 Meal planning principles</button>
+  <button class="principles-link" id="refreshPlanBtn">🔄 Refresh plan</button>
+  <div class="refresh-status-note" id="refreshStatusNote"></div>
 
   <div id="reviewBoxContainer"></div>
 
@@ -309,7 +315,7 @@
     }
   };
 
-  const PRINCIPLES_TEXT = `- Favor low-cleanup/one-pan (or one-pan-plus-one-pot) dinners on weeknights
+  let PRINCIPLES_TEXT = `- Favor low-cleanup/one-pan (or one-pan-plus-one-pot) dinners on weeknights
 - Lean on 'build-your-own' formats (tacos, pizza, etc.) as a reliable way to introduce variety without a fight
 - Keep serving nutrition-forward meals (salmon, roast veg) even when not popular with the kids yet - look for kid-friendlier formats rather than dropping them
 - OK to hide vegetables in kid portions when it helps a dish land (e.g. blended into a sauce or mac and cheese)
@@ -582,7 +588,41 @@
     });
   }
 
+  async function requestRegenerate(){
+    const btn = document.getElementById("refreshPlanBtn");
+    const note = document.getElementById("refreshStatusNote");
+    if(btn.disabled) return;
+    btn.disabled = true;
+    const originalLabel = btn.textContent;
+    btn.textContent = "🔄 Refreshing… (up to a minute)";
+    note.textContent = "";
+    try{
+      const resp = await fetch(FEEDBACK_ENDPOINT, {
+        method: "POST",
+        headers: {"Content-Type": "text/plain;charset=utf-8"},
+        body: JSON.stringify({type: "regenerate_now", week_id: WEEK_DATA.week_id})
+      });
+      const result = await resp.json();
+      if(result.status === "ok"){
+        Object.assign(WEEK_DATA, result.week_data);
+        PRINCIPLES_TEXT = result.principles_text;
+        note.textContent = "Updated ✓" + (result.summary ? " — " + result.summary : "");
+        render();
+      } else if(result.status === "no_changes"){
+        note.textContent = "Nothing new to incorporate — plan is already up to date.";
+      } else {
+        note.textContent = "Refresh failed: " + (result.message || "unknown error");
+      }
+    }catch(e){
+      note.textContent = "Couldn't reach the refresh service — try again in a moment.";
+    }finally{
+      btn.disabled = false;
+      btn.textContent = originalLabel;
+    }
+  }
+
   document.getElementById("principlesLinkBtn").addEventListener("click", openPrinciplesPage);
+  document.getElementById("refreshPlanBtn").addEventListener("click", requestRegenerate);
 
   document.querySelectorAll("#hub .tab").forEach(tab=>{
     tab.addEventListener("click", ()=>{
