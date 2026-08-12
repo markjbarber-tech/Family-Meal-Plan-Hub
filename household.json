@@ -134,7 +134,7 @@
     "published_at": null,
     "pantry_ingredients": [],
     "budget_saver_mode": false,
-    "board_notes": "The Family GP/Dietician and Child Nutritionist flagged Maddie's tomato dislike and lactose intolerance, so Tuesday's tacos and half of Friday's pizza go tomato-free, and dairy is spread lighter across the week. The Flavor Explorer leaned on Hamish's proven favourite (egg-and-soy fried rice with bacon), and salmon stays in the crumbed 'fish-finger' shape rather than the patty style that didn't land for him before. Winter week - every dinner and lunch stayed hot; no use-up ingredients flagged yet. UPDATE (Aug 11 feedback): Tuesday's dinner swapped to what the family is actually having - Old El Paso hard-shell tacos with seasoned beef instead of soft chicken tacos - keeping a build-your-own format with a tomato-free lane for Maddie. Diced tomato added as an optional topping and a tomato & cucumber side salad added to Wednesday's sausage bake (adults; kids get plain cucumber) to use up the 10 tomatoes on hand. Genevieve flagged that rich food is giving her indigestion, so excess fat is now drained from the beef and sausage before serving, and Sunday's gravy has been lightened (less oil/flour, extra fat skimmed, served sparingly) - worth keeping portions of richer dishes modest generally. UPDATE (Aug 11 feedback, round 2): two family members both asked for something much easier than pizza night, so Friday is now a one-tray oven bake of chicken nuggets, wedges & corn - the lowest-effort dinner of the week, with an optional side salad for the adults. Saturday's leftover lunch updated to match. UPDATE (Aug 12): Swapped Saturday's potato gems for oven-baked fries per the refresh-button test feedback, keeping the crumbed salmon fish-finger format and peas unchanged; updated the frozen shopping list accordingly (removed potato gems, added frozen fries). UPDATE (Aug 12): Migrated to structured per-meal ingredients (name/quantity/unit/category) so the shopping list is now computed live from whatever meals are actually in the week, instead of hand-maintained. UPDATE (Aug 12, feedback): Friday's dinner swapped from frozen chicken nuggets & frozen wedges to homemade oven-baked chicken tenders (real chicken breast, hand-crumbed) with fresh-cut roasted wedges, per feedback asking to minimise processed food — kept it a low-effort one-oven bake. Saturday's leftover lunch renamed to match. UPDATE (Aug 12): Removed One-pan sausage & rice bake, with a tomato & cucumber side salad from Wednesday's dinner — left empty. UPDATE (Aug 12): Added a new dinner for Wednesday (Hidden Veggie Pumpkin & Lentil Mac 'n' Cheese) — A one-pot pasta bake that sneaks pumpkin and lentils into a light cheese sauce for extra fibre and iron, giving the family a break from chicken this week while staying easy on Genevieve's stomach and firmly within Hamish's beloved 'plain pasta' comfort zone.. UPDATE (Aug 12): Added a new dinner for Wednesday (Sesame-Ginger Turkey Meatballs with Rice & Cucumber Ribbons) — A one-tray-plus-one-pot dinner that introduces turkey and a gentle Asian-inspired glaze in a fully build-your-own, tomato-free, low-dairy format that suits both picky kids and Genevieve's need for lighter meals.. UPDATE (Aug 12): Removed Sesame-Ginger Turkey Meatballs with Rice & Cucumber Ribbons from Wednesday's dinner — left empty.",
+    "board_notes": "The Family GP/Dietician and Child Nutritionist flagged Maddie's tomato dislike and lactose intolerance, so Tuesday's tacos and half of Friday's pizza go tomato-free, and dairy is spread lighter across the week. The Flavor Explorer leaned on Hamish's proven favourite (egg-and-soy fried rice with bacon), and salmon stays in the crumbed 'fish-finger' shape rather than the patty style that didn't land for him before. Winter week - every dinner and lunch stayed hot; no use-up ingredients flagged yet. UPDATE (Aug 11 feedback): Tuesday's dinner swapped to what the family is actually having - Old El Paso hard-shell tacos with seasoned beef instead of soft chicken tacos - keeping a build-your-own format with a tomato-free lane for Maddie. Diced tomato added as an optional topping and a tomato & cucumber side salad added to Wednesday's sausage bake (adults; kids get plain cucumber) to use up the 10 tomatoes on hand. Genevieve flagged that rich food is giving her indigestion, so excess fat is now drained from the beef and sausage before serving, and Sunday's gravy has been lightened (less oil/flour, extra fat skimmed, served sparingly) - worth keeping portions of richer dishes modest generally. UPDATE (Aug 11 feedback, round 2): two family members both asked for something much easier than pizza night, so Friday is now a one-tray oven bake of chicken nuggets, wedges & corn - the lowest-effort dinner of the week, with an optional side salad for the adults. Saturday's leftover lunch updated to match. UPDATE (Aug 12): Swapped Saturday's potato gems for oven-baked fries per the refresh-button test feedback, keeping the crumbed salmon fish-finger format and peas unchanged; updated the frozen shopping list accordingly (removed potato gems, added frozen fries). UPDATE (Aug 12): Migrated to structured per-meal ingredients (name/quantity/unit/category) so the shopping list is now computed live from whatever meals are actually in the week, instead of hand-maintained. UPDATE (Aug 12, feedback): Friday's dinner swapped from frozen chicken nuggets & frozen wedges to homemade oven-baked chicken tenders (real chicken breast, hand-crumbed) with fresh-cut roasted wedges, per feedback asking to minimise processed food — kept it a low-effort one-oven bake. Saturday's leftover lunch renamed to match. UPDATE (Aug 12): Removed One-pan sausage & rice bake, with a tomato & cucumber side salad from Wednesday's dinner — left empty. UPDATE (Aug 12): Added a new dinner for Wednesday (Hidden Veggie Pumpkin & Lentil Mac 'n' Cheese) — A one-pot pasta bake that sneaks pumpkin and lentils into a light cheese sauce for extra fibre and iron, giving the family a break from chicken this week while staying easy on Genevieve's stomach and firmly within Hamish's beloved 'plain pasta' comfort zone.. UPDATE (Aug 12): Added a new dinner for Wednesday (Sesame-Ginger Turkey Meatballs with Rice & Cucumber Ribbons) — A one-tray-plus-one-pot dinner that introduces turkey and a gentle Asian-inspired glaze in a fully build-your-own, tomato-free, low-dairy format that suits both picky kids and Genevieve's need for lighter meals.. UPDATE (Aug 12): Removed Sesame-Ginger Turkey Meatballs with Rice & Cucumber Ribbons from Wednesday's dinner — left empty. UPDATE (Aug 12): Added a new dinner for Wednesday (Build-Your-Own San Choy Bow Rice Bowls) — A one-pan, build-your-own San Choy Bow-style bowl that leans on rice and soy flavours the kids already love while quietly introducing a new lean protein format and extra veg for the grown-ups to wrap..",
     "days": [
       {
         "day": "Monday",
@@ -375,7 +375,121 @@
       },
       {
         "day": "Wednesday",
-        "dinner": null,
+        "dinner": {
+          "name": "Build-Your-Own San Choy Bow Rice Bowls",
+          "ingredients": [
+            {
+              "name": "chicken mince",
+              "quantity": 500,
+              "unit": "g",
+              "category": "meat_deli",
+              "display": "500g chicken mince"
+            },
+            {
+              "name": "jasmine rice",
+              "quantity": 300,
+              "unit": "g",
+              "category": "pantry",
+              "display": "300g jasmine rice"
+            },
+            {
+              "name": "carrot",
+              "quantity": 1,
+              "unit": "whole",
+              "category": "produce",
+              "display": "1 carrot, grated"
+            },
+            {
+              "name": "red capsicum",
+              "quantity": 1,
+              "unit": "whole",
+              "category": "produce",
+              "display": "1 red capsicum, finely diced"
+            },
+            {
+              "name": "snow peas",
+              "quantity": 100,
+              "unit": "g",
+              "category": "produce",
+              "display": "100g snow peas, thinly sliced"
+            },
+            {
+              "name": "spring onion",
+              "quantity": 3,
+              "unit": "stalks",
+              "category": "produce",
+              "display": "3 spring onions, sliced"
+            },
+            {
+              "name": "garlic",
+              "quantity": 2,
+              "unit": "cloves",
+              "category": "produce",
+              "display": "2 garlic cloves, minced"
+            },
+            {
+              "name": "ginger",
+              "quantity": 1,
+              "unit": "tsp",
+              "category": "produce",
+              "display": "1 tsp grated ginger"
+            },
+            {
+              "name": "soy sauce",
+              "quantity": 3,
+              "unit": "tbsp",
+              "category": "pantry",
+              "display": "3 tbsp soy sauce"
+            },
+            {
+              "name": "sesame oil",
+              "quantity": 1,
+              "unit": "tbsp",
+              "category": "pantry",
+              "display": "1 tbsp sesame oil"
+            },
+            {
+              "name": "rice vinegar",
+              "quantity": 1,
+              "unit": "tbsp",
+              "category": "pantry",
+              "display": "1 tbsp rice vinegar"
+            },
+            {
+              "name": "honey",
+              "quantity": 1,
+              "unit": "tsp",
+              "category": "pantry",
+              "display": "1 tsp honey"
+            },
+            {
+              "name": "vegetable oil",
+              "quantity": 1,
+              "unit": "tbsp",
+              "category": "pantry",
+              "display": "1 tbsp vegetable oil"
+            },
+            {
+              "name": "cos lettuce leaves",
+              "quantity": 8,
+              "unit": "leaves",
+              "category": "produce",
+              "display": "8 cos lettuce leaves, for wrapping (adults)"
+            }
+          ],
+          "new_or_repeat": "new",
+          "authored_by": "The Flavor Explorer & The Weeknight Realist",
+          "method": [
+            "Cook jasmine rice according to packet instructions; keep warm.",
+            "Heat vegetable oil in a large pan or wok over high heat. Add garlic and ginger, stir for 30 seconds until fragrant.",
+            "Add chicken mince and cook, breaking it up, until browned and cooked through (5-6 minutes).",
+            "Add capsicum, carrot and snow peas; stir-fry for 3-4 minutes until just tender.",
+            "Pour in soy sauce, sesame oil, rice vinegar and honey; toss to coat and simmer for 2 minutes.",
+            "Stir through half the spring onion, reserving the rest for garnish.",
+            "Serve rice in bowls topped with the mince mixture and a sprinkle of spring onion - kids can eat straight over rice.",
+            "Set lettuce leaves, extra soy sauce and (for adults) chilli flakes on the table so everyone can build their own lettuce-wrapped bites if they like."
+          ]
+        },
         "lunch": {
           "name": "Beef taco filling wraps (Tuesday's leftovers)",
           "ingredients": []
