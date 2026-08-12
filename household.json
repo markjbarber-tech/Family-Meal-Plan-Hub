@@ -79,21 +79,6 @@
   "last_board_review_date": "2026-08-10",
   "favourites": [
     {
-      "id": "js-diagnostic-test-2",
-      "name": "JS Diagnostic Test 2",
-      "authored_by": "Test",
-      "recipe": {
-        "ingredients": [
-          "a"
-        ],
-        "method": [
-          "b"
-        ]
-      },
-      "saved_at": "2026-08-12T04:58:06.943Z",
-      "requested_for_next_week": false
-    },
-    {
       "id": "soy-glazed-baked-chicken-thighs-rice-steamed-broccoli",
       "name": "Soy-glazed baked chicken thighs, rice & steamed broccoli",
       "authored_by": "The Weeknight Realist & The Child Nutritionist",
