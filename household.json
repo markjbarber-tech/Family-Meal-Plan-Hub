@@ -124,6 +124,41 @@
       },
       "saved_at": "2026-08-12T12:24:02.003Z",
       "requested_for_next_week": false
+    },
+    {
+      "id": "build-your-own-san-choy-bow-rice-bowls",
+      "name": "Build-Your-Own San Choy Bow Rice Bowls",
+      "authored_by": "The Flavor Explorer & The Weeknight Realist",
+      "recipe": {
+        "ingredients": [
+          "500g chicken mince",
+          "300g jasmine rice",
+          "1 carrot, grated",
+          "1 red capsicum, finely diced",
+          "100g snow peas, thinly sliced",
+          "3 spring onions, sliced",
+          "2 garlic cloves, minced",
+          "1 tsp grated ginger",
+          "3 tbsp soy sauce",
+          "1 tbsp sesame oil",
+          "1 tbsp rice vinegar",
+          "1 tsp honey",
+          "1 tbsp vegetable oil",
+          "8 cos lettuce leaves, for wrapping (adults)"
+        ],
+        "method": [
+          "Cook jasmine rice according to packet instructions; keep warm.",
+          "Heat vegetable oil in a large pan or wok over high heat. Add garlic and ginger, stir for 30 seconds until fragrant.",
+          "Add chicken mince and cook, breaking it up, until browned and cooked through (5-6 minutes).",
+          "Add capsicum, carrot and snow peas; stir-fry for 3-4 minutes until just tender.",
+          "Pour in soy sauce, sesame oil, rice vinegar and honey; toss to coat and simmer for 2 minutes.",
+          "Stir through half the spring onion, reserving the rest for garnish.",
+          "Serve rice in bowls topped with the mince mixture and a sprinkle of spring onion - kids can eat straight over rice.",
+          "Set lettuce leaves, extra soy sauce and (for adults) chilli flakes on the table so everyone can build their own lettuce-wrapped bites if they like."
+        ]
+      },
+      "saved_at": "2026-08-12T12:47:14.529Z",
+      "requested_for_next_week": false
     }
   ],
   "current_week": {
