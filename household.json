@@ -101,6 +101,29 @@
       },
       "saved_at": "2026-08-12T05:00:00.567Z",
       "requested_for_next_week": false
+    },
+    {
+      "id": "egg-soy-fried-rice-with-bacon",
+      "name": "Egg & soy fried rice with bacon",
+      "authored_by": "The Flavor Explorer & The Weeknight Realist",
+      "recipe": {
+        "ingredients": [
+          "4 rashers bacon, diced",
+          "3 eggs, beaten",
+          "3 tbsp soy sauce",
+          "1 cup frozen peas and corn mix",
+          "2 spring onions, sliced"
+        ],
+        "method": [
+          "Heat oil in a large pan or wok over high heat; cook bacon until crisp, about 4 min.",
+          "Push bacon to one side, pour in the beaten egg and scramble until just set.",
+          "Add 4 cups cold cooked rice (day-old if possible), breaking up clumps, and stir-fry 3-4 min.",
+          "Add the peas and corn, soy sauce and spring onions; toss until heated through and everything is coated.",
+          "Serve as-is — a proven favourite for Hamish (rice with soy sauce, egg), easy to portion small for Maddie."
+        ]
+      },
+      "saved_at": "2026-08-12T12:21:19.808Z",
+      "requested_for_next_week": false
     }
   ],
   "current_week": {
@@ -120,15 +143,69 @@
           "new_or_repeat": "new",
           "authored_by": "The Weeknight Realist & The Child Nutritionist",
           "ingredients": [
-            {"name":"chicken thighs","quantity":8,"unit":"","category":"meat_deli","display":"8 boneless, skinless chicken thighs"},
-            {"name":"soy sauce","quantity":0.33,"unit":"cup","category":"pantry","display":"1/3 cup soy sauce"},
-            {"name":"honey","quantity":2,"unit":"tbsp","category":"pantry","display":"2 tbsp honey"},
-            {"name":"rice vinegar","quantity":1,"unit":"tbsp","category":"pantry","display":"1 tbsp rice vinegar (or lemon juice)"},
-            {"name":"garlic","quantity":2,"unit":"clove","category":"produce","display":"2 cloves garlic, minced"},
-            {"name":"ginger","quantity":1,"unit":"tsp","category":"produce","display":"1 tsp grated ginger"},
-            {"name":"cornstarch","quantity":1,"unit":"tbsp","category":"pantry","display":"1 tbsp cornstarch mixed with 2 tbsp water"},
-            {"name":"jasmine rice","quantity":1.5,"unit":"cup","category":"pantry","display":"1.5 cups jasmine rice"},
-            {"name":"broccoli","quantity":2,"unit":"head","category":"produce","display":"2 heads broccoli, cut into florets"}
+            {
+              "name": "chicken thighs",
+              "quantity": 8,
+              "unit": "",
+              "category": "meat_deli",
+              "display": "8 boneless, skinless chicken thighs"
+            },
+            {
+              "name": "soy sauce",
+              "quantity": 0.33,
+              "unit": "cup",
+              "category": "pantry",
+              "display": "1/3 cup soy sauce"
+            },
+            {
+              "name": "honey",
+              "quantity": 2,
+              "unit": "tbsp",
+              "category": "pantry",
+              "display": "2 tbsp honey"
+            },
+            {
+              "name": "rice vinegar",
+              "quantity": 1,
+              "unit": "tbsp",
+              "category": "pantry",
+              "display": "1 tbsp rice vinegar (or lemon juice)"
+            },
+            {
+              "name": "garlic",
+              "quantity": 2,
+              "unit": "clove",
+              "category": "produce",
+              "display": "2 cloves garlic, minced"
+            },
+            {
+              "name": "ginger",
+              "quantity": 1,
+              "unit": "tsp",
+              "category": "produce",
+              "display": "1 tsp grated ginger"
+            },
+            {
+              "name": "cornstarch",
+              "quantity": 1,
+              "unit": "tbsp",
+              "category": "pantry",
+              "display": "1 tbsp cornstarch mixed with 2 tbsp water"
+            },
+            {
+              "name": "jasmine rice",
+              "quantity": 1.5,
+              "unit": "cup",
+              "category": "pantry",
+              "display": "1.5 cups jasmine rice"
+            },
+            {
+              "name": "broccoli",
+              "quantity": 2,
+              "unit": "head",
+              "category": "produce",
+              "display": "2 heads broccoli, cut into florets"
+            }
           ],
           "method": [
             "Preheat oven to 200°C (400°F).",
@@ -143,15 +220,39 @@
         "lunch": {
           "name": "Cheese quesadillas",
           "ingredients": [
-            {"name":"tortillas","quantity":4,"unit":"","category":"pantry","display":"4 tortillas"},
-            {"name":"grated cheese","quantity":1,"unit":"cup","category":"dairy","display":"1 cup grated cheese"}
+            {
+              "name": "tortillas",
+              "quantity": 4,
+              "unit": "",
+              "category": "pantry",
+              "display": "4 tortillas"
+            },
+            {
+              "name": "grated cheese",
+              "quantity": 1,
+              "unit": "cup",
+              "category": "dairy",
+              "display": "1 cup grated cheese"
+            }
           ]
         },
         "snack": {
           "name": "Apple slices with peanut butter",
           "ingredients": [
-            {"name":"apples","quantity":2,"unit":"","category":"produce","display":"2 apples"},
-            {"name":"peanut butter","quantity":2,"unit":"tbsp","category":"pantry","display":"2 tbsp peanut butter"}
+            {
+              "name": "apples",
+              "quantity": 2,
+              "unit": "",
+              "category": "produce",
+              "display": "2 apples"
+            },
+            {
+              "name": "peanut butter",
+              "quantity": 2,
+              "unit": "tbsp",
+              "category": "pantry",
+              "display": "2 tbsp peanut butter"
+            }
           ]
         }
       },
@@ -162,18 +263,90 @@
           "new_or_repeat": "new",
           "authored_by": "The Weeknight Realist & The Child Nutritionist",
           "ingredients": [
-            {"name":"beef mince","quantity":600,"unit":"g","category":"meat_deli","display":"600g beef mince"},
-            {"name":"ground cumin","quantity":1,"unit":"tbsp","category":"pantry","display":"1 tbsp ground cumin"},
-            {"name":"smoked paprika","quantity":1,"unit":"tbsp","category":"pantry","display":"1 tbsp smoked paprika"},
-            {"name":"garlic powder","quantity":1,"unit":"tsp","category":"pantry","display":"1 tsp garlic powder"},
-            {"name":"taco shells (Old El Paso)","quantity":12,"unit":"","category":"pantry","display":"12 Old El Paso hard taco shells"},
-            {"name":"shredded lettuce","quantity":1,"unit":"cup","category":"produce","display":"1 cup shredded lettuce"},
-            {"name":"grated cheese","quantity":1,"unit":"cup","category":"dairy","display":"1 cup grated cheese (+ lactose-free block for Maddie)"},
-            {"name":"lactose-free cheese","quantity":1,"unit":"block","category":"dairy","display":"1 lactose-free cheese block, for Maddie"},
-            {"name":"sour cream","quantity":0.5,"unit":"cup","category":"dairy","display":"1/2 cup sour cream"},
-            {"name":"avocado","quantity":1,"unit":"","category":"produce","display":"1 avocado, sliced"},
-            {"name":"tomatoes","quantity":4,"unit":"","category":"produce","display":"4 tomatoes, diced (topping — kept off Maddie's plate)"},
-            {"name":"cucumber","quantity":1,"unit":"","category":"produce","display":"1 cucumber, sliced (tomato-free lane)"}
+            {
+              "name": "beef mince",
+              "quantity": 600,
+              "unit": "g",
+              "category": "meat_deli",
+              "display": "600g beef mince"
+            },
+            {
+              "name": "ground cumin",
+              "quantity": 1,
+              "unit": "tbsp",
+              "category": "pantry",
+              "display": "1 tbsp ground cumin"
+            },
+            {
+              "name": "smoked paprika",
+              "quantity": 1,
+              "unit": "tbsp",
+              "category": "pantry",
+              "display": "1 tbsp smoked paprika"
+            },
+            {
+              "name": "garlic powder",
+              "quantity": 1,
+              "unit": "tsp",
+              "category": "pantry",
+              "display": "1 tsp garlic powder"
+            },
+            {
+              "name": "taco shells (Old El Paso)",
+              "quantity": 12,
+              "unit": "",
+              "category": "pantry",
+              "display": "12 Old El Paso hard taco shells"
+            },
+            {
+              "name": "shredded lettuce",
+              "quantity": 1,
+              "unit": "cup",
+              "category": "produce",
+              "display": "1 cup shredded lettuce"
+            },
+            {
+              "name": "grated cheese",
+              "quantity": 1,
+              "unit": "cup",
+              "category": "dairy",
+              "display": "1 cup grated cheese (+ lactose-free block for Maddie)"
+            },
+            {
+              "name": "lactose-free cheese",
+              "quantity": 1,
+              "unit": "block",
+              "category": "dairy",
+              "display": "1 lactose-free cheese block, for Maddie"
+            },
+            {
+              "name": "sour cream",
+              "quantity": 0.5,
+              "unit": "cup",
+              "category": "dairy",
+              "display": "1/2 cup sour cream"
+            },
+            {
+              "name": "avocado",
+              "quantity": 1,
+              "unit": "",
+              "category": "produce",
+              "display": "1 avocado, sliced"
+            },
+            {
+              "name": "tomatoes",
+              "quantity": 4,
+              "unit": "",
+              "category": "produce",
+              "display": "4 tomatoes, diced (topping — kept off Maddie's plate)"
+            },
+            {
+              "name": "cucumber",
+              "quantity": 1,
+              "unit": "",
+              "category": "produce",
+              "display": "1 cucumber, sliced (tomato-free lane)"
+            }
           ],
           "method": [
             "Brown beef mince in a large pan over medium-high heat, breaking it up, 6-8 min.",
@@ -190,7 +363,13 @@
         "snack": {
           "name": "Banana",
           "ingredients": [
-            {"name":"bananas","quantity":1,"unit":"bunch","category":"produce","display":"1 bunch bananas"}
+            {
+              "name": "bananas",
+              "quantity": 1,
+              "unit": "bunch",
+              "category": "produce",
+              "display": "1 bunch bananas"
+            }
           ]
         }
       },
@@ -201,14 +380,62 @@
           "new_or_repeat": "new",
           "authored_by": "The Weeknight Realist",
           "ingredients": [
-            {"name":"sausages","quantity":6,"unit":"","category":"meat_deli","display":"6 sausages, leaner variety, casings removed"},
-            {"name":"long-grain rice","quantity":1.5,"unit":"cup","category":"pantry","display":"1.5 cups long-grain rice"},
-            {"name":"onion","quantity":1,"unit":"","category":"produce","display":"1 onion, diced"},
-            {"name":"garlic","quantity":2,"unit":"clove","category":"produce","display":"2 cloves garlic, minced"},
-            {"name":"chicken stock","quantity":3,"unit":"cup","category":"pantry","display":"3 cups chicken stock"},
-            {"name":"peas","quantity":1,"unit":"cup","category":"frozen","display":"1 cup frozen peas"},
-            {"name":"tomatoes","quantity":6,"unit":"","category":"produce","display":"6 tomatoes, sliced (side salad — kept off Maddie's plate)"},
-            {"name":"cucumber","quantity":1,"unit":"","category":"produce","display":"1 cucumber, sliced"}
+            {
+              "name": "sausages",
+              "quantity": 6,
+              "unit": "",
+              "category": "meat_deli",
+              "display": "6 sausages, leaner variety, casings removed"
+            },
+            {
+              "name": "long-grain rice",
+              "quantity": 1.5,
+              "unit": "cup",
+              "category": "pantry",
+              "display": "1.5 cups long-grain rice"
+            },
+            {
+              "name": "onion",
+              "quantity": 1,
+              "unit": "",
+              "category": "produce",
+              "display": "1 onion, diced"
+            },
+            {
+              "name": "garlic",
+              "quantity": 2,
+              "unit": "clove",
+              "category": "produce",
+              "display": "2 cloves garlic, minced"
+            },
+            {
+              "name": "chicken stock",
+              "quantity": 3,
+              "unit": "cup",
+              "category": "pantry",
+              "display": "3 cups chicken stock"
+            },
+            {
+              "name": "peas",
+              "quantity": 1,
+              "unit": "cup",
+              "category": "frozen",
+              "display": "1 cup frozen peas"
+            },
+            {
+              "name": "tomatoes",
+              "quantity": 6,
+              "unit": "",
+              "category": "produce",
+              "display": "6 tomatoes, sliced (side salad — kept off Maddie's plate)"
+            },
+            {
+              "name": "cucumber",
+              "quantity": 1,
+              "unit": "",
+              "category": "produce",
+              "display": "1 cucumber, sliced"
+            }
           ],
           "method": [
             "Brown sausage meat in a large oven-proof pan, breaking it into small pieces, about 6 min; drain any excess fat.",
@@ -226,7 +453,13 @@
         "snack": {
           "name": "Mandarins",
           "ingredients": [
-            {"name":"mandarins","quantity":1,"unit":"bag","category":"produce","display":"1 bag mandarins"}
+            {
+              "name": "mandarins",
+              "quantity": 1,
+              "unit": "bag",
+              "category": "produce",
+              "display": "1 bag mandarins"
+            }
           ]
         }
       },
@@ -237,11 +470,41 @@
           "new_or_repeat": "repeat",
           "authored_by": "The Flavor Explorer & The Weeknight Realist",
           "ingredients": [
-            {"name":"bacon","quantity":4,"unit":"rasher","category":"meat_deli","display":"4 rashers bacon, diced"},
-            {"name":"eggs","quantity":3,"unit":"","category":"dairy","display":"3 eggs, beaten"},
-            {"name":"soy sauce","quantity":3,"unit":"tbsp","category":"pantry","display":"3 tbsp soy sauce"},
-            {"name":"frozen peas and corn mix","quantity":1,"unit":"cup","category":"frozen","display":"1 cup frozen peas and corn mix"},
-            {"name":"spring onions","quantity":2,"unit":"","category":"produce","display":"2 spring onions, sliced"}
+            {
+              "name": "bacon",
+              "quantity": 4,
+              "unit": "rasher",
+              "category": "meat_deli",
+              "display": "4 rashers bacon, diced"
+            },
+            {
+              "name": "eggs",
+              "quantity": 3,
+              "unit": "",
+              "category": "dairy",
+              "display": "3 eggs, beaten"
+            },
+            {
+              "name": "soy sauce",
+              "quantity": 3,
+              "unit": "tbsp",
+              "category": "pantry",
+              "display": "3 tbsp soy sauce"
+            },
+            {
+              "name": "frozen peas and corn mix",
+              "quantity": 1,
+              "unit": "cup",
+              "category": "frozen",
+              "display": "1 cup frozen peas and corn mix"
+            },
+            {
+              "name": "spring onions",
+              "quantity": 2,
+              "unit": "",
+              "category": "produce",
+              "display": "2 spring onions, sliced"
+            }
           ],
           "method": [
             "Heat oil in a large pan or wok over high heat; cook bacon until crisp, about 4 min.",
@@ -258,7 +521,13 @@
         "snack": {
           "name": "Popcorn",
           "ingredients": [
-            {"name":"popcorn kernels","quantity":0.5,"unit":"cup","category":"pantry","display":"1/2 cup popcorn kernels"}
+            {
+              "name": "popcorn kernels",
+              "quantity": 0.5,
+              "unit": "cup",
+              "category": "pantry",
+              "display": "1/2 cup popcorn kernels"
+            }
           ]
         }
       },
@@ -269,14 +538,62 @@
           "new_or_repeat": "new",
           "authored_by": "The Weeknight Realist & The Family GP/Dietician",
           "ingredients": [
-            {"name":"chicken breast","quantity":700,"unit":"g","category":"meat_deli","display":"700g chicken breast, cut into tender-sized strips"},
-            {"name":"plain flour","quantity":0.5,"unit":"cup","category":"pantry","display":"1/2 cup flour"},
-            {"name":"eggs","quantity":2,"unit":"","category":"dairy","display":"2 eggs, beaten"},
-            {"name":"panko breadcrumbs","quantity":1.5,"unit":"cup","category":"pantry","display":"1.5 cups panko breadcrumbs"},
-            {"name":"potatoes","quantity":1,"unit":"kg","category":"produce","display":"1kg potatoes, cut into wedges"},
-            {"name":"corn kernels","quantity":2,"unit":"cup","category":"produce","display":"2 cups corn kernels, fresh or tinned"},
-            {"name":"salad greens","quantity":1,"unit":"bag","category":"produce","display":"Salad greens (adults only)"},
-            {"name":"cucumber","quantity":1,"unit":"","category":"produce","display":"1 cucumber, for the adults' salad"}
+            {
+              "name": "chicken breast",
+              "quantity": 700,
+              "unit": "g",
+              "category": "meat_deli",
+              "display": "700g chicken breast, cut into tender-sized strips"
+            },
+            {
+              "name": "plain flour",
+              "quantity": 0.5,
+              "unit": "cup",
+              "category": "pantry",
+              "display": "1/2 cup flour"
+            },
+            {
+              "name": "eggs",
+              "quantity": 2,
+              "unit": "",
+              "category": "dairy",
+              "display": "2 eggs, beaten"
+            },
+            {
+              "name": "panko breadcrumbs",
+              "quantity": 1.5,
+              "unit": "cup",
+              "category": "pantry",
+              "display": "1.5 cups panko breadcrumbs"
+            },
+            {
+              "name": "potatoes",
+              "quantity": 1,
+              "unit": "kg",
+              "category": "produce",
+              "display": "1kg potatoes, cut into wedges"
+            },
+            {
+              "name": "corn kernels",
+              "quantity": 2,
+              "unit": "cup",
+              "category": "produce",
+              "display": "2 cups corn kernels, fresh or tinned"
+            },
+            {
+              "name": "salad greens",
+              "quantity": 1,
+              "unit": "bag",
+              "category": "produce",
+              "display": "Salad greens (adults only)"
+            },
+            {
+              "name": "cucumber",
+              "quantity": 1,
+              "unit": "",
+              "category": "produce",
+              "display": "1 cucumber, for the adults' salad"
+            }
           ],
           "method": [
             "Preheat oven to 200°C (400°F) and line two trays.",
@@ -295,7 +612,13 @@
         "snack": {
           "name": "Rice crackers",
           "ingredients": [
-            {"name":"rice crackers","quantity":1,"unit":"packet","category":"pantry","display":"1 packet rice crackers"}
+            {
+              "name": "rice crackers",
+              "quantity": 1,
+              "unit": "packet",
+              "category": "pantry",
+              "display": "1 packet rice crackers"
+            }
           ]
         }
       },
@@ -306,13 +629,55 @@
           "new_or_repeat": "new",
           "authored_by": "The Family GP/Dietician & The Child Nutritionist",
           "ingredients": [
-            {"name":"salmon fillets","quantity":600,"unit":"g","category":"meat_deli","display":"600g skinless salmon fillets, cut into finger-width strips"},
-            {"name":"plain flour","quantity":0.5,"unit":"cup","category":"pantry","display":"1/2 cup flour"},
-            {"name":"eggs","quantity":2,"unit":"","category":"dairy","display":"2 eggs, beaten"},
-            {"name":"panko breadcrumbs","quantity":1.5,"unit":"cup","category":"pantry","display":"1.5 cups panko breadcrumbs"},
-            {"name":"frozen fries","quantity":1,"unit":"bag (~500g)","category":"frozen","display":"1 bag frozen oven-baked fries"},
-            {"name":"peas","quantity":1,"unit":"cup","category":"frozen","display":"Frozen peas, to serve"},
-            {"name":"ketchup","quantity":1,"unit":"bottle","category":"pantry","display":"Ketchup, to serve"}
+            {
+              "name": "salmon fillets",
+              "quantity": 600,
+              "unit": "g",
+              "category": "meat_deli",
+              "display": "600g skinless salmon fillets, cut into finger-width strips"
+            },
+            {
+              "name": "plain flour",
+              "quantity": 0.5,
+              "unit": "cup",
+              "category": "pantry",
+              "display": "1/2 cup flour"
+            },
+            {
+              "name": "eggs",
+              "quantity": 2,
+              "unit": "",
+              "category": "dairy",
+              "display": "2 eggs, beaten"
+            },
+            {
+              "name": "panko breadcrumbs",
+              "quantity": 1.5,
+              "unit": "cup",
+              "category": "pantry",
+              "display": "1.5 cups panko breadcrumbs"
+            },
+            {
+              "name": "frozen fries",
+              "quantity": 1,
+              "unit": "bag (~500g)",
+              "category": "frozen",
+              "display": "1 bag frozen oven-baked fries"
+            },
+            {
+              "name": "peas",
+              "quantity": 1,
+              "unit": "cup",
+              "category": "frozen",
+              "display": "Frozen peas, to serve"
+            },
+            {
+              "name": "ketchup",
+              "quantity": 1,
+              "unit": "bottle",
+              "category": "pantry",
+              "display": "Ketchup, to serve"
+            }
           ],
           "method": [
             "Preheat oven to 200°C (400°F) and line a tray.",
@@ -330,7 +695,13 @@
         "snack": {
           "name": "Lactose-free yoghurt pouch (or fresh fruit if unavailable)",
           "ingredients": [
-            {"name":"lactose-free yoghurt pouches","quantity":4,"unit":"","category":"dairy","display":"4 lactose-free yoghurt pouches"}
+            {
+              "name": "lactose-free yoghurt pouches",
+              "quantity": 4,
+              "unit": "",
+              "category": "dairy",
+              "display": "4 lactose-free yoghurt pouches"
+            }
           ]
         }
       },
@@ -341,14 +712,62 @@
           "new_or_repeat": "repeat",
           "authored_by": "The Weeknight Realist & The Family GP/Dietician",
           "ingredients": [
-            {"name":"whole chicken","quantity":1,"unit":"(~1.8kg)","category":"meat_deli","display":"1 whole chicken (~1.8kg)"},
-            {"name":"potatoes","quantity":1.5,"unit":"kg","category":"produce","display":"1.5kg potatoes, quartered"},
-            {"name":"garlic","quantity":2,"unit":"clove","category":"produce","display":"2 cloves garlic"},
-            {"name":"lemon","quantity":1,"unit":"","category":"produce","display":"1 lemon, halved"},
-            {"name":"fresh thyme","quantity":1,"unit":"bunch","category":"produce","display":"A few sprigs thyme"},
-            {"name":"plain flour","quantity":1,"unit":"tbsp","category":"pantry","display":"1 tbsp flour, for the gravy"},
-            {"name":"chicken stock","quantity":2,"unit":"cup","category":"pantry","display":"2 cups chicken stock (for gravy)"},
-            {"name":"broccoli","quantity":1,"unit":"head","category":"produce","display":"1 head broccoli, steamed"}
+            {
+              "name": "whole chicken",
+              "quantity": 1,
+              "unit": "(~1.8kg)",
+              "category": "meat_deli",
+              "display": "1 whole chicken (~1.8kg)"
+            },
+            {
+              "name": "potatoes",
+              "quantity": 1.5,
+              "unit": "kg",
+              "category": "produce",
+              "display": "1.5kg potatoes, quartered"
+            },
+            {
+              "name": "garlic",
+              "quantity": 2,
+              "unit": "clove",
+              "category": "produce",
+              "display": "2 cloves garlic"
+            },
+            {
+              "name": "lemon",
+              "quantity": 1,
+              "unit": "",
+              "category": "produce",
+              "display": "1 lemon, halved"
+            },
+            {
+              "name": "fresh thyme",
+              "quantity": 1,
+              "unit": "bunch",
+              "category": "produce",
+              "display": "A few sprigs thyme"
+            },
+            {
+              "name": "plain flour",
+              "quantity": 1,
+              "unit": "tbsp",
+              "category": "pantry",
+              "display": "1 tbsp flour, for the gravy"
+            },
+            {
+              "name": "chicken stock",
+              "quantity": 2,
+              "unit": "cup",
+              "category": "pantry",
+              "display": "2 cups chicken stock (for gravy)"
+            },
+            {
+              "name": "broccoli",
+              "quantity": 1,
+              "unit": "head",
+              "category": "produce",
+              "display": "1 head broccoli, steamed"
+            }
           ],
           "method": [
             "Preheat oven to 200°C (400°F).",
@@ -366,8 +785,20 @@
         "snack": {
           "name": "Cheese and crackers",
           "ingredients": [
-            {"name":"cheese","quantity":1,"unit":"block","category":"dairy","display":"1 block cheese"},
-            {"name":"crackers","quantity":1,"unit":"packet","category":"pantry","display":"1 packet crackers"}
+            {
+              "name": "cheese",
+              "quantity": 1,
+              "unit": "block",
+              "category": "dairy",
+              "display": "1 block cheese"
+            },
+            {
+              "name": "crackers",
+              "quantity": 1,
+              "unit": "packet",
+              "category": "pantry",
+              "display": "1 packet crackers"
+            }
           ]
         }
       }
