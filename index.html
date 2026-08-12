@@ -99,6 +99,9 @@ body{
 .meal-row:first-of-type{border-top:none;}
 .meal-label{font-family:var(--font-mono);font-size:0.62rem;text-transform:uppercase;color:var(--ink-faint);width:44px;flex-shrink:0;padding-top:3px;letter-spacing:0.04em;}
 .meal-name{flex:1;}
+.meal-name-btn{background:none;border:none;padding:0;margin:0;font:inherit;color:inherit;text-align:left;cursor:pointer;}
+.meal-name-btn:hover{text-decoration:underline;}
+.meal-name-btn:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
 .badge-new{font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.03em;color:var(--status-new);font-weight:600;margin-left:5px;}
 .by-line{font-size:0.72rem;color:var(--ink-soft);font-style:italic;display:block;margin-top:1px;}
 .log-btn{font-family:var(--font-head);font-size:0.68rem;font-weight:600;color:var(--teal-dark);background:rgba(255,255,255,0.6);border:1px solid var(--glass-border);border-radius:10px;padding:5px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
@@ -424,7 +427,7 @@ body{
 
   function renderDays(){
     const list = document.getElementById('days-list');
-    list.innerHTML = WEEK_DATA.days.map(d => {
+    list.innerHTML = WEEK_DATA.days.map((d, dayIndex) => {
       const status = d.dinner ? dishStatus(d.dinner.name) : 'new';
       const meals = ["lunch","snack","dinner"];
       return `<div class="day-card">
@@ -437,9 +440,14 @@ body{
           const info = d[m];
           if(!info) return "";
           const logged = !!loggedLocally[key(d.day,m)];
+          const hasRecipe = m === 'dinner' && info.recipe;
+          const nameHtml = `${info.name}${info.new ? '<span class="badge-new">new</span>':''}${m==='dinner' && info.authored_by ? `<span class="by-line">${info.authored_by}</span>` : ''}`;
+          const nameEl = hasRecipe
+            ? `<button class="meal-name meal-name-btn" data-day-index="${dayIndex}">${nameHtml}</button>`
+            : `<span class="meal-name">${nameHtml}</span>`;
           return `<div class="meal-row">
             <span class="meal-label">${m}</span>
-            <span class="meal-name">${info.name}${info.new ? '<span class="badge-new">new</span>':''}${m==='dinner' && info.authored_by ? `<span class="by-line">${info.authored_by}</span>` : ''}</span>
+            ${nameEl}
             <button class="log-btn ${logged?'logged':''}" data-day="${d.day}" data-meal="${m}" data-name="${info.name}">${logged ? '✓ Logged' : 'Log'}</button>
           </div>`;
         }).join("")}
@@ -447,6 +455,9 @@ body{
     }).join("");
     list.querySelectorAll(".log-btn").forEach(btn=>{
       btn.addEventListener("click", ()=> openModal(btn.dataset.day, btn.dataset.meal, btn.dataset.name));
+    });
+    list.querySelectorAll(".meal-name-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=> goToRecipe(parseInt(btn.dataset.dayIndex, 10)));
     });
   }
 
@@ -790,22 +801,36 @@ body{
   document.getElementById("refreshPlanBtn").addEventListener("click", requestRegenerate);
   document.getElementById("favouritesLinkBtn").addEventListener("click", openFavouritesPage);
 
+  function switchTab(name){
+    document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.tab === name));
+    document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("hidden", p.id !== "panel-" + name));
+    if(name === "recipe" && !recipeTabInitialized){
+      renderRecipeTab();
+      recipeTabInitialized = true;
+    }
+  }
+
+  function goToRecipe(dayIndex){
+    recipeTabIndex = dayIndex;
+    switchTab("recipe");
+    renderRecipeTab();
+  }
+
   document.querySelectorAll(".tab").forEach(tab=>{
-    tab.addEventListener("click", ()=>{
-      document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-      document.querySelectorAll(".panel").forEach(p=>p.classList.add("hidden"));
-      tab.classList.add("active");
-      document.getElementById("panel-" + tab.dataset.tab).classList.remove("hidden");
-      if(tab.dataset.tab === "recipe" && !recipeTabInitialized){
-        renderRecipeTab();
-        recipeTabInitialized = true;
-      }
-    });
+    tab.addEventListener("click", ()=> switchTab(tab.dataset.tab));
   });
 
   async function init(){
     document.getElementById("headerTitle").textContent = "This week";
     document.getElementById("headerSub").textContent = (WEEK_DATA.date_range || "—").toUpperCase();
+
+    // Render immediately from local data — the plan itself never depends on the network.
+    // dish_stats/shopping_state (status badges, checkbox state) are fetched in the
+    // background and applied with a re-render once they land, so a slow or cold-started
+    // Apps Script backend never leaves the Plan tab looking empty.
+    renderPlan();
+    renderShopping();
+
     await Promise.all([fetchDishStats(), fetchShoppingState()]);
     renderPlan();
     renderShopping();
