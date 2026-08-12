@@ -1512,7 +1512,7 @@ body{
 
   async function regenerateMealFlow(day, meal, backdrop){
     const modal = backdrop.querySelector(".modal");
-    modal.innerHTML = `<h3>Generating…</h3><div class="meal-sub">${day} · ${meal}</div><div class="modal-status-note">This can take up to a minute.</div>`;
+    modal.innerHTML = `<h3>Generating…</h3><div class="meal-sub">${day} · ${meal}</div><div class="modal-status-note">This can take up to two minutes — keep this tab open.</div>`;
     try{
       const result = await postJSON({type:"regenerate_meal", week_id: WEEK_DATA.week_id, day, meal});
       if(result.status === "ok"){
@@ -1522,7 +1522,7 @@ body{
         renderRegenerateRetry(day, meal, backdrop, result.message || "Unknown error");
       }
     }catch(e){
-      renderRegenerateRetry(day, meal, backdrop, "Couldn't reach the server.");
+      renderRegenerateRetry(day, meal, backdrop, "Lost the connection while waiting — it may have still gone through. Check the Plan tab before trying again.");
     }
   }
 
@@ -1794,7 +1794,7 @@ body{
     if(btn.disabled) return;
     btn.disabled = true;
     const originalLabel = btn.innerHTML;
-    btn.innerHTML = '<i class="ti ti-refresh"></i>Refreshing… (up to a minute)';
+    btn.innerHTML = '<i class="ti ti-refresh"></i>Refreshing… (up to a few minutes)';
     note.textContent = "";
     try{
       const result = await postJSON({type: "regenerate_now", week_id: WEEK_DATA.week_id});
@@ -1809,7 +1809,7 @@ body{
         note.textContent = "Refresh failed: " + (result.message || "unknown error");
       }
     }catch(e){
-      note.textContent = "Couldn't reach the refresh service — try again in a moment.";
+      note.textContent = "Lost the connection while waiting — it may have still gone through. Reload in a moment to check before trying again.";
     }finally{
       btn.disabled = false;
       btn.innerHTML = originalLabel;
