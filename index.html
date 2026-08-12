@@ -174,6 +174,28 @@ body{
 .primary-btn:disabled{opacity:0.6;cursor:default;}
 .primary-btn:focus-visible{outline:3px solid var(--status-new);outline-offset:2px;}
 
+/* Settings */
+.settings-btn{position:fixed;top:18px;right:16px;z-index:55;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--glass-strong);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);color:var(--teal-dark);cursor:pointer;box-shadow:0 2px 8px rgba(42,59,76,0.12);}
+.settings-btn:hover{background:var(--white);}
+.settings-btn i{font-size:20px;}
+.settings-btn:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.settings-section{margin-bottom:24px;}
+.settings-section h3{font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;font-size:1rem;margin:0 0 4px;}
+.settings-section .section-sub{font-size:0.8rem;color:var(--ink-soft);margin-bottom:12px;}
+
+/* Meal history banner (Plan tab) */
+.history-banner{display:flex;align-items:flex-start;gap:12px;background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--glass-border);border-radius:14px;padding:13px 16px;margin-bottom:16px;font-size:0.82rem;}
+.history-banner i{font-size:20px;color:var(--teal-dark);flex-shrink:0;margin-top:1px;}
+.history-banner .hb-text{flex:1;line-height:1.5;}
+.history-banner .hb-link{display:inline-block;margin-top:3px;font-family:var(--font-head);font-weight:600;font-size:0.78rem;color:var(--teal-dark);background:none;border:none;padding:0;cursor:pointer;text-decoration:underline;}
+.history-banner .hb-link:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+
+/* Meal history upload form */
+.history-session-note{font-family:var(--font-mono);font-size:0.68rem;color:var(--ink-soft);margin-bottom:14px;min-height:14px;}
+.history-form-card{background:var(--glass-strong);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:18px;padding:18px;margin-bottom:14px;}
+.history-form-card textarea{width:100%;font-family:var(--font-body);font-size:0.85rem;line-height:1.5;background:rgba(255,255,255,0.7);border:1px solid var(--glass-border);border-radius:10px;padding:12px;margin-bottom:12px;resize:vertical;color:var(--ink);}
+.history-form-card textarea:focus-visible{outline:3px solid var(--teal);outline-offset:1px;}
+
 /* Favourites list */
 .favourite-card{background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:18px;padding:16px 18px;margin-bottom:12px;}
 .favourite-card .fav-name{font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;font-size:1.05rem;margin-bottom:2px;}
@@ -227,13 +249,14 @@ body{
 <body>
 <div class="wrap" id="hub">
 
+  <button class="settings-btn" id="settingsBtn" aria-label="Settings"><i class="ti ti-settings"></i></button>
+
   <div class="header">
     <h1 id="headerTitle">This week</h1>
     <div class="sub" id="headerSub">—</div>
   </div>
 
   <div class="util-row">
-    <button class="util-btn" id="principlesLinkBtn"><i class="ti ti-clipboard-list"></i>Principles</button>
     <button class="util-btn" id="refreshPlanBtn"><i class="ti ti-refresh"></i>Refresh plan</button>
     <button class="util-btn" id="favouritesLinkBtn"><i class="ti ti-heart"></i>Favourites</button>
   </div>
@@ -246,6 +269,7 @@ body{
   </div>
 
   <div class="panel" id="panel-plan">
+    <div id="historyBannerContainer"></div>
     <div id="reviewBoxContainer"></div>
     <div class="scoreboard" id="scoreboard"></div>
     <div class="days" id="days-list"></div>
@@ -1678,34 +1702,218 @@ body{
     });
   }
 
-  function openPrinciplesPage(){
+  function openSettingsPage(){
     const page = document.createElement("div");
     page.className = "overlay-page";
     page.innerHTML = `
       <div class="overlay-inner">
-        <button class="overlay-close" id="principlesCloseBtn"><i class="ti ti-arrow-left"></i>Back</button>
-        <div class="overlay-title">Meal planning principles</div>
-        <div class="principles-card">
-          <textarea id="principlesTextarea" rows="14"></textarea>
-          <div class="principles-status-note" id="principlesStatusNote"></div>
-          <button class="primary-btn" id="principlesUpdateBtn">Update</button>
+        <button class="overlay-close" id="settingsCloseBtn"><i class="ti ti-arrow-left"></i>Back</button>
+        <div class="overlay-title">Settings</div>
+
+        <div class="settings-section">
+          <h3>Meal planning principles</h3>
+          <div class="section-sub">These guide every plan the board drafts — edit them any time.</div>
+          <div class="principles-card">
+            <textarea id="principlesTextarea" rows="14"></textarea>
+            <div class="principles-status-note" id="principlesStatusNote"></div>
+            <button class="primary-btn" id="principlesUpdateBtn">Update</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>Meal history</h3>
+          <div class="section-sub">Add your family's past meals — including ones from before this app — so the board has a richer picture of what's worked.</div>
+          <button class="primary-btn" id="addHistoryBtn"><i class="ti ti-history"></i> Add meal history</button>
         </div>
       </div>`;
     document.getElementById("hub").appendChild(page);
-    page.querySelector("#principlesTextarea").value = PRINCIPLES_TEXT;
-    page.querySelector("#principlesCloseBtn").addEventListener("click", ()=> page.remove());
+
+    const textarea = page.querySelector("#principlesTextarea");
+    textarea.value = PRINCIPLES_TEXT;
+    let principlesDirty = false;
+    textarea.addEventListener("input", ()=>{ principlesDirty = true; });
+
+    function closeSettings(){
+      if(principlesDirty && !confirm("You have unsaved changes to the meal planning principles. Discard them?")) return;
+      page.remove();
+    }
+    page.querySelector("#settingsCloseBtn").addEventListener("click", closeSettings);
+
     page.querySelector("#principlesUpdateBtn").addEventListener("click", async ()=>{
-      const text = page.querySelector("#principlesTextarea").value;
+      const text = textarea.value;
       const note = page.querySelector("#principlesStatusNote");
       if(!text.trim()){ note.textContent = "Add some text first"; return; }
       note.textContent = "Sending…";
       try{
         await sendToSheet({type: "principles_update", week_id: WEEK_DATA.week_id, plan_feedback: text});
+        PRINCIPLES_TEXT = text;
+        principlesDirty = false;
         note.textContent = "Saved ✓ — applies next time the planner runs";
       }catch(e){
         note.textContent = "Couldn't send — try again in a moment";
       }
     });
+
+    page.querySelector("#addHistoryBtn").addEventListener("click", ()=> openMealHistoryUpload());
+  }
+
+  // ---------------- Meal history upload journey ----------------
+  function historyUploaded(){
+    try{ return localStorage.getItem('menu-hub-history-uploaded') === '1'; }catch(e){ return false; }
+  }
+  function markHistoryUploaded(){
+    try{ localStorage.setItem('menu-hub-history-uploaded', '1'); }catch(e){}
+  }
+  function renderHistoryBanner(){
+    const container = document.getElementById("historyBannerContainer");
+    if(!container) return;
+    if(historyUploaded()){ container.innerHTML = ""; return; }
+    container.innerHTML = `
+      <div class="history-banner">
+        <i class="ti ti-history"></i>
+        <div class="hb-text">
+          Add your family's meal history to improve meal plan generation.<br>
+          <button class="hb-link" id="historyBannerLink">Add meal history</button>
+        </div>
+      </div>`;
+    container.querySelector("#historyBannerLink").addEventListener("click", ()=> openMealHistoryUpload());
+  }
+
+  function openMealHistoryUpload(){
+    let sessionCount = 0;
+    const page = document.createElement("div");
+    page.className = "overlay-page";
+    page.innerHTML = `
+      <div class="overlay-inner">
+        <button class="overlay-close" id="historyFinishBtn"><i class="ti ti-check"></i>Finish</button>
+        <div class="overlay-title">Add meal history</div>
+        <div class="overlay-sub">Add one meal at a time — description required, link and feedback optional. Tap Finish whenever you're done.</div>
+        <div class="history-session-note" id="historySessionNote"></div>
+        <div id="historyFormContainer"></div>
+      </div>`;
+    document.getElementById("hub").appendChild(page);
+
+    function updateSessionNote(){
+      const note = page.querySelector("#historySessionNote");
+      note.textContent = sessionCount > 0 ? `${sessionCount} meal${sessionCount === 1 ? '' : 's'} added this session` : "";
+    }
+
+    function renderForm(){
+      const container = page.querySelector("#historyFormContainer");
+      let fetchedRecipe = null;
+      let feedback = null;
+      container.innerHTML = `
+        <div class="history-form-card">
+          <div class="modal-label">Description</div>
+          <textarea id="historyDescInput" rows="3" placeholder="What was the meal?"></textarea>
+
+          <div class="modal-label">Recipe link (optional)</div>
+          <input type="url" id="historyLinkInput" class="text-input" placeholder="https://example.com/recipe">
+          <button class="favourite-btn add-link-btn" id="historyFetchLinkBtn"><i class="ti ti-link"></i> Fetch recipe</button>
+          <div class="modal-status-note" id="historyLinkNote"></div>
+          <div id="historyIngredientsPreview"></div>
+
+          <div class="modal-label" style="margin-top:14px;">Feedback (optional — assumed a yes if skipped)</div>
+          <div class="btn-row" id="historyFeedbackRow">
+            <button class="stamp" data-v="yes">Yes</button>
+            <button class="stamp" data-v="mostly">Mostly</button>
+            <button class="stamp" data-v="no">Not really</button>
+          </div>
+          <textarea id="historyNoteInput" rows="2" placeholder="Optional note"></textarea>
+
+          <div class="modal-status-note" id="historySaveNote"></div>
+          <button class="primary-btn" id="historySaveBtn">Save &amp; add another</button>
+        </div>`;
+
+      const feedbackRow = container.querySelector("#historyFeedbackRow");
+      feedbackRow.querySelectorAll(".stamp").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          feedback = feedback === b.dataset.v ? null : b.dataset.v;
+          feedbackRow.querySelectorAll(".stamp").forEach(x=>x.className = "stamp");
+          if(feedback) feedbackRow.querySelector(`[data-v="${feedback}"]`).classList.add("sel-" + feedback);
+        });
+      });
+
+      container.querySelector("#historyFetchLinkBtn").addEventListener("click", async ()=>{
+        const url = container.querySelector("#historyLinkInput").value.trim();
+        const note = container.querySelector("#historyLinkNote");
+        const btn = container.querySelector("#historyFetchLinkBtn");
+        const previewEl = container.querySelector("#historyIngredientsPreview");
+        if(!url){ note.textContent = "Paste a URL first"; return; }
+        btn.disabled = true; btn.textContent = "Fetching…"; note.textContent = ""; previewEl.innerHTML = "";
+        try{
+          const result = await postJSON({type:"preview_external_recipe", url});
+          if(result.status === "ok"){
+            fetchedRecipe = result.recipe;
+            previewEl.innerHTML = `<ul class="preview-ingredients">${result.recipe.ingredients.map(i => `<li>${i.display || i.name}</li>`).join('')}</ul>`;
+            note.textContent = "Recipe read ✓";
+          } else {
+            fetchedRecipe = null;
+            note.innerHTML = `<i class="ti ti-alert-triangle"></i> Couldn't read that link — the meal will still save without it.`;
+          }
+        }catch(e){
+          fetchedRecipe = null;
+          note.innerHTML = `<i class="ti ti-alert-triangle"></i> Couldn't read that link — the meal will still save without it.`;
+        }finally{
+          btn.disabled = false; btn.textContent = "Fetch recipe";
+        }
+      });
+
+      container.querySelector("#historySaveBtn").addEventListener("click", async ()=>{
+        const desc = container.querySelector("#historyDescInput").value.trim();
+        const note = container.querySelector("#historySaveNote");
+        const btn = container.querySelector("#historySaveBtn");
+        if(!desc){ note.textContent = "Add a description first"; return; }
+        btn.disabled = true; btn.textContent = "Saving…"; note.textContent = "";
+        const url = container.querySelector("#historyLinkInput").value.trim();
+        const freeNote = container.querySelector("#historyNoteInput").value.trim();
+        try{
+          const result = await postJSON({
+            type: "add_history_meal",
+            description: desc,
+            source_url: url || undefined,
+            ingredients: fetchedRecipe ? fetchedRecipe.ingredients : undefined,
+            kids_ate_it: feedback || "yes",
+            note: freeNote || undefined
+          });
+          if(result.status === "ok"){
+            sessionCount++;
+            markHistoryUploaded();
+            renderHistoryBanner();
+            updateSessionNote();
+            renderForm();
+          } else {
+            note.textContent = "Couldn't save: " + (result.message || "unknown error");
+            btn.disabled = false; btn.textContent = "Save & add another";
+          }
+        }catch(e){
+          note.textContent = "Couldn't reach the server — try again.";
+          btn.disabled = false; btn.textContent = "Save & add another";
+        }
+      });
+    }
+
+    renderForm();
+
+    page.querySelector("#historyFinishBtn").addEventListener("click", ()=>{
+      document.querySelectorAll(".overlay-page").forEach(p => p.remove());
+      switchTab("plan");
+      if(sessionCount > 0) showHistoryFinishPopup();
+    });
+  }
+
+  function showHistoryFinishPopup(){
+    const backdrop = document.createElement("div");
+    backdrop.className = "modal-backdrop";
+    backdrop.innerHTML = `
+      <div class="modal">
+        <h3>Meal history saved</h3>
+        <p class="confirm-text">This will be used to inform <strong>next week's</strong> automatically generated plan.</p>
+        <p class="confirm-text">To have <strong>this week's</strong> plan reflect it now instead, use the + button on any meal to regenerate it.</p>
+        <button class="review-submit-btn" id="historyPopupCloseBtn">Got it</button>
+      </div>`;
+    document.getElementById("hub").appendChild(backdrop);
+    backdrop.querySelector("#historyPopupCloseBtn").addEventListener("click", ()=> backdrop.remove());
   }
 
   function openRecipeOverlay(name, authored_by, recipe){
@@ -1816,7 +2024,7 @@ body{
     }
   }
 
-  document.getElementById("principlesLinkBtn").addEventListener("click", openPrinciplesPage);
+  document.getElementById("settingsBtn").addEventListener("click", openSettingsPage);
   document.getElementById("refreshPlanBtn").addEventListener("click", requestRegenerate);
   document.getElementById("favouritesLinkBtn").addEventListener("click", openFavouritesPage);
 
@@ -1849,6 +2057,7 @@ body{
     // Apps Script backend never leaves the Plan tab looking empty.
     renderPlan();
     renderShopping();
+    renderHistoryBanner();
 
     await Promise.all([fetchDishStats(), fetchShoppingState()]);
     renderPlan();
