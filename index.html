@@ -276,21 +276,610 @@ body{
   const READ_KEY = "family-menu-2026"; // must match Apps Script's READ_KEY — it's a light lock, not real security
 
   const WEEK_DATA = {
-    week_id: "2026-W33",
-    date_range: "Aug 10 \u2013 Aug 16, 2026",
-    status: "proposed",
-    pantry_ingredients: [],
-    budget_saver_mode: false,
-    days: [
-      {day:"Monday", dinner:{name:"Soy-glazed baked chicken thighs, rice & steamed broccoli", new:true, authored_by:"The Weeknight Realist & The Child Nutritionist", ingredients:[{"name":"chicken thighs","quantity":8,"unit":"","category":"meat_deli","display":"8 boneless, skinless chicken thighs"},{"name":"soy sauce","quantity":0.33,"unit":"cup","category":"pantry","display":"1/3 cup soy sauce"},{"name":"honey","quantity":2,"unit":"tbsp","category":"pantry","display":"2 tbsp honey"},{"name":"rice vinegar","quantity":1,"unit":"tbsp","category":"pantry","display":"1 tbsp rice vinegar (or lemon juice)"},{"name":"garlic","quantity":2,"unit":"clove","category":"produce","display":"2 cloves garlic, minced"},{"name":"ginger","quantity":1,"unit":"tsp","category":"produce","display":"1 tsp grated ginger"},{"name":"cornstarch","quantity":1,"unit":"tbsp","category":"pantry","display":"1 tbsp cornstarch mixed with 2 tbsp water"},{"name":"jasmine rice","quantity":1.5,"unit":"cup","category":"pantry","display":"1.5 cups jasmine rice"},{"name":"broccoli","quantity":2,"unit":"head","category":"produce","display":"2 heads broccoli, cut into florets"}], method:["Preheat oven to 200\u00b0C (400\u00b0F).","Whisk soy sauce, honey, rice vinegar, garlic and ginger in a small saucepan; simmer 2-3 min.","Stir in the cornstarch slurry and simmer until glossy and slightly thickened, about 1 min.","Lay chicken thighs in a baking dish, spoon over half the sauce, and bake 20 min.","Brush on the remaining sauce and bake a further 10 min until sticky and cooked through.","Meanwhile cook the rice according to packet directions, steaming the broccoli for the last 5-6 min.","Serve chicken over rice with broccoli alongside \u2014 a splash of extra plain soy sauce on the side for Hamish's rice if he wants it saucier."]}, lunch:{name:"Cheese quesadillas", ingredients:[{"name":"tortillas","quantity":4,"unit":"","category":"pantry","display":"4 tortillas"},{"name":"grated cheese","quantity":1,"unit":"cup","category":"dairy","display":"1 cup grated cheese"}]}, snack:{name:"Apple slices with peanut butter", ingredients:[{"name":"apples","quantity":2,"unit":"","category":"produce","display":"2 apples"},{"name":"peanut butter","quantity":2,"unit":"tbsp","category":"pantry","display":"2 tbsp peanut butter"}]}},
-      {day:"Tuesday", dinner:{name:"Build-your-own hard-shell tacos (Old El Paso), seasoned beef & toppings bar", new:true, authored_by:"The Weeknight Realist & The Child Nutritionist", ingredients:[{"name":"beef mince","quantity":600,"unit":"g","category":"meat_deli","display":"600g beef mince"},{"name":"ground cumin","quantity":1,"unit":"tbsp","category":"pantry","display":"1 tbsp ground cumin"},{"name":"smoked paprika","quantity":1,"unit":"tbsp","category":"pantry","display":"1 tbsp smoked paprika"},{"name":"garlic powder","quantity":1,"unit":"tsp","category":"pantry","display":"1 tsp garlic powder"},{"name":"taco shells (Old El Paso)","quantity":12,"unit":"","category":"pantry","display":"12 Old El Paso hard taco shells"},{"name":"shredded lettuce","quantity":1,"unit":"cup","category":"produce","display":"1 cup shredded lettuce"},{"name":"grated cheese","quantity":1,"unit":"cup","category":"dairy","display":"1 cup grated cheese (+ lactose-free block for Maddie)"},{"name":"lactose-free cheese","quantity":1,"unit":"block","category":"dairy","display":"1 lactose-free cheese block, for Maddie"},{"name":"sour cream","quantity":0.5,"unit":"cup","category":"dairy","display":"1/2 cup sour cream"},{"name":"avocado","quantity":1,"unit":"","category":"produce","display":"1 avocado, sliced"},{"name":"tomatoes","quantity":4,"unit":"","category":"produce","display":"4 tomatoes, diced (topping \u2014 kept off Maddie's plate)"},{"name":"cucumber","quantity":1,"unit":"","category":"produce","display":"1 cucumber, sliced (tomato-free lane)"}], method:["Brown beef mince in a large pan over medium-high heat, breaking it up, 6-8 min.","Stir in cumin, paprika, garlic powder and salt, then a splash of water; simmer 3-4 min until thickened.","Warm the taco shells according to packet directions.","Set out beef, lettuce, cheese, sour cream, avocado, diced tomato and cucumber separately.","Everyone builds their own \u2014 keep diced tomato and heavy cheese/sour cream light or off Maddie's plate, cucumber slices in its place."]}, lunch:{name:"Soy chicken & rice wraps (Monday's leftovers)", ingredients:[]}, snack:{name:"Banana", ingredients:[{"name":"bananas","quantity":1,"unit":"bunch","category":"produce","display":"1 bunch bananas"}]}},
-      {day:"Wednesday", dinner:{name:"One-pan sausage & rice bake, with a tomato & cucumber side salad", new:true, authored_by:"The Weeknight Realist", ingredients:[{"name":"sausages","quantity":6,"unit":"","category":"meat_deli","display":"6 sausages, leaner variety, casings removed"},{"name":"long-grain rice","quantity":1.5,"unit":"cup","category":"pantry","display":"1.5 cups long-grain rice"},{"name":"onion","quantity":1,"unit":"","category":"produce","display":"1 onion, diced"},{"name":"garlic","quantity":2,"unit":"clove","category":"produce","display":"2 cloves garlic, minced"},{"name":"chicken stock","quantity":3,"unit":"cup","category":"pantry","display":"3 cups chicken stock"},{"name":"peas","quantity":1,"unit":"cup","category":"frozen","display":"1 cup frozen peas"},{"name":"tomatoes","quantity":6,"unit":"","category":"produce","display":"6 tomatoes, sliced (side salad \u2014 kept off Maddie's plate)"},{"name":"cucumber","quantity":1,"unit":"","category":"produce","display":"1 cucumber, sliced"}], method:["Brown sausage meat in a large oven-proof pan, breaking it into small pieces, about 6 min; drain any excess fat.","Add onion and garlic, cook until soft, 3 min.","Stir in rice, then pour in stock and bring to a simmer.","Cover and cook 15-18 min until rice is tender and the liquid is absorbed, stirring in the peas for the last 5 min.","While the bake cooks, toss the sliced tomato and cucumber with a little olive oil and salt for a light side salad.","Serve as-is for the kids; pass the tomato-cucumber salad separately for the adults and Hamish \u2014 kept off Maddie's plate for the tomato, and light on any extra dairy for Genevieve."]}, lunch:{name:"Beef taco filling wraps (Tuesday's leftovers)", ingredients:[]}, snack:{name:"Mandarins", ingredients:[{"name":"mandarins","quantity":1,"unit":"bag","category":"produce","display":"1 bag mandarins"}]}},
-      {day:"Thursday", dinner:{name:"Egg & soy fried rice with bacon", new:false, authored_by:"The Flavor Explorer & The Weeknight Realist", ingredients:[{"name":"bacon","quantity":4,"unit":"rasher","category":"meat_deli","display":"4 rashers bacon, diced"},{"name":"eggs","quantity":3,"unit":"","category":"dairy","display":"3 eggs, beaten"},{"name":"soy sauce","quantity":3,"unit":"tbsp","category":"pantry","display":"3 tbsp soy sauce"},{"name":"frozen peas and corn mix","quantity":1,"unit":"cup","category":"frozen","display":"1 cup frozen peas and corn mix"},{"name":"spring onions","quantity":2,"unit":"","category":"produce","display":"2 spring onions, sliced"}], method:["Heat oil in a large pan or wok over high heat; cook bacon until crisp, about 4 min.","Push bacon to one side, pour in the beaten egg and scramble until just set.","Add 4 cups cold cooked rice (day-old if possible), breaking up clumps, and stir-fry 3-4 min.","Add the peas and corn, soy sauce and spring onions; toss until heated through and everything is coated.","Serve as-is \u2014 a proven favourite for Hamish (rice with soy sauce, egg), easy to portion small for Maddie."]}, lunch:{name:"Sausage rice bake (Wednesday's leftovers)", ingredients:[]}, snack:{name:"Popcorn", ingredients:[{"name":"popcorn kernels","quantity":0.5,"unit":"cup","category":"pantry","display":"1/2 cup popcorn kernels"}]}},
-      {day:"Friday", dinner:{name:"Oven-baked chicken tenders (homemade), roasted potato wedges & corn (with a side salad for the grown-ups)", new:true, authored_by:"The Weeknight Realist & The Family GP/Dietician", ingredients:[{"name":"chicken breast","quantity":700,"unit":"g","category":"meat_deli","display":"700g chicken breast, cut into tender-sized strips"},{"name":"plain flour","quantity":0.5,"unit":"cup","category":"pantry","display":"1/2 cup flour"},{"name":"eggs","quantity":2,"unit":"","category":"dairy","display":"2 eggs, beaten"},{"name":"panko breadcrumbs","quantity":1.5,"unit":"cup","category":"pantry","display":"1.5 cups panko breadcrumbs"},{"name":"potatoes","quantity":1,"unit":"kg","category":"produce","display":"1kg potatoes, cut into wedges"},{"name":"corn kernels","quantity":2,"unit":"cup","category":"produce","display":"2 cups corn kernels, fresh or tinned"},{"name":"salad greens","quantity":1,"unit":"bag","category":"produce","display":"Salad greens (adults only)"},{"name":"cucumber","quantity":1,"unit":"","category":"produce","display":"1 cucumber, for the adults' salad"}], method:["Preheat oven to 200\u00b0C (400\u00b0F) and line two trays.","Toss the potato wedges with oil, salt and pepper on one tray; roast 25-30 min, turning once, until golden.","Set up three shallow bowls: flour, beaten egg, and panko. Coat each chicken strip in flour, then egg, then panko, pressing the crumbs on firmly.","Lay the chicken tenders on the second tray, spray lightly with oil, and bake alongside the wedges for the last 15-18 min, turning once, until golden and cooked through.","Steam or microwave the corn for the last 5 min.","Toss a quick side salad for the adults while everything bakes.","Serve straight from the trays \u2014 homemade tenders and fresh-cut wedges in place of last time's frozen versions, still a low-effort one-oven dinner."]}, lunch:{name:"Fried rice (Thursday's leftovers)", ingredients:[]}, snack:{name:"Rice crackers", ingredients:[{"name":"rice crackers","quantity":1,"unit":"packet","category":"pantry","display":"1 packet rice crackers"}]}},
-      {day:"Saturday", dinner:{name:"Crumbed salmon 'fish fingers', oven-baked fries & peas", new:true, authored_by:"The Family GP/Dietician & The Child Nutritionist", ingredients:[{"name":"salmon fillets","quantity":600,"unit":"g","category":"meat_deli","display":"600g skinless salmon fillets, cut into finger-width strips"},{"name":"plain flour","quantity":0.5,"unit":"cup","category":"pantry","display":"1/2 cup flour"},{"name":"eggs","quantity":2,"unit":"","category":"dairy","display":"2 eggs, beaten"},{"name":"panko breadcrumbs","quantity":1.5,"unit":"cup","category":"pantry","display":"1.5 cups panko breadcrumbs"},{"name":"frozen fries","quantity":1,"unit":"bag (~500g)","category":"frozen","display":"1 bag frozen oven-baked fries"},{"name":"peas","quantity":1,"unit":"cup","category":"frozen","display":"Frozen peas, to serve"},{"name":"ketchup","quantity":1,"unit":"bottle","category":"pantry","display":"Ketchup, to serve"}], method:["Preheat oven to 200\u00b0C (400\u00b0F) and line a tray.","Set up three shallow bowls: flour, beaten egg, and panko.","Coat each salmon strip in flour, then egg, then panko, pressing the crumbs on firmly.","Lay on the tray, spray lightly with oil, and bake 12-15 min, turning once, until golden and just cooked through.","Bake the fries on a separate tray alongside per packet directions, and steam or microwave the peas.","Serve with ketchup \u2014 same crumbed-and-fried approach that worked well before, oven fries in place of potato gems this week."]}, lunch:{name:"Chicken tender & wedge wraps (Friday's leftovers)", ingredients:[]}, snack:{name:"Lactose-free yoghurt pouch (or fresh fruit if unavailable)", ingredients:[{"name":"lactose-free yoghurt pouches","quantity":4,"unit":"","category":"dairy","display":"4 lactose-free yoghurt pouches"}]}},
-      {day:"Sunday", dinner:{name:"Roast chicken, roast potatoes, broccoli & a lighter gravy", new:false, authored_by:"The Weeknight Realist & The Family GP/Dietician", ingredients:[{"name":"whole chicken","quantity":1,"unit":"(~1.8kg)","category":"meat_deli","display":"1 whole chicken (~1.8kg)"},{"name":"potatoes","quantity":1.5,"unit":"kg","category":"produce","display":"1.5kg potatoes, quartered"},{"name":"garlic","quantity":2,"unit":"clove","category":"produce","display":"2 cloves garlic"},{"name":"lemon","quantity":1,"unit":"","category":"produce","display":"1 lemon, halved"},{"name":"fresh thyme","quantity":1,"unit":"bunch","category":"produce","display":"A few sprigs thyme"},{"name":"plain flour","quantity":1,"unit":"tbsp","category":"pantry","display":"1 tbsp flour, for the gravy"},{"name":"chicken stock","quantity":2,"unit":"cup","category":"pantry","display":"2 cups chicken stock (for gravy)"},{"name":"broccoli","quantity":1,"unit":"head","category":"produce","display":"1 head broccoli, steamed"}], method:["Preheat oven to 200\u00b0C (400\u00b0F).","Pat the chicken dry, rub with oil, salt and pepper; stuff the cavity with garlic, lemon and thyme.","Place chicken in a large roasting tray, scatter potatoes around it tossed in oil, salt and pepper.","Roast 70-80 min until juices run clear and potatoes are golden, basting once halfway.","Rest chicken 10 min. Skim excess fat from the pan juices, whisk in flour over heat, then gradually add stock, simmering until thickened \u2014 go light on the flour/fat for a lighter gravy.","Steam broccoli and serve alongside."]}, lunch:{name:"Salmon finger wraps (Saturday's leftovers)", ingredients:[]}, snack:{name:"Cheese and crackers", ingredients:[{"name":"cheese","quantity":1,"unit":"block","category":"dairy","display":"1 block cheese"},{"name":"crackers","quantity":1,"unit":"packet","category":"pantry","display":"1 packet crackers"}]}}
+    "week_id": "2026-W33",
+    "date_range": "Aug 10 - Aug 16, 2026",
+    "status": "proposed",
+    "pantry_ingredients": [],
+    "budget_saver_mode": false,
+    "days": [
+        {
+            "day": "Monday",
+            "dinner": {
+                "name": "Soy-glazed baked chicken thighs, rice & steamed broccoli",
+                "new_or_repeat": "new",
+                "authored_by": "The Weeknight Realist & The Child Nutritionist",
+                "ingredients": [
+                    {
+                        "name": "chicken thighs",
+                        "quantity": 8,
+                        "unit": "",
+                        "category": "meat_deli",
+                        "display": "8 boneless, skinless chicken thighs"
+                    },
+                    {
+                        "name": "soy sauce",
+                        "quantity": 0.33,
+                        "unit": "cup",
+                        "category": "pantry",
+                        "display": "1/3 cup soy sauce"
+                    },
+                    {
+                        "name": "honey",
+                        "quantity": 2,
+                        "unit": "tbsp",
+                        "category": "pantry",
+                        "display": "2 tbsp honey"
+                    },
+                    {
+                        "name": "rice vinegar",
+                        "quantity": 1,
+                        "unit": "tbsp",
+                        "category": "pantry",
+                        "display": "1 tbsp rice vinegar (or lemon juice)"
+                    },
+                    {
+                        "name": "garlic",
+                        "quantity": 2,
+                        "unit": "clove",
+                        "category": "produce",
+                        "display": "2 cloves garlic, minced"
+                    },
+                    {
+                        "name": "ginger",
+                        "quantity": 1,
+                        "unit": "tsp",
+                        "category": "produce",
+                        "display": "1 tsp grated ginger"
+                    },
+                    {
+                        "name": "cornstarch",
+                        "quantity": 1,
+                        "unit": "tbsp",
+                        "category": "pantry",
+                        "display": "1 tbsp cornstarch mixed with 2 tbsp water"
+                    },
+                    {
+                        "name": "jasmine rice",
+                        "quantity": 1.5,
+                        "unit": "cup",
+                        "category": "pantry",
+                        "display": "1.5 cups jasmine rice"
+                    },
+                    {
+                        "name": "broccoli",
+                        "quantity": 2,
+                        "unit": "head",
+                        "category": "produce",
+                        "display": "2 heads broccoli, cut into florets"
+                    }
+                ],
+                "method": [
+                    "Preheat oven to 200°C (400°F).",
+                    "Whisk soy sauce, honey, rice vinegar, garlic and ginger in a small saucepan; simmer 2-3 min.",
+                    "Stir in the cornstarch slurry and simmer until glossy and slightly thickened, about 1 min.",
+                    "Lay chicken thighs in a baking dish, spoon over half the sauce, and bake 20 min.",
+                    "Brush on the remaining sauce and bake a further 10 min until sticky and cooked through.",
+                    "Meanwhile cook the rice according to packet directions, steaming the broccoli for the last 5-6 min.",
+                    "Serve chicken over rice with broccoli alongside — a splash of extra plain soy sauce on the side for Hamish's rice if he wants it saucier."
+                ]
+            },
+            "lunch": {
+                "name": "Cheese quesadillas",
+                "ingredients": [
+                    {
+                        "name": "tortillas",
+                        "quantity": 4,
+                        "unit": "",
+                        "category": "pantry",
+                        "display": "4 tortillas"
+                    },
+                    {
+                        "name": "grated cheese",
+                        "quantity": 1,
+                        "unit": "cup",
+                        "category": "dairy",
+                        "display": "1 cup grated cheese"
+                    }
+                ]
+            },
+            "snack": {
+                "name": "Apple slices with peanut butter",
+                "ingredients": [
+                    {
+                        "name": "apples",
+                        "quantity": 2,
+                        "unit": "",
+                        "category": "produce",
+                        "display": "2 apples"
+                    },
+                    {
+                        "name": "peanut butter",
+                        "quantity": 2,
+                        "unit": "tbsp",
+                        "category": "pantry",
+                        "display": "2 tbsp peanut butter"
+                    }
+                ]
+            }
+        },
+        {
+            "day": "Tuesday",
+            "dinner": {
+                "name": "Build-your-own hard-shell tacos (Old El Paso), seasoned beef & toppings bar",
+                "new_or_repeat": "new",
+                "authored_by": "The Weeknight Realist & The Child Nutritionist",
+                "ingredients": [
+                    {
+                        "name": "beef mince",
+                        "quantity": 600,
+                        "unit": "g",
+                        "category": "meat_deli",
+                        "display": "600g beef mince"
+                    },
+                    {
+                        "name": "ground cumin",
+                        "quantity": 1,
+                        "unit": "tbsp",
+                        "category": "pantry",
+                        "display": "1 tbsp ground cumin"
+                    },
+                    {
+                        "name": "smoked paprika",
+                        "quantity": 1,
+                        "unit": "tbsp",
+                        "category": "pantry",
+                        "display": "1 tbsp smoked paprika"
+                    },
+                    {
+                        "name": "garlic powder",
+                        "quantity": 1,
+                        "unit": "tsp",
+                        "category": "pantry",
+                        "display": "1 tsp garlic powder"
+                    },
+                    {
+                        "name": "taco shells (Old El Paso)",
+                        "quantity": 12,
+                        "unit": "",
+                        "category": "pantry",
+                        "display": "12 Old El Paso hard taco shells"
+                    },
+                    {
+                        "name": "shredded lettuce",
+                        "quantity": 1,
+                        "unit": "cup",
+                        "category": "produce",
+                        "display": "1 cup shredded lettuce"
+                    },
+                    {
+                        "name": "grated cheese",
+                        "quantity": 1,
+                        "unit": "cup",
+                        "category": "dairy",
+                        "display": "1 cup grated cheese (+ lactose-free block for Maddie)"
+                    },
+                    {
+                        "name": "lactose-free cheese",
+                        "quantity": 1,
+                        "unit": "block",
+                        "category": "dairy",
+                        "display": "1 lactose-free cheese block, for Maddie"
+                    },
+                    {
+                        "name": "sour cream",
+                        "quantity": 0.5,
+                        "unit": "cup",
+                        "category": "dairy",
+                        "display": "1/2 cup sour cream"
+                    },
+                    {
+                        "name": "avocado",
+                        "quantity": 1,
+                        "unit": "",
+                        "category": "produce",
+                        "display": "1 avocado, sliced"
+                    },
+                    {
+                        "name": "tomatoes",
+                        "quantity": 4,
+                        "unit": "",
+                        "category": "produce",
+                        "display": "4 tomatoes, diced (topping — kept off Maddie's plate)"
+                    },
+                    {
+                        "name": "cucumber",
+                        "quantity": 1,
+                        "unit": "",
+                        "category": "produce",
+                        "display": "1 cucumber, sliced (tomato-free lane)"
+                    }
+                ],
+                "method": [
+                    "Brown beef mince in a large pan over medium-high heat, breaking it up, 6-8 min.",
+                    "Stir in cumin, paprika, garlic powder and salt, then a splash of water; simmer 3-4 min until thickened.",
+                    "Warm the taco shells according to packet directions.",
+                    "Set out beef, lettuce, cheese, sour cream, avocado, diced tomato and cucumber separately.",
+                    "Everyone builds their own — keep diced tomato and heavy cheese/sour cream light or off Maddie's plate, cucumber slices in its place."
+                ]
+            },
+            "lunch": {
+                "name": "Soy chicken & rice wraps (Monday's leftovers)",
+                "ingredients": []
+            },
+            "snack": {
+                "name": "Banana",
+                "ingredients": [
+                    {
+                        "name": "bananas",
+                        "quantity": 1,
+                        "unit": "bunch",
+                        "category": "produce",
+                        "display": "1 bunch bananas"
+                    }
+                ]
+            }
+        },
+        {
+            "day": "Wednesday",
+            "dinner": null,
+            "lunch": {
+                "name": "Beef taco filling wraps (Tuesday's leftovers)",
+                "ingredients": []
+            },
+            "snack": {
+                "name": "Mandarins",
+                "ingredients": [
+                    {
+                        "name": "mandarins",
+                        "quantity": 1,
+                        "unit": "bag",
+                        "category": "produce",
+                        "display": "1 bag mandarins"
+                    }
+                ]
+            }
+        },
+        {
+            "day": "Thursday",
+            "dinner": {
+                "name": "Egg & soy fried rice with bacon",
+                "new_or_repeat": "repeat",
+                "authored_by": "The Flavor Explorer & The Weeknight Realist",
+                "ingredients": [
+                    {
+                        "name": "bacon",
+                        "quantity": 4,
+                        "unit": "rasher",
+                        "category": "meat_deli",
+                        "display": "4 rashers bacon, diced"
+                    },
+                    {
+                        "name": "eggs",
+                        "quantity": 3,
+                        "unit": "",
+                        "category": "dairy",
+                        "display": "3 eggs, beaten"
+                    },
+                    {
+                        "name": "soy sauce",
+                        "quantity": 3,
+                        "unit": "tbsp",
+                        "category": "pantry",
+                        "display": "3 tbsp soy sauce"
+                    },
+                    {
+                        "name": "frozen peas and corn mix",
+                        "quantity": 1,
+                        "unit": "cup",
+                        "category": "frozen",
+                        "display": "1 cup frozen peas and corn mix"
+                    },
+                    {
+                        "name": "spring onions",
+                        "quantity": 2,
+                        "unit": "",
+                        "category": "produce",
+                        "display": "2 spring onions, sliced"
+                    }
+                ],
+                "method": [
+                    "Heat oil in a large pan or wok over high heat; cook bacon until crisp, about 4 min.",
+                    "Push bacon to one side, pour in the beaten egg and scramble until just set.",
+                    "Add 4 cups cold cooked rice (day-old if possible), breaking up clumps, and stir-fry 3-4 min.",
+                    "Add the peas and corn, soy sauce and spring onions; toss until heated through and everything is coated.",
+                    "Serve as-is — a proven favourite for Hamish (rice with soy sauce, egg), easy to portion small for Maddie."
+                ]
+            },
+            "lunch": {
+                "name": "Sausage rice bake (Wednesday's leftovers)",
+                "ingredients": []
+            },
+            "snack": {
+                "name": "Popcorn",
+                "ingredients": [
+                    {
+                        "name": "popcorn kernels",
+                        "quantity": 0.5,
+                        "unit": "cup",
+                        "category": "pantry",
+                        "display": "1/2 cup popcorn kernels"
+                    }
+                ]
+            }
+        },
+        {
+            "day": "Friday",
+            "dinner": {
+                "name": "Oven-baked chicken tenders (homemade), roasted potato wedges & corn (with a side salad for the grown-ups)",
+                "new_or_repeat": "new",
+                "authored_by": "The Weeknight Realist & The Family GP/Dietician",
+                "ingredients": [
+                    {
+                        "name": "chicken breast",
+                        "quantity": 700,
+                        "unit": "g",
+                        "category": "meat_deli",
+                        "display": "700g chicken breast, cut into tender-sized strips"
+                    },
+                    {
+                        "name": "plain flour",
+                        "quantity": 0.5,
+                        "unit": "cup",
+                        "category": "pantry",
+                        "display": "1/2 cup flour"
+                    },
+                    {
+                        "name": "eggs",
+                        "quantity": 2,
+                        "unit": "",
+                        "category": "dairy",
+                        "display": "2 eggs, beaten"
+                    },
+                    {
+                        "name": "panko breadcrumbs",
+                        "quantity": 1.5,
+                        "unit": "cup",
+                        "category": "pantry",
+                        "display": "1.5 cups panko breadcrumbs"
+                    },
+                    {
+                        "name": "potatoes",
+                        "quantity": 1,
+                        "unit": "kg",
+                        "category": "produce",
+                        "display": "1kg potatoes, cut into wedges"
+                    },
+                    {
+                        "name": "corn kernels",
+                        "quantity": 2,
+                        "unit": "cup",
+                        "category": "produce",
+                        "display": "2 cups corn kernels, fresh or tinned"
+                    },
+                    {
+                        "name": "salad greens",
+                        "quantity": 1,
+                        "unit": "bag",
+                        "category": "produce",
+                        "display": "Salad greens (adults only)"
+                    },
+                    {
+                        "name": "cucumber",
+                        "quantity": 1,
+                        "unit": "",
+                        "category": "produce",
+                        "display": "1 cucumber, for the adults' salad"
+                    }
+                ],
+                "method": [
+                    "Preheat oven to 200°C (400°F) and line two trays.",
+                    "Toss the potato wedges with oil, salt and pepper on one tray; roast 25-30 min, turning once, until golden.",
+                    "Set up three shallow bowls: flour, beaten egg, and panko. Coat each chicken strip in flour, then egg, then panko, pressing the crumbs on firmly.",
+                    "Lay the chicken tenders on the second tray, spray lightly with oil, and bake alongside the wedges for the last 15-18 min, turning once, until golden and cooked through.",
+                    "Steam or microwave the corn for the last 5 min.",
+                    "Toss a quick side salad for the adults while everything bakes.",
+                    "Serve straight from the trays — homemade tenders and fresh-cut wedges in place of last time's frozen versions, still a low-effort one-oven dinner."
+                ]
+            },
+            "lunch": {
+                "name": "Fried rice (Thursday's leftovers)",
+                "ingredients": []
+            },
+            "snack": {
+                "name": "Rice crackers",
+                "ingredients": [
+                    {
+                        "name": "rice crackers",
+                        "quantity": 1,
+                        "unit": "packet",
+                        "category": "pantry",
+                        "display": "1 packet rice crackers"
+                    }
+                ]
+            }
+        },
+        {
+            "day": "Saturday",
+            "dinner": {
+                "name": "Crumbed salmon 'fish fingers', oven-baked fries & peas",
+                "new_or_repeat": "new",
+                "authored_by": "The Family GP/Dietician & The Child Nutritionist",
+                "ingredients": [
+                    {
+                        "name": "salmon fillets",
+                        "quantity": 600,
+                        "unit": "g",
+                        "category": "meat_deli",
+                        "display": "600g skinless salmon fillets, cut into finger-width strips"
+                    },
+                    {
+                        "name": "plain flour",
+                        "quantity": 0.5,
+                        "unit": "cup",
+                        "category": "pantry",
+                        "display": "1/2 cup flour"
+                    },
+                    {
+                        "name": "eggs",
+                        "quantity": 2,
+                        "unit": "",
+                        "category": "dairy",
+                        "display": "2 eggs, beaten"
+                    },
+                    {
+                        "name": "panko breadcrumbs",
+                        "quantity": 1.5,
+                        "unit": "cup",
+                        "category": "pantry",
+                        "display": "1.5 cups panko breadcrumbs"
+                    },
+                    {
+                        "name": "frozen fries",
+                        "quantity": 1,
+                        "unit": "bag (~500g)",
+                        "category": "frozen",
+                        "display": "1 bag frozen oven-baked fries"
+                    },
+                    {
+                        "name": "peas",
+                        "quantity": 1,
+                        "unit": "cup",
+                        "category": "frozen",
+                        "display": "Frozen peas, to serve"
+                    },
+                    {
+                        "name": "ketchup",
+                        "quantity": 1,
+                        "unit": "bottle",
+                        "category": "pantry",
+                        "display": "Ketchup, to serve"
+                    }
+                ],
+                "method": [
+                    "Preheat oven to 200°C (400°F) and line a tray.",
+                    "Set up three shallow bowls: flour, beaten egg, and panko.",
+                    "Coat each salmon strip in flour, then egg, then panko, pressing the crumbs on firmly.",
+                    "Lay on the tray, spray lightly with oil, and bake 12-15 min, turning once, until golden and just cooked through.",
+                    "Bake the fries on a separate tray alongside per packet directions, and steam or microwave the peas.",
+                    "Serve with ketchup — same crumbed-and-fried approach that worked well before, oven fries in place of potato gems this week."
+                ]
+            },
+            "lunch": {
+                "name": "Chicken tender & wedge wraps (Friday's leftovers)",
+                "ingredients": []
+            },
+            "snack": {
+                "name": "Lactose-free yoghurt pouch (or fresh fruit if unavailable)",
+                "ingredients": [
+                    {
+                        "name": "lactose-free yoghurt pouches",
+                        "quantity": 4,
+                        "unit": "",
+                        "category": "dairy",
+                        "display": "4 lactose-free yoghurt pouches"
+                    }
+                ]
+            }
+        },
+        {
+            "day": "Sunday",
+            "dinner": {
+                "name": "Roast chicken, roast potatoes, broccoli & a lighter gravy",
+                "new_or_repeat": "repeat",
+                "authored_by": "The Weeknight Realist & The Family GP/Dietician",
+                "ingredients": [
+                    {
+                        "name": "whole chicken",
+                        "quantity": 1,
+                        "unit": "(~1.8kg)",
+                        "category": "meat_deli",
+                        "display": "1 whole chicken (~1.8kg)"
+                    },
+                    {
+                        "name": "potatoes",
+                        "quantity": 1.5,
+                        "unit": "kg",
+                        "category": "produce",
+                        "display": "1.5kg potatoes, quartered"
+                    },
+                    {
+                        "name": "garlic",
+                        "quantity": 2,
+                        "unit": "clove",
+                        "category": "produce",
+                        "display": "2 cloves garlic"
+                    },
+                    {
+                        "name": "lemon",
+                        "quantity": 1,
+                        "unit": "",
+                        "category": "produce",
+                        "display": "1 lemon, halved"
+                    },
+                    {
+                        "name": "fresh thyme",
+                        "quantity": 1,
+                        "unit": "bunch",
+                        "category": "produce",
+                        "display": "A few sprigs thyme"
+                    },
+                    {
+                        "name": "plain flour",
+                        "quantity": 1,
+                        "unit": "tbsp",
+                        "category": "pantry",
+                        "display": "1 tbsp flour, for the gravy"
+                    },
+                    {
+                        "name": "chicken stock",
+                        "quantity": 2,
+                        "unit": "cup",
+                        "category": "pantry",
+                        "display": "2 cups chicken stock (for gravy)"
+                    },
+                    {
+                        "name": "broccoli",
+                        "quantity": 1,
+                        "unit": "head",
+                        "category": "produce",
+                        "display": "1 head broccoli, steamed"
+                    }
+                ],
+                "method": [
+                    "Preheat oven to 200°C (400°F).",
+                    "Pat the chicken dry, rub with oil, salt and pepper; stuff the cavity with garlic, lemon and thyme.",
+                    "Place chicken in a large roasting tray, scatter potatoes around it tossed in oil, salt and pepper.",
+                    "Roast 70-80 min until juices run clear and potatoes are golden, basting once halfway.",
+                    "Rest chicken 10 min. Skim excess fat from the pan juices, whisk in flour over heat, then gradually add stock, simmering until thickened — go light on the flour/fat for a lighter gravy.",
+                    "Steam broccoli and serve alongside."
+                ]
+            },
+            "lunch": {
+                "name": "Salmon finger wraps (Saturday's leftovers)",
+                "ingredients": []
+            },
+            "snack": {
+                "name": "Cheese and crackers",
+                "ingredients": [
+                    {
+                        "name": "cheese",
+                        "quantity": 1,
+                        "unit": "block",
+                        "category": "dairy",
+                        "display": "1 block cheese"
+                    },
+                    {
+                        "name": "crackers",
+                        "quantity": 1,
+                        "unit": "packet",
+                        "category": "pantry",
+                        "display": "1 packet crackers"
+                    }
+                ]
+            }
+        }
     ]
-  };
+};
 
   let PRINCIPLES_TEXT = `- Favor low-cleanup/one-pan (or one-pan-plus-one-pot) dinners on weeknights
 - Lean on 'build-your-own' formats (tacos, pizza, etc.) as a reliable way to introduce variety without a fight
