@@ -81,6 +81,8 @@ Keep it restrained. No page-load animation sequences, no scroll-triggered reveal
 - Hover/tap states on buttons and cards: subtle background/shadow transitions (~150ms ease)
 - Respect `prefers-reduced-motion: reduce` — disable all transitions when set (already implemented in the reference file; carry this rule into any new CSS)
 
+**One deliberate exception — the loading indicator.** Any action with a real network/processing wait (AI plan generation, recipe fetch, sign-in) uses a shared loading component: a soft pulsing/rippling shape in `--teal`, evoking the water theme, paired with a short plain-text label describing what's happening (e.g. "Generating your plan..."). This is the one place sustained animation is intentional — it should still respect `prefers-reduced-motion` (fall back to a static teal shape + text, no pulsing, when that's set). Reuse this single component everywhere a wait applies rather than building a different spinner per feature. See `weekly-board-defaults-loading-prd.md` for the full catalogue of where it's used.
+
 ## Copy / voice
 
 Plain and functional. Name the action, not the feeling: "Copy list," "Kids ate it," not "Yay, copied!" or playful phrasing. Sentence case, no exclamation points, no filler words. This matches the existing labels throughout the app and should hold for anything new (buttons, empty states, error messages).

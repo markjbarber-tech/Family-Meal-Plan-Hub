@@ -174,6 +174,18 @@ body{
 .primary-btn:disabled{opacity:0.6;cursor:default;}
 .primary-btn:focus-visible{outline:3px solid var(--status-new);outline-offset:2px;}
 
+/* Shared loading indicator (AI plan generation, recipe fetch, sign-in) */
+.loading-indicator{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px 0;}
+.loading-pulse{position:relative;width:40px;height:40px;flex-shrink:0;}
+.loading-pulse::before,.loading-pulse::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--teal);opacity:0.55;animation:loading-ripple 1.8s ease-out infinite;}
+.loading-pulse::after{animation-delay:0.9s;}
+.loading-label{font-family:var(--font-head);font-size:0.85rem;color:var(--ink-soft);text-align:center;}
+@keyframes loading-ripple{0%{transform:scale(0.35);opacity:0.6;}100%{transform:scale(1);opacity:0;}}
+
+/* Default meal planning principles checklist */
+.principles-defaults-list{margin-bottom:14px;}
+.principles-defaults-list .item{padding:6px 0;}
+
 /* Settings */
 .settings-btn{position:fixed;top:18px;right:16px;z-index:55;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--glass-strong);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);color:var(--teal-dark);cursor:pointer;box-shadow:0 2px 8px rgba(42,59,76,0.12);}
 .settings-btn:hover{background:var(--white);}
@@ -243,7 +255,7 @@ body{
 .toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,10px);background:var(--ink);color:var(--white);font-family:var(--font-head);font-size:0.8rem;padding:9px 18px;border-radius:20px;opacity:0;transition:opacity .2s ease, transform .2s ease;z-index:90;white-space:nowrap;}
 .toast.show{opacity:1;transform:translate(-50%,0);}
 
-@media (prefers-reduced-motion:reduce){*{transition:none !important;} .pull-refresh-indicator.checking i{animation:none !important;}}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;} .pull-refresh-indicator.checking i{animation:none !important;} .loading-pulse::before,.loading-pulse::after{animation:none !important;opacity:0.5 !important;transform:scale(1) !important;}}
 </style>
 </head>
 <body>
@@ -1421,6 +1433,7 @@ body{
 
   function renderRecipeCard(i){
     recipeTabIndex = i;
+    window.scrollTo(0, 0);
     const d = WEEK_DATA.days[i];
     const card = document.getElementById('recipe-card');
     const info = d.dinner;
@@ -1535,9 +1548,15 @@ body{
     backdrop.querySelector("#linkMealBtn").addEventListener("click", ()=> showAddFromLinkForm(day, meal, backdrop));
   }
 
+  // Shared loading indicator (design system: soft pulsing/rippling teal shape + label,
+  // reused everywhere a real network/processing wait applies).
+  function loadingIndicatorHTML(label){
+    return `<div class="loading-indicator"><div class="loading-pulse"></div><div class="loading-label">${label}</div></div>`;
+  }
+
   async function regenerateMealFlow(day, meal, backdrop){
     const modal = backdrop.querySelector(".modal");
-    modal.innerHTML = `<h3>Generating…</h3><div class="meal-sub">${day} · ${meal}</div><div class="modal-status-note">This can take up to two minutes — keep this tab open.</div>`;
+    modal.innerHTML = `<h3>Generating…</h3><div class="meal-sub">${day} · ${meal}</div>${loadingIndicatorHTML("This can take up to two minutes — keep this tab open.")}`;
     try{
       const result = await postJSON({type:"regenerate_meal", week_id: WEEK_DATA.week_id, day, meal});
       if(result.status === "ok"){
@@ -1579,7 +1598,7 @@ body{
       const note = modal.querySelector("#linkFetchNote");
       const btn = modal.querySelector("#fetchLinkBtn");
       if(!url){ note.textContent = "Paste a URL first"; return; }
-      btn.disabled = true; btn.textContent = "Fetching…"; note.textContent = "";
+      btn.disabled = true; btn.textContent = "Fetching…"; note.innerHTML = loadingIndicatorHTML("Reading that recipe…");
       try{
         const result = await postJSON({type:"preview_external_recipe", url});
         if(result.status === "ok"){
@@ -1703,9 +1722,32 @@ body{
     });
   }
 
+  // Sensible defaults for a household with nothing configured yet (Settings > Meal
+  // planning principles). The 3 "checked" flags are just the shipped default state —
+  // all 5 stay freely togglable, never locked.
+  const DEFAULT_PRINCIPLES = [
+    {id:'low_cleanup', label:'Low-cleanup/simple weeknight meals', text:'Favor low-cleanup, simple weeknight meals', checked:true},
+    {id:'balanced', label:'Balanced nutrition — protein variety, veg included', text:'Aim for balanced nutrition — protein variety, vegetables included', checked:true},
+    {id:'variety', label:'Introduce variety across the week', text:'Introduce variety across the week rather than repeating the same meals', checked:true},
+    {id:'budget', label:'Budget-conscious by default', text:'Be budget-conscious when choosing ingredients and meals', checked:false},
+    {id:'kid_friendly', label:'Kid-friendly formats prioritized', text:'Prioritise kid-friendly formats for dinners', checked:false}
+  ];
+
   function openSettingsPage(){
     const page = document.createElement("div");
     page.className = "overlay-page";
+    const isDefaultState = !PRINCIPLES_TEXT || !PRINCIPLES_TEXT.trim();
+    const principlesInner = isDefaultState
+      ? `<div class="principles-defaults-list">
+          ${DEFAULT_PRINCIPLES.map(p => `
+            <label class="item">
+              <input type="checkbox" data-principle-id="${p.id}" ${p.checked ? 'checked' : ''}>
+              <span>${p.label}</span>
+            </label>`).join('')}
+        </div>
+        <div class="modal-label" style="margin-top:14px;">Anything else? (optional)</div>
+        <textarea id="principlesFreeText" rows="4" placeholder="Add any other principle not covered above"></textarea>`
+      : `<textarea id="principlesTextarea" rows="14"></textarea>`;
     page.innerHTML = `
       <div class="overlay-inner">
         <button class="overlay-close" id="settingsCloseBtn"><i class="ti ti-arrow-left"></i>Back</button>
@@ -1715,9 +1757,9 @@ body{
           <h3>Meal planning principles</h3>
           <div class="section-sub">These guide every plan the board drafts — edit them any time.</div>
           <div class="principles-card">
-            <textarea id="principlesTextarea" rows="14"></textarea>
+            ${principlesInner}
             <div class="principles-status-note" id="principlesStatusNote"></div>
-            <button class="primary-btn" id="principlesUpdateBtn">Update</button>
+            <button class="primary-btn" id="principlesUpdateBtn">${isDefaultState ? 'Save' : 'Update'}</button>
           </div>
         </div>
 
@@ -1729,10 +1771,34 @@ body{
       </div>`;
     document.getElementById("hub").appendChild(page);
 
-    const textarea = page.querySelector("#principlesTextarea");
-    textarea.value = PRINCIPLES_TEXT;
     let principlesDirty = false;
-    textarea.addEventListener("input", ()=>{ principlesDirty = true; });
+    const markDirty = ()=>{ principlesDirty = true; };
+
+    function composePrinciplesText(){
+      if(!isDefaultState) return page.querySelector("#principlesTextarea").value;
+      const lines = [];
+      page.querySelectorAll('[data-principle-id]').forEach(cb=>{
+        if(cb.checked){
+          const preset = DEFAULT_PRINCIPLES.find(p => p.id === cb.dataset.principleId);
+          if(preset) lines.push('- ' + preset.text);
+        }
+      });
+      const freeText = page.querySelector("#principlesFreeText").value.trim();
+      if(freeText){
+        freeText.split('\n').map(l=>l.trim()).filter(Boolean).forEach(l=>{
+          lines.push(l.charAt(0) === '-' ? l : '- ' + l);
+        });
+      }
+      return lines.join('\n');
+    }
+
+    if(isDefaultState){
+      page.querySelectorAll('[data-principle-id]').forEach(cb => cb.addEventListener('change', markDirty));
+      page.querySelector('#principlesFreeText').addEventListener('input', markDirty);
+    } else {
+      page.querySelector("#principlesTextarea").value = PRINCIPLES_TEXT;
+      page.querySelector("#principlesTextarea").addEventListener("input", markDirty);
+    }
 
     function closeSettings(){
       if(principlesDirty && !confirm("You have unsaved changes to the meal planning principles. Discard them?")) return;
@@ -1741,7 +1807,7 @@ body{
     page.querySelector("#settingsCloseBtn").addEventListener("click", closeSettings);
 
     page.querySelector("#principlesUpdateBtn").addEventListener("click", async ()=>{
-      const text = textarea.value;
+      const text = composePrinciplesText();
       const note = page.querySelector("#principlesStatusNote");
       if(!text.trim()){ note.textContent = "Add some text first"; return; }
       note.textContent = "Sending…";
@@ -1841,7 +1907,7 @@ body{
         const btn = container.querySelector("#historyFetchLinkBtn");
         const previewEl = container.querySelector("#historyIngredientsPreview");
         if(!url){ note.textContent = "Paste a URL first"; return; }
-        btn.disabled = true; btn.textContent = "Fetching…"; note.textContent = ""; previewEl.innerHTML = "";
+        btn.disabled = true; btn.textContent = "Fetching…"; note.innerHTML = loadingIndicatorHTML("Reading that recipe…"); previewEl.innerHTML = "";
         try{
           const result = await postJSON({type:"preview_external_recipe", url});
           if(result.status === "ok"){
@@ -2004,7 +2070,7 @@ body{
     btn.disabled = true;
     const originalLabel = btn.innerHTML;
     btn.innerHTML = '<i class="ti ti-refresh"></i>Refreshing… (up to a few minutes)';
-    note.textContent = "";
+    note.innerHTML = loadingIndicatorHTML("Generating your plan…");
     try{
       const result = await postJSON({type: "regenerate_now", week_id: WEEK_DATA.week_id});
       if(result.status === "ok"){
@@ -2032,9 +2098,12 @@ body{
   function switchTab(name){
     document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.tab === name));
     document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("hidden", p.id !== "panel-" + name));
-    if(name === "recipe" && !recipeTabInitialized){
-      renderRecipeTab();
-      recipeTabInitialized = true;
+    if(name === "recipe"){
+      if(!recipeTabInitialized){
+        renderRecipeTab();
+        recipeTabInitialized = true;
+      }
+      window.scrollTo(0, 0);
     }
   }
 
