@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>This Week</title>
+<style>
+:root{
+  --font-head:-apple-system,'Helvetica Neue',Arial,sans-serif;
+  --font-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  --font-mono:ui-monospace,'SF Mono','Cascadia Code','Roboto Mono',Consolas,monospace;
+  --ink:#2A3B4C;
+  --ink-soft:#5C6B7A;
+  --ink-faint:#8B9AA8;
+  --glass:rgba(255,255,255,0.55);
+  --glass-strong:rgba(255,255,255,0.78);
+  --glass-border:rgba(255,255,255,0.65);
+  --teal:#2F8F8A;
+  --teal-dark:#236b67;
+  --status-proven:#3D8B86;
+  --status-new:#C98A3E;
+  --status-caution:#C15A4A;
+  --white:#ffffff;
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:var(--font-body);
+  color:var(--ink);
+  min-height:100vh;
+  background:
+    linear-gradient(160deg,#CFE0EC 0%,#BFE6E0 45%,#EAF4E6 100%);
+  background-attachment:fixed;
+  padding-bottom:40px;
+}
+
+.wrap{max-width:640px;margin:0 auto;padding:26px 16px 0;}
+
+/* Header */
+.header{text-align:center;margin-bottom:22px;}
+.header h1{
+  font-family:var(--font-head);letter-spacing:-0.01em;
+  font-weight:600;
+  font-size:1.7rem;
+  margin:0 0 3px;
+}
+.header .sub{
+  font-family:var(--font-mono);
+  font-size:0.72rem;
+  color:var(--ink-soft);
+  letter-spacing:0.03em;
+}
+
+/* Tabs */
+.tabs{
+  display:flex;
+  gap:6px;
+  background:rgba(255,255,255,0.35);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid var(--glass-border);
+  border-radius:16px;
+  padding:5px;
+  margin-bottom:18px;
+}
+.tab{
+  flex:1;
+  font-family:var(--font-head);letter-spacing:-0.01em;
+  font-weight:600;
+  font-size:0.85rem;
+  text-align:center;
+  padding:9px 4px;
+  background:transparent;
+  color:var(--ink-soft);
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  transition:background .15s ease, color .15s ease, box-shadow .15s ease;
+}
+.tab:hover{color:var(--ink);}
+.tab.active{
+  background:var(--white);
+  color:var(--teal-dark);
+  box-shadow:0 3px 10px rgba(42,59,76,0.15);
+}
+.tab:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+
+.hidden{display:none;}
+
+/* Scoreboard */
+.scoreboard{
+  font-family:var(--font-mono);
+  font-size:0.74rem;
+  color:var(--ink-soft);
+  background:var(--glass);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid var(--glass-border);
+  border-radius:12px;
+  padding:9px 14px;
+  margin-bottom:18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+.dot.proven{background:var(--status-proven);}
+.dot.new{background:var(--status-new);}
+
+/* Day cards */
+.days{display:flex;flex-direction:column;gap:14px;}
+.day-card{
+  position:relative;
+  background:var(--glass);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border:1px solid var(--glass-border);
+  border-radius:18px;
+  padding:16px 18px;
+}
+.glow{
+  position:absolute;
+  top:16px;right:16px;
+  width:9px;height:9px;
+  border-radius:50%;
+}
+.glow.proven{background:var(--status-proven);box-shadow:0 0 9px 2px rgba(61,139,134,0.55);}
+.glow.new{background:var(--status-new);box-shadow:0 0 9px 2px rgba(201,138,62,0.55);}
+.day-head{display:flex;align-items:baseline;gap:8px;margin-bottom:8px;}
+.day-name{font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;font-size:1.1rem;}
+.day-status{font-family:var(--font-mono);font-size:0.62rem;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.04em;}
+.meal-row{display:flex;gap:10px;font-size:0.86rem;padding:4px 0;}
+.meal-label{
+  font-family:var(--font-mono);
+  font-size:0.62rem;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+  width:48px;
+  flex-shrink:0;
+  padding-top:2px;
+  letter-spacing:0.04em;
+}
+.by-line{font-size:0.72rem;color:var(--ink-soft);font-style:italic;display:block;margin-top:1px;}
+.fb-row{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(42,59,76,0.1);}
+.fb-row .fb-label{font-family:var(--font-mono);font-size:0.62rem;text-transform:uppercase;color:var(--ink-faint);letter-spacing:0.04em;}
+
+/* Shopping */
+.shop-card{
+  background:var(--glass);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border:1px solid var(--glass-border);
+  border-radius:18px;
+  padding:20px 18px 22px;
+}
+.shop-card h2{
+  font-family:var(--font-head);letter-spacing:-0.01em;
+  font-weight:600;
+  font-size:1.25rem;
+  margin:0 0 2px;
+  text-align:center;
+}
+.shop-sub{text-align:center;font-family:var(--font-mono);font-size:0.68rem;color:var(--ink-soft);margin-bottom:16px;}
+.cat{
+  font-family:var(--font-mono);
+  font-size:0.68rem;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  color:var(--teal-dark);
+  margin:16px 0 6px;
+  border-bottom:1px solid rgba(42,59,76,0.12);
+  padding-bottom:3px;
+}
+.cat:first-of-type{margin-top:0;}
+.item{display:flex;align-items:flex-start;gap:9px;padding:4px 0;font-size:0.85rem;}
+.item input{margin-top:3px;accent-color:var(--teal);width:15px;height:15px;flex-shrink:0;}
+.item label{flex:1;}
+.copy-btn{
+  display:block;
+  margin:18px auto 0;
+  font-family:var(--font-head);letter-spacing:-0.01em;
+  font-weight:600;
+  background:var(--teal);
+  color:var(--white);
+  border:none;
+  padding:10px 22px;
+  border-radius:12px;
+  font-size:0.9rem;
+  cursor:pointer;
+}
+.copy-btn:hover{background:var(--teal-dark);}
+.copy-btn:focus-visible{outline:3px solid var(--status-new);outline-offset:2px;}
+
+/* Review box + feedback stamps */
+.review-box{
+  background:rgba(255,255,255,0.65);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border:1px solid var(--glass-border);
+  border-radius:14px;
+  padding:14px 16px;
+  margin-bottom:18px;
+  font-size:0.85rem;
+}
+.review-box .rb-title{font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;font-size:1rem;margin-bottom:6px;}
+.stamp-row{display:flex;gap:6px;}
+.stamp{
+  font-family:var(--font-mono);
+  font-size:0.7rem;
+  border:1.5px solid var(--ink-faint);
+  color:var(--ink-soft);
+  background:transparent;
+  border-radius:10px;
+  padding:6px 12px;
+  cursor:pointer;
+  text-transform:uppercase;
+  letter-spacing:0.03em;
+}
+.stamp:hover{border-color:var(--ink);color:var(--ink);}
+.stamp.sel-yes.selected{border-color:var(--status-proven);color:var(--status-proven);background:rgba(61,139,134,0.12);}
+.stamp.sel-mostly.selected{border-color:var(--status-new);color:var(--status-new);background:rgba(201,138,62,0.12);}
+.stamp.sel-no.selected{border-color:var(--status-caution);color:var(--status-caution);background:rgba(193,90,74,0.12);}
+.stamp:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+
+/* Recipe */
+.recipe-picker{display:flex;gap:6px;overflow-x:auto;margin-bottom:16px;padding-bottom:4px;}
+.rp-btn{
+  font-family:var(--font-mono);
+  font-size:0.68rem;
+  white-space:nowrap;
+  background:rgba(255,255,255,0.5);
+  border:1px solid var(--glass-border);
+  padding:7px 12px;
+  border-radius:10px;
+  cursor:pointer;
+  color:var(--ink-soft);
+}
+.rp-btn.active{background:var(--teal);color:var(--white);border-color:var(--teal);}
+.rp-btn:focus-visible{outline:3px solid var(--status-new);outline-offset:2px;}
+.recipe-card{
+  background:var(--glass-strong);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--glass-border);
+  border-radius:18px;
+  padding:20px 20px 22px;
+}
+.recipe-card h3{font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;font-size:1.2rem;margin:0 0 2px;}
+.recipe-card .by{font-size:0.75rem;font-style:italic;color:var(--ink-soft);margin-bottom:14px;}
+.recipe-card h4{
+  font-family:var(--font-mono);
+  font-size:0.68rem;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  color:var(--teal-dark);
+  margin:14px 0 6px;
+}
+.recipe-card ul, .recipe-card ol{margin:0;padding-left:22px;font-size:0.86rem;line-height:1.65;}
+.recipe-card li{margin-bottom:3px;}
+
+@media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <h1>This week</h1>
+    <div class="sub">MARK &amp; GENEVIEVE &middot; AUG 10&ndash;16, 2026</div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" role="tab" data-tab="plan">Plan</button>
+    <button class="tab" role="tab" data-tab="shopping">Shopping</button>
+    <button class="tab" role="tab" data-tab="recipe">Recipe</button>
+  </div>
+
+  <!-- PLAN -->
+  <div class="panel" id="panel-plan">
+    <div class="review-box">
+      <div class="rb-title">Anything to flag before this plan goes out?</div>
+      Note plan changes or fridge/pantry items that need using up &mdash; this box disappears once the week is published.
+    </div>
+    <div class="scoreboard">
+      <span><span class="dot proven"></span>proven winner &nbsp;&nbsp;<span class="dot new"></span>new attempt</span>
+      <span>5 proven &middot; 2 new this week</span>
+    </div>
+    <div class="days" id="days-list"></div>
+  </div>
+
+  <!-- SHOPPING -->
+  <div class="panel hidden" id="panel-shopping">
+    <div class="shop-card">
+      <h2>Shopping list</h2>
+      <div class="shop-sub">WEEK OF AUG 10</div>
+      <div id="shopping-list"></div>
+      <button class="copy-btn" id="copy-btn">Copy list</button>
+    </div>
+  </div>
+
+  <!-- RECIPE -->
+  <div class="panel hidden" id="panel-recipe">
+    <div class="recipe-picker" id="recipe-picker"></div>
+    <div class="recipe-card" id="recipe-card"></div>
+  </div>
+
+</div>
+
+<script>
+const WEEK = [
+  {day:"Monday", status:"proven", dinner:"One-pot chicken thighs, rice, broccoli", by:"The Weeknight Realist",
+    lunch:"Cheese quesadillas", snack:"Apple slices with peanut butter",
+    recipe:{ingredients:["6 bone-in chicken thighs","1.5 cups long-grain rice","3 cups chicken stock","2 heads broccoli, florets","1 onion, diced","2 cloves garlic, minced","2 tbsp olive oil","Salt and pepper"],
+      method:["Season chicken, brown skin-side down 5 min in oil, flip, brown 2 min, set aside.","Soften onion and garlic in the same pot, 3 min.","Stir in rice 1 min, add stock, scrape up browned bits.","Nestle chicken back on top, cover, simmer 20 min.","Scatter broccoli on top for the last 6-8 min, covered, until tender."]}},
+  {day:"Tuesday", status:"proven", dinner:"One-pan creamy sausage gnocchi", by:"The Weeknight Realist",
+    lunch:"Chicken & rice wraps (Mon leftovers)", snack:"Yoghurt pouch",
+    recipe:{ingredients:["6 sausages, casings removed","500g gnocchi","1 onion","2 cloves garlic","1.5 cups chicken stock","3/4 cup cream","1 cup baby spinach, chopped fine (optional)","1/2 cup parmesan"],
+      method:["Brown sausage meat, breaking into small pieces, 6 min.","Add onion and garlic, 3 min.","Pour in stock and cream, simmer.","Stir in gnocchi, cook uncovered 5-6 min until tender and sauce thickens.","Stir through spinach and parmesan."]}},
+  {day:"Wednesday", status:"proven", dinner:"Build-your-own soft shell chicken tacos", by:"The Flavor Explorer & Child Nutritionist",
+    lunch:"Leftover gnocchi (Tue leftovers)", snack:"Cheese and crackers",
+    recipe:{ingredients:["700g diced chicken breast","1 packet mild taco seasoning","8 soft tortillas","1 cup grated cheese","1/2 cup sour cream","2 avocados","1/2 cup mild salsa (no raw tomato chunks for Maddie)"],
+      method:["Brown chicken in oil, 8 min.","Add seasoning and a splash of water, simmer 2-3 min.","Warm tortillas.","Set out fillings separately - everyone builds their own."]}},
+  {day:"Thursday", status:"proven", dinner:"Teriyaki glazed baked chicken thighs, rice, cucumber sticks", by:"The Flavor Explorer",
+    lunch:"Taco filling wraps (Wed leftovers)", snack:"Banana",
+    recipe:{ingredients:["8 boneless chicken thighs","1/2 cup soy sauce","1/4 cup brown sugar","2 tbsp honey","2 cloves garlic","1 tsp grated ginger","1 tbsp cornstarch + 2 tbsp water"],
+      method:["Whisk soy sauce, sugar, honey, garlic, ginger; simmer 3-4 min.","Stir in cornstarch slurry, simmer until glossy, 1-2 min.","Bake chicken with half the sauce at 200C for 20 min, brush on rest, bake 10-15 min more until sticky.","Serve over rice with cucumber sticks."]}},
+  {day:"Friday", status:"proven", dinner:"Homemade pizza night", by:"The Weeknight Realist",
+    lunch:"Teriyaki chicken rice bowl (Thu leftovers)", snack:"Popcorn",
+    recipe:{ingredients:["3 cups flour","1 packet instant yeast","1 tsp sugar","1 tsp salt","1 cup warm water","2 tbsp olive oil","Pizza sauce, mozzarella, toppings"],
+      method:["Mix yeast, sugar, warm water, rest 5 min until foamy.","Stir in flour, salt, oil to a shaggy dough, knead 5 min.","Rest covered 20-30 min.","Divide into 4, stretch into bases, top - kids get plain ham & cheese.","Bake at highest oven setting (or pizza oven) 6-10 min until golden."]}},
+  {day:"Saturday", status:"new", dinner:"Crumbed salmon 'fish fingers', potato wedges, peas", by:"The Family GP/Dietician & Child Nutritionist",
+    lunch:"Leftover pizza slices (Fri leftovers)", snack:"Mandarins",
+    recipe:{ingredients:["600g skinless salmon, cut into strips","1/2 cup flour","2 eggs, beaten","1.5 cups panko","Potato wedges and peas to serve"],
+      method:["Set up three bowls: flour, egg, panko.","Coat each salmon strip in flour, then egg, then panko, pressing crumbs on.","Bake at 200C for 12-15 min, turning once, until golden and just cooked through.","Serve with potato wedges (bake alongside) and peas."]}},
+  {day:"Sunday", status:"proven", dinner:"Roast chicken, roast potatoes, broccoli, gravy", by:"The Weeknight Realist",
+    lunch:"Salmon finger wraps (Sat leftovers)", snack:"Rice crackers",
+    recipe:{ingredients:["1 whole chicken (~1.8kg)","1.5kg potatoes, quartered","2 tbsp olive oil","2 cloves garlic","1 lemon","A few sprigs thyme","2 tbsp flour","2 cups chicken stock","1 head broccoli"],
+      method:["Rub chicken with oil, salt, pepper; stuff cavity with garlic, lemon, thyme.","Surround with potatoes tossed in oil, salt, pepper.","Roast at 200C for 70-80 min, basting once, until juices run clear.","Rest 10 min. Skim pan juices, whisk in flour, gradually add stock, simmer for gravy.","Steam broccoli to serve."]}}
+];
+
+const SHOPPING = {
+  "Produce":["Broccoli (2 heads)","Cucumber (2)","Avocado (2)","Mandarins (1 bag)","Bananas (1 bunch)","Apples (4)","Peas (frozen)","Salad greens","Potatoes (3kg)","Onion (2)","Garlic","Lemon","Fresh thyme","Ginger"],
+  "Meat & Deli":["Chicken thighs (2kg, mixed)","Sausages (500g)","Chicken breast (700g)","Salmon fillets (600g, skinless)","Whole chicken (~1.8kg)","Ham (sliced)"],
+  "Dairy":["Cheese, block/grated","Sour cream","Yoghurt pouches x4","Butter","Milk","Cream","Parmesan","Mozzarella","Eggs"],
+  "Pantry":["Rice","Gnocchi (500g)","Soft tortillas","Mild taco seasoning","Flour","Instant yeast","Panko breadcrumbs","Soy sauce","Brown sugar","Honey","Mild salsa (no raw tomato)","Peanut butter","Crackers","Popcorn","Rice crackers","Chicken stock","Pizza sauce"],
+  "Other":["Ketchup","Sweet chilli sauce"]
+};
+
+function initPlan(){
+  const list = document.getElementById('days-list');
+  list.innerHTML = WEEK.map(d => `
+    <div class="day-card">
+      <div class="glow ${d.status}"></div>
+      <div class="day-head">
+        <span class="day-name">${d.day}</span>
+        <span class="day-status">${d.status==='proven'?'proven':'new attempt'}</span>
+      </div>
+      <div class="meal-row"><span class="meal-label">Lunch</span><span>${d.lunch}</span></div>
+      <div class="meal-row"><span class="meal-label">Snack</span><span>${d.snack}</span></div>
+      <div class="meal-row"><span class="meal-label">Dinner</span><span>${d.dinner}<span class="by-line">${d.by}</span></span></div>
+      <div class="fb-row">
+        <span class="fb-label">Kids ate it</span>
+        <div class="stamp-row" data-day="${d.day}">
+          <button class="stamp sel-yes">Yes</button>
+          <button class="stamp sel-mostly">Mostly</button>
+          <button class="stamp sel-no">No</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  list.querySelectorAll('.stamp').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const row = btn.parentElement;
+      row.querySelectorAll('.stamp').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+  });
+}
+
+function initShopping(){
+  const el = document.getElementById('shopping-list');
+  el.innerHTML = Object.entries(SHOPPING).map(([cat, items]) => `
+    <div class="cat">${cat}</div>
+    ${items.map((it,i) => `
+      <div class="item">
+        <input type="checkbox" id="${cat}-${i}">
+        <label for="${cat}-${i}">${it}</label>
+      </div>`).join('')}
+  `).join('');
+}
+
+document.getElementById('copy-btn').addEventListener('click', () => {
+  let text = '';
+  Object.entries(SHOPPING).forEach(([cat, items]) => {
+    text += cat.toUpperCase() + '\n' + items.map(i => '- ' + i).join('\n') + '\n\n';
+  });
+  navigator.clipboard?.writeText(text).catch(()=>{});
+  const btn = document.getElementById('copy-btn');
+  const orig = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(()=>btn.textContent = orig, 1500);
+});
+
+function initRecipes(){
+  const picker = document.getElementById('recipe-picker');
+  picker.innerHTML = WEEK.map((d,i) => `<button class="rp-btn ${i===0?'active':''}" data-i="${i}">${d.day.slice(0,3)}</button>`).join('');
+  picker.querySelectorAll('.rp-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      picker.querySelectorAll('.rp-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderRecipe(parseInt(btn.dataset.i));
+    });
+  });
+  renderRecipe(0);
+}
+
+function renderRecipe(i){
+  const d = WEEK[i];
+  const card = document.getElementById('recipe-card');
+  card.innerHTML = `
+    <h3>${d.dinner}</h3>
+    <div class="by">${d.by}'s method</div>
+    <h4>Ingredients</h4>
+    <ul>${d.recipe.ingredients.map(x=>`<li>${x}</li>`).join('')}</ul>
+    <h4>Method</h4>
+    <ol>${d.recipe.method.map(x=>`<li>${x}</li>`).join('')}</ol>
+  `;
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden'));
+    document.getElementById('panel-' + tab.dataset.tab).classList.remove('hidden');
+  });
+});
+
+initPlan();
+initShopping();
+initRecipes();
+</script>
+</body>
+</html>

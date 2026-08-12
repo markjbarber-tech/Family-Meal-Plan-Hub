@@ -79,6 +79,11 @@ body{
 .review-submit-btn{width:100%;font-family:var(--font-head);font-weight:600;background:var(--teal);color:var(--white);border:none;padding:10px;border-radius:12px;font-size:0.85rem;cursor:pointer;}
 .review-submit-btn:hover{background:var(--teal-dark);}
 .review-submit-btn:focus-visible{outline:3px solid var(--status-new);outline-offset:2px;}
+.review-submit-btn.danger{background:var(--status-caution);}
+.review-submit-btn.danger:hover{background:#a3493c;}
+.review-submit-btn:disabled{opacity:0.65;cursor:default;}
+.budget-toggle-row{display:flex !important;align-items:center;gap:8px;font-family:var(--font-body) !important;font-size:0.82rem !important;text-transform:none !important;color:var(--ink) !important;letter-spacing:normal !important;margin-bottom:12px;cursor:pointer;}
+.budget-toggle-row input{accent-color:var(--teal);width:16px;height:16px;flex-shrink:0;}
 
 /* Scoreboard */
 .scoreboard{font-family:var(--font-mono);font-size:0.74rem;color:var(--ink-soft);background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);border-radius:12px;padding:9px 14px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
@@ -107,6 +112,13 @@ body{
 .log-btn{font-family:var(--font-head);font-size:0.68rem;font-weight:600;color:var(--teal-dark);background:rgba(255,255,255,0.6);border:1px solid var(--glass-border);border-radius:10px;padding:5px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
 .log-btn.logged{background:var(--teal);color:var(--white);border-color:var(--teal);}
 .log-btn:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.remove-meal-btn{background:none;border:none;color:var(--ink-faint);opacity:0.4;padding:5px;cursor:pointer;border-radius:8px;flex-shrink:0;display:flex;align-items:center;font-size:15px;}
+.remove-meal-btn:hover{opacity:1;color:var(--status-caution);background:rgba(193,90,74,0.1);}
+.remove-meal-btn:focus-visible{opacity:1;outline:3px solid var(--teal);outline-offset:2px;}
+.meal-row-empty{align-items:center;}
+.add-meal-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--font-mono);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.03em;color:var(--ink-faint);background:none;border:1.5px dashed var(--glass-border);border-radius:10px;padding:8px;cursor:pointer;}
+.add-meal-btn:hover{color:var(--teal-dark);border-color:var(--teal);}
+.add-meal-btn:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
 
 /* Shopping */
 .shop-card{background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:18px;padding:20px 18px 22px;}
@@ -137,10 +149,11 @@ body{
 .recipe-card .no-recipe{font-size:0.85rem;color:var(--ink-soft);}
 
 /* Favourite save button (recipe card + favourites list) */
-.favourite-btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-head);font-weight:600;font-size:0.78rem;color:var(--teal-dark);background:rgba(255,255,255,0.6);border:1px solid var(--glass-border);border-radius:20px;padding:7px 14px;cursor:pointer;margin-bottom:2px;}
+.favourite-btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-head);font-weight:600;font-size:0.78rem;color:var(--teal-dark);background:rgba(255,255,255,0.6);border:1px solid var(--glass-border);border-radius:20px;padding:7px 14px;cursor:pointer;margin-bottom:2px;text-decoration:none;}
 .favourite-btn.saved{background:var(--teal);color:var(--white);border-color:var(--teal);cursor:default;}
 .favourite-btn:disabled{opacity:0.7;}
 .favourite-btn:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.favourite-btn.add-link-btn{width:100%;justify-content:center;box-sizing:border-box;margin-top:10px;}
 .favourite-status-note{font-family:var(--font-mono);font-size:0.68rem;color:var(--status-proven);margin:4px 0 6px;min-height:14px;}
 
 /* Full-page overlays (Principles / Favourites / Favourite recipe detail) */
@@ -192,12 +205,23 @@ body{
 .star:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
 .modal textarea{width:100%;border:1px solid var(--glass-border);border-radius:10px;padding:10px;font-family:var(--font-body);font-size:0.85rem;resize:none;margin-bottom:14px;background:rgba(255,255,255,0.6);color:var(--ink);}
 .modal textarea:focus-visible{outline:3px solid var(--teal);outline-offset:1px;}
-.modal-status-note{font-family:var(--font-mono);font-size:0.7rem;color:var(--status-proven);font-weight:600;height:16px;margin-bottom:4px;}
+.modal-status-note{font-family:var(--font-mono);font-size:0.7rem;color:var(--ink-soft);font-weight:600;min-height:16px;margin-bottom:4px;}
 .cancel-link{display:block;width:100%;text-align:center;margin-top:10px;font-family:var(--font-body);font-size:0.75rem;color:var(--ink-soft);opacity:0.8;background:none;border:none;cursor:pointer;}
+.confirm-text{font-size:0.85rem;line-height:1.5;color:var(--ink);margin:0 0 14px;}
+.text-input{width:100%;box-sizing:border-box;border:1px solid var(--glass-border);border-radius:10px;padding:10px;font-family:var(--font-body);font-size:0.85rem;margin-bottom:14px;background:rgba(255,255,255,0.6);color:var(--ink);}
+.text-input:focus-visible{outline:3px solid var(--teal);outline-offset:1px;}
+.preview-ingredients{font-size:0.85rem;line-height:1.6;max-height:220px;overflow-y:auto;padding-left:20px;margin:0 0 14px;}
 
 .footer-note{font-family:var(--font-mono);font-size:0.66rem;color:var(--ink-soft);opacity:0.65;text-align:center;margin-top:26px;}
 
-@media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+/* Pull-to-refresh */
+.pull-refresh-indicator{position:fixed;top:0;left:50%;width:34px;height:34px;margin-left:-17px;background:var(--glass-strong);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--glass-border);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--teal-dark);opacity:0;transform:translate(-50%,-40px);transition:transform .15s ease;z-index:80;pointer-events:none;}
+.pull-refresh-indicator.checking i{animation:pull-spin 0.8s linear infinite;}
+@keyframes pull-spin{to{transform:rotate(360deg);}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,10px);background:var(--ink);color:var(--white);font-family:var(--font-head);font-size:0.8rem;padding:9px 18px;border-radius:20px;opacity:0;transition:opacity .2s ease, transform .2s ease;z-index:90;white-space:nowrap;}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+
+@media (prefers-reduced-motion:reduce){*{transition:none !important;} .pull-refresh-indicator.checking i{animation:none !important;}}
 </style>
 </head>
 <body>
@@ -253,26 +277,20 @@ body{
 
   const WEEK_DATA = {
     week_id: "2026-W33",
-    date_range: "Aug 10 – Aug 16, 2026",
+    date_range: "Aug 10 \u2013 Aug 16, 2026",
     status: "proposed",
+    pantry_ingredients: [],
+    budget_saver_mode: false,
     days: [
-      {day:"Monday", dinner:{name:"Soy-glazed baked chicken thighs, rice & steamed broccoli", new:true, authored_by:"The Weeknight Realist & The Child Nutritionist", recipe:{ingredients:["8 boneless, skinless chicken thighs","1/3 cup soy sauce","2 tbsp honey","1 tbsp rice vinegar (or lemon juice)","2 cloves garlic, minced","1 tsp grated ginger","1 tbsp cornstarch mixed with 2 tbsp water","1.5 cups jasmine rice","2 heads broccoli, cut into florets"], method:["Preheat oven to 200°C (400°F).","Whisk soy sauce, honey, rice vinegar, garlic and ginger in a small saucepan; simmer 2-3 min.","Stir in the cornstarch slurry and simmer until glossy and slightly thickened, about 1 min.","Lay chicken thighs in a baking dish, spoon over half the sauce, and bake 20 min.","Brush on the remaining sauce and bake a further 10 min until sticky and cooked through.","Meanwhile cook the rice according to packet directions, steaming the broccoli for the last 5-6 min.","Serve chicken over rice with broccoli alongside — a splash of extra plain soy sauce on the side for Hamish's rice if he wants it saucier."]}}, lunch:{name:"Cheese quesadillas"}, snack:{name:"Apple slices with peanut butter"}},
-      {day:"Tuesday", dinner:{name:"Build-your-own hard-shell tacos (Old El Paso), seasoned beef & toppings bar", new:true, authored_by:"The Weeknight Realist & The Child Nutritionist", recipe:{ingredients:["600g beef mince","1 tbsp ground cumin","1 tbsp smoked paprika","1 tsp garlic powder","1/2 tsp salt","1/4 cup water","12 Old El Paso hard taco shells","1 cup shredded lettuce","1 cup grated cheese (+ lactose-free block for Maddie)","1/2 cup sour cream","1 avocado, sliced","4 tomatoes, diced (topping — kept off Maddie's plate)","1 cucumber, sliced (tomato-free lane)"], method:["Brown beef mince in a large pan over medium-high heat, breaking it up, 6-8 min.","Stir in cumin, paprika, garlic powder and salt, then the water; simmer 3-4 min until thickened.","Warm the taco shells according to packet directions.","Set out beef, lettuce, cheese, sour cream, avocado, diced tomato and cucumber separately.","Everyone builds their own — keep diced tomato and heavy cheese/sour cream light or off Maddie's plate, cucumber slices in its place."]}}, lunch:{name:"Soy chicken & rice wraps (Monday's leftovers)"}, snack:{name:"Banana"}},
-      {day:"Wednesday", dinner:{name:"One-pan sausage & rice bake, with a tomato & cucumber side salad", new:true, authored_by:"The Weeknight Realist", recipe:{ingredients:["6 sausages, leaner variety, casings removed","1.5 cups long-grain rice","1 onion, diced","2 cloves garlic, minced","3 cups chicken stock","1 cup frozen peas","6 tomatoes, sliced (side salad — kept off Maddie's plate)","1 cucumber, sliced","Olive oil & a pinch of salt, to dress"], method:["Brown sausage meat in a large oven-proof pan, breaking it into small pieces, about 6 min; drain any excess fat.","Add onion and garlic, cook until soft, 3 min.","Stir in rice, then pour in stock and bring to a simmer.","Cover and cook 15-18 min until rice is tender and the liquid is absorbed, stirring in the peas for the last 5 min.","While the bake cooks, toss the sliced tomato and cucumber with a little olive oil and salt for a light side salad.","Serve as-is for the kids; pass the tomato-cucumber salad separately for the adults and Hamish — kept off Maddie's plate for the tomato, and light on any extra dairy for Genevieve."]}}, lunch:{name:"Beef taco filling wraps (Tuesday's leftovers)"}, snack:{name:"Mandarins"}},
-      {day:"Thursday", dinner:{name:"Egg & soy fried rice with bacon", new:false, authored_by:"The Flavor Explorer & The Weeknight Realist", recipe:{ingredients:["4 cups cold cooked rice (day-old if possible)","4 rashers bacon, diced","3 eggs, beaten","3 tbsp soy sauce","1 cup frozen peas and corn mix","2 spring onions, sliced","2 tbsp neutral oil"], method:["Heat oil in a large pan or wok over high heat; cook bacon until crisp, about 4 min.","Push bacon to one side, pour in the beaten egg and scramble until just set.","Add the rice, breaking up clumps, and stir-fry 3-4 min.","Add the peas and corn, soy sauce and spring onions; toss until heated through and everything is coated.","Serve as-is — a proven favourite for Hamish (rice with soy sauce, egg), easy to portion small for Maddie."]}}, lunch:{name:"Sausage rice bake (Wednesday's leftovers)"}, snack:{name:"Popcorn"}},
-      {day:"Friday", dinner:{name:"Oven-tray chicken nuggets, wedges & corn (with a side salad for the grown-ups)", new:true, authored_by:"The Weeknight Realist", recipe:{ingredients:["1 bag frozen chicken nuggets or tenders (~700g)","1 bag frozen potato wedges (~750g)","2 cups corn kernels, fresh or tinned","Olive oil spray","Salad greens, cucumber and dressing (adults only)"], method:["Preheat oven to the temperature on the nugget/wedge packets (usually 200°C).","Spread nuggets and wedges across one large tray (or two if crowded), spray lightly with oil.","Bake according to packet directions, turning once, until golden and cooked through — usually 18-22 min.","Steam or microwave the corn for the last 5 min.","Toss a quick side salad for the adults while everything else bakes.","Serve straight from the tray — the lowest-effort dinner of the week."]}}, lunch:{name:"Fried rice (Thursday's leftovers)"}, snack:{name:"Rice crackers"}},
-      {day:"Saturday", dinner:{name:"Crumbed salmon 'fish fingers', oven-baked fries & peas", new:true, authored_by:"The Family GP/Dietician & The Child Nutritionist", recipe:{ingredients:["600g skinless salmon fillets, cut into finger-width strips","1/2 cup flour","2 eggs, beaten","1.5 cups panko breadcrumbs","1 bag frozen oven-baked fries","Frozen peas to serve","Ketchup to serve"], method:["Preheat oven to 200°C (400°F) and line a tray.","Set up three shallow bowls: flour, beaten egg, and panko.","Coat each salmon strip in flour, then egg, then panko, pressing the crumbs on firmly.","Lay on the tray, spray lightly with oil, and bake 12-15 min, turning once, until golden and just cooked through.","Bake the fries on a separate tray alongside per packet directions, and steam or microwave the peas.","Serve with ketchup — same crumbed-and-fried approach that worked well before, oven fries in place of potato gems this week."]}}, lunch:{name:"Chicken nugget & wedge wraps (Friday's leftovers)"}, snack:{name:"Lactose-free yoghurt pouch (or fresh fruit if unavailable)"}},
-      {day:"Sunday", dinner:{name:"Roast chicken, roast potatoes, broccoli & a lighter gravy", new:false, authored_by:"The Weeknight Realist & The Family GP/Dietician", recipe:{ingredients:["1 whole chicken (~1.8kg)","1.5kg potatoes, quartered","2 tbsp olive oil","2 cloves garlic","1 lemon, halved","A few sprigs thyme","1 tbsp flour","2 cups chicken stock (for gravy)","1 head broccoli, steamed"], method:["Preheat oven to 200°C (400°F).","Pat the chicken dry, rub with oil, salt and pepper; stuff the cavity with garlic, lemon and thyme.","Place chicken in a large roasting tray, scatter potatoes around it tossed in oil, salt and pepper.","Roast 70-80 min until juices run clear and potatoes are golden, basting once halfway.","Rest chicken 10 min. Skim excess fat from the pan juices, whisk in flour over heat, then gradually add stock, simmering until thickened — go light on the flour/fat for a lighter gravy.","Steam broccoli and serve alongside."]}}, lunch:{name:"Salmon finger wraps (Saturday's leftovers)"}, snack:{name:"Cheese and crackers"}}
-    ],
-    shopping_list: {
-        "Produce": ["Broccoli (2 heads)", "Avocados (2)", "Shredded lettuce (1 bag)", "Corn kernels (2 cups, fresh or tinned)", "Onion (2)", "Garlic (1 bulb)", "Ginger (small knob)", "Lemon (1)", "Fresh thyme", "Spring onions (2)", "Bananas (1 bunch)", "Apples (4)", "Mandarins (1 bag)", "Potatoes (1.5kg)", "Cucumber (2)"],
-        "Meat & deli": ["Chicken thighs, boneless skinless (8, ~1.2kg)", "Beef mince, lean (500g)", "Sausages (6, ~500g)", "Bacon (4 rashers)", "Salmon fillets, skinless (600g)", "Whole chicken (~1.8kg)"],
-        "Dairy": ["Grated cheese (block) + a lactose-free block for Maddie's portions", "Sour cream", "Parmesan (small wedge, adults only)", "Butter", "Eggs (1 dozen)", "Lactose-free yoghurt pouches x2-4"],
-        "Pantry": ["Jasmine or long-grain rice (2kg bag)", "Soy sauce", "Honey", "Rice vinegar", "Cornstarch", "Hard taco shells (Old El Paso, 12)", "Taco seasoning (Old El Paso packet)", "Plain flour", "Panko breadcrumbs", "Chicken stock", "Rice crackers", "Popcorn kernels", "Peanut butter", "Ketchup"],
-        "Frozen": ["Peas", "Frozen peas & corn mix", "Frozen fries (~500g)", "Chicken nuggets or tenders, frozen (~700g)", "Potato wedges, frozen (~750g)"],
-        "Other": []
-    }
-};
+      {day:"Monday", dinner:{name:"Soy-glazed baked chicken thighs, rice & steamed broccoli", new:true, authored_by:"The Weeknight Realist & The Child Nutritionist", ingredients:[{"name":"chicken thighs","quantity":8,"unit":"","category":"meat_deli","display":"8 boneless, skinless chicken thighs"},{"name":"soy sauce","quantity":0.33,"unit":"cup","category":"pantry","display":"1/3 cup soy sauce"},{"name":"honey","quantity":2,"unit":"tbsp","category":"pantry","display":"2 tbsp honey"},{"name":"rice vinegar","quantity":1,"unit":"tbsp","category":"pantry","display":"1 tbsp rice vinegar (or lemon juice)"},{"name":"garlic","quantity":2,"unit":"clove","category":"produce","display":"2 cloves garlic, minced"},{"name":"ginger","quantity":1,"unit":"tsp","category":"produce","display":"1 tsp grated ginger"},{"name":"cornstarch","quantity":1,"unit":"tbsp","category":"pantry","display":"1 tbsp cornstarch mixed with 2 tbsp water"},{"name":"jasmine rice","quantity":1.5,"unit":"cup","category":"pantry","display":"1.5 cups jasmine rice"},{"name":"broccoli","quantity":2,"unit":"head","category":"produce","display":"2 heads broccoli, cut into florets"}], method:["Preheat oven to 200\u00b0C (400\u00b0F).","Whisk soy sauce, honey, rice vinegar, garlic and ginger in a small saucepan; simmer 2-3 min.","Stir in the cornstarch slurry and simmer until glossy and slightly thickened, about 1 min.","Lay chicken thighs in a baking dish, spoon over half the sauce, and bake 20 min.","Brush on the remaining sauce and bake a further 10 min until sticky and cooked through.","Meanwhile cook the rice according to packet directions, steaming the broccoli for the last 5-6 min.","Serve chicken over rice with broccoli alongside \u2014 a splash of extra plain soy sauce on the side for Hamish's rice if he wants it saucier."]}, lunch:{name:"Cheese quesadillas", ingredients:[{"name":"tortillas","quantity":4,"unit":"","category":"pantry","display":"4 tortillas"},{"name":"grated cheese","quantity":1,"unit":"cup","category":"dairy","display":"1 cup grated cheese"}]}, snack:{name:"Apple slices with peanut butter", ingredients:[{"name":"apples","quantity":2,"unit":"","category":"produce","display":"2 apples"},{"name":"peanut butter","quantity":2,"unit":"tbsp","category":"pantry","display":"2 tbsp peanut butter"}]}},
+      {day:"Tuesday", dinner:{name:"Build-your-own hard-shell tacos (Old El Paso), seasoned beef & toppings bar", new:true, authored_by:"The Weeknight Realist & The Child Nutritionist", ingredients:[{"name":"beef mince","quantity":600,"unit":"g","category":"meat_deli","display":"600g beef mince"},{"name":"ground cumin","quantity":1,"unit":"tbsp","category":"pantry","display":"1 tbsp ground cumin"},{"name":"smoked paprika","quantity":1,"unit":"tbsp","category":"pantry","display":"1 tbsp smoked paprika"},{"name":"garlic powder","quantity":1,"unit":"tsp","category":"pantry","display":"1 tsp garlic powder"},{"name":"taco shells (Old El Paso)","quantity":12,"unit":"","category":"pantry","display":"12 Old El Paso hard taco shells"},{"name":"shredded lettuce","quantity":1,"unit":"cup","category":"produce","display":"1 cup shredded lettuce"},{"name":"grated cheese","quantity":1,"unit":"cup","category":"dairy","display":"1 cup grated cheese (+ lactose-free block for Maddie)"},{"name":"lactose-free cheese","quantity":1,"unit":"block","category":"dairy","display":"1 lactose-free cheese block, for Maddie"},{"name":"sour cream","quantity":0.5,"unit":"cup","category":"dairy","display":"1/2 cup sour cream"},{"name":"avocado","quantity":1,"unit":"","category":"produce","display":"1 avocado, sliced"},{"name":"tomatoes","quantity":4,"unit":"","category":"produce","display":"4 tomatoes, diced (topping \u2014 kept off Maddie's plate)"},{"name":"cucumber","quantity":1,"unit":"","category":"produce","display":"1 cucumber, sliced (tomato-free lane)"}], method:["Brown beef mince in a large pan over medium-high heat, breaking it up, 6-8 min.","Stir in cumin, paprika, garlic powder and salt, then a splash of water; simmer 3-4 min until thickened.","Warm the taco shells according to packet directions.","Set out beef, lettuce, cheese, sour cream, avocado, diced tomato and cucumber separately.","Everyone builds their own \u2014 keep diced tomato and heavy cheese/sour cream light or off Maddie's plate, cucumber slices in its place."]}, lunch:{name:"Soy chicken & rice wraps (Monday's leftovers)", ingredients:[]}, snack:{name:"Banana", ingredients:[{"name":"bananas","quantity":1,"unit":"bunch","category":"produce","display":"1 bunch bananas"}]}},
+      {day:"Wednesday", dinner:{name:"One-pan sausage & rice bake, with a tomato & cucumber side salad", new:true, authored_by:"The Weeknight Realist", ingredients:[{"name":"sausages","quantity":6,"unit":"","category":"meat_deli","display":"6 sausages, leaner variety, casings removed"},{"name":"long-grain rice","quantity":1.5,"unit":"cup","category":"pantry","display":"1.5 cups long-grain rice"},{"name":"onion","quantity":1,"unit":"","category":"produce","display":"1 onion, diced"},{"name":"garlic","quantity":2,"unit":"clove","category":"produce","display":"2 cloves garlic, minced"},{"name":"chicken stock","quantity":3,"unit":"cup","category":"pantry","display":"3 cups chicken stock"},{"name":"peas","quantity":1,"unit":"cup","category":"frozen","display":"1 cup frozen peas"},{"name":"tomatoes","quantity":6,"unit":"","category":"produce","display":"6 tomatoes, sliced (side salad \u2014 kept off Maddie's plate)"},{"name":"cucumber","quantity":1,"unit":"","category":"produce","display":"1 cucumber, sliced"}], method:["Brown sausage meat in a large oven-proof pan, breaking it into small pieces, about 6 min; drain any excess fat.","Add onion and garlic, cook until soft, 3 min.","Stir in rice, then pour in stock and bring to a simmer.","Cover and cook 15-18 min until rice is tender and the liquid is absorbed, stirring in the peas for the last 5 min.","While the bake cooks, toss the sliced tomato and cucumber with a little olive oil and salt for a light side salad.","Serve as-is for the kids; pass the tomato-cucumber salad separately for the adults and Hamish \u2014 kept off Maddie's plate for the tomato, and light on any extra dairy for Genevieve."]}, lunch:{name:"Beef taco filling wraps (Tuesday's leftovers)", ingredients:[]}, snack:{name:"Mandarins", ingredients:[{"name":"mandarins","quantity":1,"unit":"bag","category":"produce","display":"1 bag mandarins"}]}},
+      {day:"Thursday", dinner:{name:"Egg & soy fried rice with bacon", new:false, authored_by:"The Flavor Explorer & The Weeknight Realist", ingredients:[{"name":"bacon","quantity":4,"unit":"rasher","category":"meat_deli","display":"4 rashers bacon, diced"},{"name":"eggs","quantity":3,"unit":"","category":"dairy","display":"3 eggs, beaten"},{"name":"soy sauce","quantity":3,"unit":"tbsp","category":"pantry","display":"3 tbsp soy sauce"},{"name":"frozen peas and corn mix","quantity":1,"unit":"cup","category":"frozen","display":"1 cup frozen peas and corn mix"},{"name":"spring onions","quantity":2,"unit":"","category":"produce","display":"2 spring onions, sliced"}], method:["Heat oil in a large pan or wok over high heat; cook bacon until crisp, about 4 min.","Push bacon to one side, pour in the beaten egg and scramble until just set.","Add 4 cups cold cooked rice (day-old if possible), breaking up clumps, and stir-fry 3-4 min.","Add the peas and corn, soy sauce and spring onions; toss until heated through and everything is coated.","Serve as-is \u2014 a proven favourite for Hamish (rice with soy sauce, egg), easy to portion small for Maddie."]}, lunch:{name:"Sausage rice bake (Wednesday's leftovers)", ingredients:[]}, snack:{name:"Popcorn", ingredients:[{"name":"popcorn kernels","quantity":0.5,"unit":"cup","category":"pantry","display":"1/2 cup popcorn kernels"}]}},
+      {day:"Friday", dinner:{name:"Oven-tray chicken nuggets, wedges & corn (with a side salad for the grown-ups)", new:true, authored_by:"The Weeknight Realist", ingredients:[{"name":"chicken nuggets or tenders","quantity":1,"unit":"bag (~700g)","category":"frozen","display":"1 bag frozen chicken nuggets or tenders (~700g)"},{"name":"potato wedges","quantity":1,"unit":"bag (~750g)","category":"frozen","display":"1 bag frozen potato wedges (~750g)"},{"name":"corn kernels","quantity":2,"unit":"cup","category":"produce","display":"2 cups corn kernels, fresh or tinned"},{"name":"salad greens","quantity":1,"unit":"bag","category":"produce","display":"Salad greens (adults only)"},{"name":"cucumber","quantity":1,"unit":"","category":"produce","display":"1 cucumber, for the adults' salad"}], method:["Preheat oven to the temperature on the nugget/wedge packets (usually 200\u00b0C).","Spread nuggets and wedges across one large tray (or two if crowded), spray lightly with oil.","Bake according to packet directions, turning once, until golden and cooked through \u2014 usually 18-22 min.","Steam or microwave the corn for the last 5 min.","Toss a quick side salad for the adults while everything else bakes.","Serve straight from the tray \u2014 the lowest-effort dinner of the week."]}, lunch:{name:"Fried rice (Thursday's leftovers)", ingredients:[]}, snack:{name:"Rice crackers", ingredients:[{"name":"rice crackers","quantity":1,"unit":"packet","category":"pantry","display":"1 packet rice crackers"}]}},
+      {day:"Saturday", dinner:{name:"Crumbed salmon 'fish fingers', oven-baked fries & peas", new:true, authored_by:"The Family GP/Dietician & The Child Nutritionist", ingredients:[{"name":"salmon fillets","quantity":600,"unit":"g","category":"meat_deli","display":"600g skinless salmon fillets, cut into finger-width strips"},{"name":"plain flour","quantity":0.5,"unit":"cup","category":"pantry","display":"1/2 cup flour"},{"name":"eggs","quantity":2,"unit":"","category":"dairy","display":"2 eggs, beaten"},{"name":"panko breadcrumbs","quantity":1.5,"unit":"cup","category":"pantry","display":"1.5 cups panko breadcrumbs"},{"name":"frozen fries","quantity":1,"unit":"bag (~500g)","category":"frozen","display":"1 bag frozen oven-baked fries"},{"name":"peas","quantity":1,"unit":"cup","category":"frozen","display":"Frozen peas, to serve"},{"name":"ketchup","quantity":1,"unit":"bottle","category":"pantry","display":"Ketchup, to serve"}], method:["Preheat oven to 200\u00b0C (400\u00b0F) and line a tray.","Set up three shallow bowls: flour, beaten egg, and panko.","Coat each salmon strip in flour, then egg, then panko, pressing the crumbs on firmly.","Lay on the tray, spray lightly with oil, and bake 12-15 min, turning once, until golden and just cooked through.","Bake the fries on a separate tray alongside per packet directions, and steam or microwave the peas.","Serve with ketchup \u2014 same crumbed-and-fried approach that worked well before, oven fries in place of potato gems this week."]}, lunch:{name:"Chicken nugget & wedge wraps (Friday's leftovers)", ingredients:[]}, snack:{name:"Lactose-free yoghurt pouch (or fresh fruit if unavailable)", ingredients:[{"name":"lactose-free yoghurt pouches","quantity":4,"unit":"","category":"dairy","display":"4 lactose-free yoghurt pouches"}]}},
+      {day:"Sunday", dinner:{name:"Roast chicken, roast potatoes, broccoli & a lighter gravy", new:false, authored_by:"The Weeknight Realist & The Family GP/Dietician", ingredients:[{"name":"whole chicken","quantity":1,"unit":"(~1.8kg)","category":"meat_deli","display":"1 whole chicken (~1.8kg)"},{"name":"potatoes","quantity":1.5,"unit":"kg","category":"produce","display":"1.5kg potatoes, quartered"},{"name":"garlic","quantity":2,"unit":"clove","category":"produce","display":"2 cloves garlic"},{"name":"lemon","quantity":1,"unit":"","category":"produce","display":"1 lemon, halved"},{"name":"fresh thyme","quantity":1,"unit":"bunch","category":"produce","display":"A few sprigs thyme"},{"name":"plain flour","quantity":1,"unit":"tbsp","category":"pantry","display":"1 tbsp flour, for the gravy"},{"name":"chicken stock","quantity":2,"unit":"cup","category":"pantry","display":"2 cups chicken stock (for gravy)"},{"name":"broccoli","quantity":1,"unit":"head","category":"produce","display":"1 head broccoli, steamed"}], method:["Preheat oven to 200\u00b0C (400\u00b0F).","Pat the chicken dry, rub with oil, salt and pepper; stuff the cavity with garlic, lemon and thyme.","Place chicken in a large roasting tray, scatter potatoes around it tossed in oil, salt and pepper.","Roast 70-80 min until juices run clear and potatoes are golden, basting once halfway.","Rest chicken 10 min. Skim excess fat from the pan juices, whisk in flour over heat, then gradually add stock, simmering until thickened \u2014 go light on the flour/fat for a lighter gravy.","Steam broccoli and serve alongside."]}, lunch:{name:"Salmon finger wraps (Saturday's leftovers)", ingredients:[]}, snack:{name:"Cheese and crackers", ingredients:[{"name":"cheese","quantity":1,"unit":"block","category":"dairy","display":"1 block cheese"},{"name":"crackers","quantity":1,"unit":"packet","category":"pantry","display":"1 packet crackers"}]}}
+    ]
+  };
 
   let PRINCIPLES_TEXT = `- Favor low-cleanup/one-pan (or one-pan-plus-one-pot) dinners on weeknights
 - Lean on 'build-your-own' formats (tacos, pizza, etc.) as a reliable way to introduce variety without a fight
@@ -320,8 +338,69 @@ body{
   let recipeTabInitialized = false;
 
   function slugify(name){ return String(name).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
-  function shopItemKey(cat, item){ return cat + '::' + item; }
+  function shopItemKey(cat, name){ return cat + '::' + String(name).toLowerCase(); }
   function key(day, meal){ return day + "-" + meal; }
+
+  const CATEGORY_ORDER = ['produce','meat_deli','dairy','pantry','frozen','other'];
+  const CATEGORY_LABELS = {produce:'Produce', meat_deli:'Meat & deli', dairy:'Dairy', pantry:'Pantry', frozen:'Frozen', other:'Other'};
+
+  // Only pluralize count-noun units ("clove" -> "cloves") — abbreviations like g/kg/tbsp/cup
+  // read wrong pluralized ("600 gs") and are conventionally left singular in ingredient lists.
+  const PLURALIZABLE_UNITS = ['clove','head','bunch','rasher','block','bag','bottle','packet'];
+  function formatQuantityUnit(qty, unit){
+    if(qty == null || qty === '') return '';
+    const qtyStr = Number.isInteger(qty) ? String(qty) : String(Math.round(qty*100)/100);
+    if(!unit) return qtyStr;
+    const lower = unit.toLowerCase();
+    const pluralUnit = (PLURALIZABLE_UNITS.includes(lower) && qty !== 1) ? unit + 's' : unit;
+    return `${qtyStr} ${pluralUnit}`;
+  }
+  function formatIngredientLine(x){
+    return `${formatQuantityUnit(x.quantity, x.unit)} ${x.name}`.replace(/\s+/g,' ').trim();
+  }
+
+  // Computed aggregation across every meal still in the week — dropping a meal drops its
+  // ingredients automatically, adding one merges in. Sums quantities only when an ingredient's
+  // canonical name AND unit match exactly across meals; otherwise lists them separately
+  // (best-effort, per the product spec — not worth a full unit-conversion system).
+  function computeShoppingList(days){
+    const totals = {};
+    days.forEach(d=>{
+      ['lunch','snack','dinner'].forEach(m=>{
+        const info = d[m];
+        if(!info || !info.ingredients) return;
+        info.ingredients.forEach(ing=>{
+          if(!ing || !ing.name) return;
+          const category = CATEGORY_ORDER.includes(ing.category) ? ing.category : 'other';
+          const nameKey = String(ing.name).toLowerCase();
+          const tKey = category + '::' + nameKey;
+          if(!totals[tKey]) totals[tKey] = {category, name: ing.name, quantity: 0, unit: '', hasQty: false, mixedUnits: false};
+          const t = totals[tKey];
+          if(typeof ing.quantity === 'number'){
+            if(!t.hasQty){
+              t.quantity = ing.quantity;
+              t.unit = ing.unit || '';
+              t.hasQty = true;
+            } else if((ing.unit || '') === t.unit){
+              t.quantity += ing.quantity;
+            } else {
+              t.mixedUnits = true;
+            }
+          }
+        });
+      });
+    });
+    const byCategory = {};
+    CATEGORY_ORDER.forEach(c => byCategory[c] = []);
+    Object.values(totals).forEach(t=>{
+      const label = (t.hasQty && !t.mixedUnits)
+        ? formatIngredientLine({quantity: t.quantity, unit: t.unit, name: t.name})
+        : t.name;
+      const capitalized = label.charAt(0).toUpperCase() + label.slice(1);
+      byCategory[t.category].push({key: shopItemKey(t.category, t.name), label: capitalized});
+    });
+    return byCategory;
+  }
 
   // Which meals have been logged on THIS device (cosmetic only — the real record is the Sheet)
   let loggedLocally = {};
@@ -384,6 +463,7 @@ body{
   function renderReviewBox(){
     const container = document.getElementById("reviewBoxContainer");
     if(WEEK_DATA.status === "proposed"){
+      const pantryValue = (WEEK_DATA.pantry_ingredients || []).join(', ');
       container.innerHTML = `
         <div class="review-box">
           <div class="rb-title">Anything to flag before this plan goes out?</div>
@@ -392,17 +472,26 @@ body{
           <textarea id="planFeedbackInput" placeholder="e.g. can we swap Wednesday's sausage bake for something else?"></textarea>
           <label>Ingredients to use up</label>
           <textarea id="useUpInput" placeholder="e.g. half a bag of spinach, leftover ham"></textarea>
+          <label>Pantry ingredients to build around</label>
+          <textarea id="pantryInput" placeholder="e.g. chicken thighs, capsicum">${pantryValue}</textarea>
+          <label class="budget-toggle-row">
+            <input type="checkbox" id="budgetSaverInput" ${WEEK_DATA.budget_saver_mode ? 'checked' : ''}>
+            <span>Budget Saver Mode — chain meals together to shrink this week's shopping list</span>
+          </label>
           <div class="review-saved-note" id="reviewSavedNote"></div>
           <button class="review-submit-btn" id="saveReviewBtn">Send feedback</button>
         </div>`;
       container.querySelector("#saveReviewBtn").addEventListener("click", async ()=>{
         const plan_feedback = container.querySelector("#planFeedbackInput").value;
         const use_up = container.querySelector("#useUpInput").value;
+        const pantry_ingredients = container.querySelector("#pantryInput").value;
+        const budget_saver_mode = container.querySelector("#budgetSaverInput").checked;
         const note = container.querySelector("#reviewSavedNote");
-        if(!plan_feedback && !use_up){ note.textContent = "Add something in one of the boxes first"; return; }
+        const budgetModeChanged = budget_saver_mode !== !!WEEK_DATA.budget_saver_mode;
+        if(!plan_feedback && !use_up && !pantry_ingredients && !budgetModeChanged){ note.textContent = "Add something in one of the boxes first"; return; }
         note.textContent = "Sending…";
         try{
-          await sendToSheet({type:"review_feedback", week_id: WEEK_DATA.week_id, plan_feedback, use_up});
+          await sendToSheet({type:"review_feedback", week_id: WEEK_DATA.week_id, plan_feedback, use_up, pantry_ingredients, budget_saver_mode});
           note.textContent = "Sent ✓";
         }catch(e){
           note.textContent = "Couldn't send — reply to our email instead";
@@ -438,9 +527,14 @@ body{
         </div>
         ${meals.map(m=>{
           const info = d[m];
-          if(!info) return "";
+          if(!info){
+            return `<div class="meal-row meal-row-empty">
+              <span class="meal-label">${m}</span>
+              <button class="add-meal-btn" data-day="${d.day}" data-meal="${m}"><i class="ti ti-plus"></i>Add a meal</button>
+            </div>`;
+          }
           const logged = !!loggedLocally[key(d.day,m)];
-          const hasRecipe = m === 'dinner' && info.recipe;
+          const hasRecipe = m === 'dinner' && info.method;
           const nameHtml = `${info.name}${info.new ? '<span class="badge-new">new</span>':''}${m==='dinner' && info.authored_by ? `<span class="by-line">${info.authored_by}</span>` : ''}`;
           const nameEl = hasRecipe
             ? `<button class="meal-name meal-name-btn" data-day-index="${dayIndex}">${nameHtml}</button>`
@@ -449,6 +543,7 @@ body{
             <span class="meal-label">${m}</span>
             ${nameEl}
             <button class="log-btn ${logged?'logged':''}" data-day="${d.day}" data-meal="${m}" data-name="${info.name}">${logged ? '✓ Logged' : 'Log'}</button>
+            <button class="remove-meal-btn" data-day="${d.day}" data-meal="${m}" data-name="${info.name}" aria-label="Remove ${info.name}"><i class="ti ti-trash"></i></button>
           </div>`;
         }).join("")}
       </div>`;
@@ -458,6 +553,12 @@ body{
     });
     list.querySelectorAll(".meal-name-btn").forEach(btn=>{
       btn.addEventListener("click", ()=> goToRecipe(parseInt(btn.dataset.dayIndex, 10)));
+    });
+    list.querySelectorAll(".remove-meal-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=> openRemoveConfirm(btn.dataset.day, btn.dataset.meal, btn.dataset.name));
+    });
+    list.querySelectorAll(".add-meal-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=> openAddMealPicker(btn.dataset.day, btn.dataset.meal));
     });
   }
 
@@ -470,21 +571,21 @@ body{
   function renderShopping(){
     document.getElementById("shopSub").textContent = "WEEK OF " + WEEK_DATA.date_range.toUpperCase();
     const shop = document.getElementById("shopping-list");
-    shop.innerHTML = Object.entries(WEEK_DATA.shopping_list)
-      .filter(([cat, items]) => items.length)
-      .map(([cat, items]) => `
+    const byCategory = computeShoppingList(WEEK_DATA.days);
+    shop.innerHTML = CATEGORY_ORDER
+      .filter(cat => byCategory[cat].length)
+      .map(cat => `
         <div class="shop-cat-block">
-          <div class="cat">${cat}</div>
-          ${items.map((it) => {
-            const ik = shopItemKey(cat, it);
-            const checked = !!shoppingState[ik];
+          <div class="cat">${CATEGORY_LABELS[cat]}</div>
+          ${byCategory[cat].map((it) => {
+            const checked = !!shoppingState[it.key];
             return `
-            <label class="item ${checked?'checked':''}" data-key="${ik}">
+            <label class="item ${checked?'checked':''}" data-key="${it.key}">
               <input type="checkbox" ${checked?'checked':''}>
-              <span>${it}</span>
+              <span>${it.label}</span>
             </label>`;
           }).join("")}
-        </div>`).join("") ;
+        </div>`).join("") || `<div class="no-recipe">Nothing on the list — every meal this week is a leftover or has no tracked ingredients.</div>`;
     shop.querySelectorAll(".item").forEach(row=>{
       row.querySelector("input").addEventListener("change", async (e)=>{
         const checked = e.target.checked;
@@ -499,11 +600,13 @@ body{
   }
 
   document.getElementById("copy-btn").addEventListener("click", async (e)=>{
+    const byCategory = computeShoppingList(WEEK_DATA.days);
     const lines = [];
-    Object.entries(WEEK_DATA.shopping_list).forEach(([cat, items])=>{
+    CATEGORY_ORDER.forEach(cat=>{
+      const items = byCategory[cat];
       if(!items.length) return;
-      lines.push(cat.toUpperCase());
-      items.forEach(it => lines.push('- ' + it));
+      lines.push(CATEGORY_LABELS[cat].toUpperCase());
+      items.forEach(it => lines.push('- ' + it.label));
       lines.push("");
     });
     const text = lines.join("\n").trim();
@@ -535,12 +638,14 @@ body{
     const d = WEEK_DATA.days[i];
     const card = document.getElementById('recipe-card');
     const info = d.dinner;
-    if(!info || !info.recipe){
-      card.innerHTML = `<div class="no-recipe">No recipe on file for ${d.day}'s dinner.</div>`;
+    if(!info){
+      card.innerHTML = `<div class="no-recipe">No dinner planned for ${d.day} yet — add one from the Plan tab.</div>`;
       return;
     }
+    const isExternal = info.source && info.source.type === 'external_url';
     const favId = slugify(info.name);
     const alreadySaved = FAVOURITES.some(f => f.id === favId);
+    const ingredientsHtml = (info.ingredients || []).map(x => `<li>${x.display || formatIngredientLine(x)}</li>`).join('');
     card.innerHTML = `
       <h3>${info.name}</h3>
       ${info.authored_by ? `<div class="by">${info.authored_by}</div>` : ''}
@@ -549,19 +654,24 @@ body{
       </button>
       <div class="favourite-status-note" id="recipeSaveFavNote"></div>
       <h4>Ingredients</h4>
-      <ul>${info.recipe.ingredients.map(x=>`<li>${x}</li>`).join('')}</ul>
-      <h4>Method</h4>
-      <ol>${info.recipe.method.map(x=>`<li>${x}</li>`).join('')}</ol>
+      <ul>${ingredientsHtml}</ul>
+      ${isExternal
+        ? `<h4>Method</h4><a class="favourite-btn" href="${info.source.url}" target="_blank" rel="noopener"><i class="ti ti-external-link"></i>View full recipe</a>`
+        : (info.method ? `<h4>Method</h4><ol>${info.method.map(x=>`<li>${x}</li>`).join('')}</ol>` : '')}
     `;
     if(!alreadySaved){
       card.querySelector("#recipeSaveFavBtn").addEventListener("click", ()=>
-        saveFavouriteFlow(info.name, info.authored_by, info.recipe, card.querySelector("#recipeSaveFavBtn"), card.querySelector("#recipeSaveFavNote")));
+        saveFavouriteFlow(info.name, info.authored_by, info, card.querySelector("#recipeSaveFavBtn"), card.querySelector("#recipeSaveFavNote")));
     }
   }
 
-  async function saveFavouriteFlow(name, authored_by, recipe, btn, note){
+  async function saveFavouriteFlow(name, authored_by, info, btn, note){
     btn.disabled = true;
     note.textContent = "Saving…";
+    const recipe = {
+      ingredients: (info.ingredients || []).map(x => x.display || formatIngredientLine(x)),
+      method: info.method || []
+    };
     try{
       const result = await postJSON({type: "save_favourite", name: name, authored_by: authored_by, recipe: recipe});
       if(result.status === "ok"){
@@ -577,6 +687,157 @@ body{
       note.textContent = "Couldn't reach the server — try again in a moment.";
       btn.disabled = false;
     }
+  }
+
+  // Applies a fresh week_data payload from the server (remove/regenerate meal, add external
+  // recipe, refresh plan) and re-renders every view that depends on it.
+  function applyWeekPatch(newWeekData){
+    Object.assign(WEEK_DATA, newWeekData);
+    renderPlan();
+    renderShopping();
+    if(recipeTabInitialized) renderRecipeTab();
+  }
+
+  function openRemoveConfirm(day, meal, name){
+    const backdrop = document.createElement("div");
+    backdrop.className = "modal-backdrop";
+    backdrop.innerHTML = `
+      <div class="modal">
+        <h3>Remove this meal?</h3>
+        <div class="meal-sub">${day} · ${meal}</div>
+        <p class="confirm-text">Remove "${name}" from ${day}'s ${meal}? The slot will be left empty until you add something new.</p>
+        <div class="modal-status-note" id="removeStatusNote"></div>
+        <button class="review-submit-btn danger" id="confirmRemoveBtn">Remove</button>
+        <button class="cancel-link" id="cancelRemoveBtn">Cancel</button>
+      </div>`;
+    document.getElementById("hub").appendChild(backdrop);
+    backdrop.querySelector("#cancelRemoveBtn").addEventListener("click", ()=> backdrop.remove());
+    backdrop.querySelector("#confirmRemoveBtn").addEventListener("click", async ()=>{
+      const btn = backdrop.querySelector("#confirmRemoveBtn");
+      const note = backdrop.querySelector("#removeStatusNote");
+      btn.disabled = true; btn.textContent = "Removing…";
+      try{
+        const result = await postJSON({type:"remove_meal", week_id: WEEK_DATA.week_id, day, meal});
+        if(result.status === "ok"){
+          applyWeekPatch(result.week_data);
+          backdrop.remove();
+        } else {
+          note.innerHTML = `<i class="ti ti-alert-triangle"></i> Couldn't remove: ${result.message || 'unknown error'}`;
+          btn.disabled = false; btn.textContent = "Remove";
+        }
+      }catch(e){
+        note.innerHTML = `<i class="ti ti-alert-triangle"></i> Couldn't reach the server — try again.`;
+        btn.disabled = false; btn.textContent = "Remove";
+      }
+    });
+  }
+
+  function openAddMealPicker(day, meal){
+    const backdrop = document.createElement("div");
+    backdrop.className = "modal-backdrop";
+    backdrop.innerHTML = `
+      <div class="modal">
+        <h3>Add a meal</h3>
+        <div class="meal-sub">${day} · ${meal}</div>
+        <button class="review-submit-btn" id="genMealBtn"><i class="ti ti-sparkles"></i> Generate a meal</button>
+        <button class="favourite-btn add-link-btn" id="linkMealBtn"><i class="ti ti-link"></i> Add from a link</button>
+        <button class="cancel-link" id="cancelAddBtn">Cancel</button>
+      </div>`;
+    document.getElementById("hub").appendChild(backdrop);
+    backdrop.querySelector("#cancelAddBtn").addEventListener("click", ()=> backdrop.remove());
+    backdrop.querySelector("#genMealBtn").addEventListener("click", ()=> regenerateMealFlow(day, meal, backdrop));
+    backdrop.querySelector("#linkMealBtn").addEventListener("click", ()=> showAddFromLinkForm(day, meal, backdrop));
+  }
+
+  async function regenerateMealFlow(day, meal, backdrop){
+    const modal = backdrop.querySelector(".modal");
+    modal.innerHTML = `<h3>Generating…</h3><div class="meal-sub">${day} · ${meal}</div><div class="modal-status-note">This can take up to a minute.</div>`;
+    try{
+      const result = await postJSON({type:"regenerate_meal", week_id: WEEK_DATA.week_id, day, meal});
+      if(result.status === "ok"){
+        applyWeekPatch(result.week_data);
+        backdrop.remove();
+      } else {
+        renderRegenerateRetry(day, meal, backdrop, result.message || "Unknown error");
+      }
+    }catch(e){
+      renderRegenerateRetry(day, meal, backdrop, "Couldn't reach the server.");
+    }
+  }
+
+  function renderRegenerateRetry(day, meal, backdrop, message){
+    const modal = backdrop.querySelector(".modal");
+    modal.innerHTML = `
+      <h3>Couldn't generate a meal</h3>
+      <div class="meal-sub">${day} · ${meal}</div>
+      <div class="modal-status-note"><i class="ti ti-alert-triangle"></i> ${message}</div>
+      <button class="review-submit-btn" id="retryGenBtn">Try again</button>
+      <button class="cancel-link" id="cancelGenBtn">Cancel</button>`;
+    modal.querySelector("#cancelGenBtn").addEventListener("click", ()=> backdrop.remove());
+    modal.querySelector("#retryGenBtn").addEventListener("click", ()=> regenerateMealFlow(day, meal, backdrop));
+  }
+
+  function showAddFromLinkForm(day, meal, backdrop){
+    const modal = backdrop.querySelector(".modal");
+    modal.innerHTML = `
+      <h3>Add from a link</h3>
+      <div class="meal-sub">${day} · ${meal}</div>
+      <label class="modal-label">Recipe URL</label>
+      <input type="url" id="recipeUrlInput" class="text-input" placeholder="https://example.com/recipe">
+      <div class="modal-status-note" id="linkFetchNote"></div>
+      <button class="review-submit-btn" id="fetchLinkBtn">Fetch recipe</button>
+      <button class="cancel-link" id="cancelLinkBtn">Cancel</button>`;
+    modal.querySelector("#cancelLinkBtn").addEventListener("click", ()=> backdrop.remove());
+    modal.querySelector("#fetchLinkBtn").addEventListener("click", async ()=>{
+      const url = modal.querySelector("#recipeUrlInput").value.trim();
+      const note = modal.querySelector("#linkFetchNote");
+      const btn = modal.querySelector("#fetchLinkBtn");
+      if(!url){ note.textContent = "Paste a URL first"; return; }
+      btn.disabled = true; btn.textContent = "Fetching…"; note.textContent = "";
+      try{
+        const result = await postJSON({type:"preview_external_recipe", url});
+        if(result.status === "ok"){
+          showExternalRecipePreview(day, meal, backdrop, result.recipe);
+        } else {
+          note.innerHTML = `<i class="ti ti-alert-triangle"></i> Couldn't read that page — try a different link, or generate a meal instead.`;
+          btn.disabled = false; btn.textContent = "Fetch recipe";
+        }
+      }catch(e){
+        note.innerHTML = `<i class="ti ti-alert-triangle"></i> Couldn't read that page — try a different link, or generate a meal instead.`;
+        btn.disabled = false; btn.textContent = "Fetch recipe";
+      }
+    });
+  }
+
+  function showExternalRecipePreview(day, meal, backdrop, recipe){
+    const modal = backdrop.querySelector(".modal");
+    modal.innerHTML = `
+      <h3>${recipe.title}</h3>
+      <div class="meal-sub">${day} · ${meal} · <a href="${recipe.source_url}" target="_blank" rel="noopener">source</a></div>
+      <div class="modal-label">Ingredients</div>
+      <ul class="preview-ingredients">${recipe.ingredients.map(i => `<li>${i.display || i.name}</li>`).join('')}</ul>
+      <div class="modal-status-note" id="confirmLinkNote"></div>
+      <button class="review-submit-btn" id="confirmLinkBtn">Add this recipe</button>
+      <button class="cancel-link" id="cancelLinkBtn2">Cancel</button>`;
+    modal.querySelector("#cancelLinkBtn2").addEventListener("click", ()=> backdrop.remove());
+    modal.querySelector("#confirmLinkBtn").addEventListener("click", async ()=>{
+      const btn = modal.querySelector("#confirmLinkBtn");
+      const note = modal.querySelector("#confirmLinkNote");
+      btn.disabled = true; btn.textContent = "Adding…";
+      try{
+        const result = await postJSON({type:"add_external_recipe", week_id: WEEK_DATA.week_id, day, meal, title: recipe.title, source_url: recipe.source_url, ingredients: recipe.ingredients});
+        if(result.status === "ok"){
+          applyWeekPatch(result.week_data);
+          backdrop.remove();
+        } else {
+          note.textContent = "Couldn't add: " + (result.message || "unknown error");
+          btn.disabled = false; btn.textContent = "Add this recipe";
+        }
+      }catch(e){
+        note.textContent = "Couldn't reach the server — try again.";
+        btn.disabled = false; btn.textContent = "Add this recipe";
+      }
+    });
   }
 
   let modalState = {day:null, meal:null, kids_ate_it:null, parent_rating:0, note:""};
@@ -777,13 +1038,10 @@ body{
     try{
       const result = await postJSON({type: "regenerate_now", week_id: WEEK_DATA.week_id});
       if(result.status === "ok"){
-        Object.assign(WEEK_DATA, result.week_data);
         PRINCIPLES_TEXT = result.principles_text;
         note.textContent = "Updated ✓" + (result.summary ? " — " + result.summary : "");
         await fetchShoppingState();
-        renderPlan();
-        renderShopping();
-        if(recipeTabInitialized) renderRecipeTab();
+        applyWeekPatch(result.week_data);
       } else if(result.status === "no_changes"){
         note.textContent = "Nothing new to incorporate — plan is already up to date.";
       } else {
@@ -835,6 +1093,95 @@ body{
     renderPlan();
     renderShopping();
   }
+
+  // ---------------- Pull-to-refresh (app-code updates only, not a data refresh) ----------------
+  // GitHub Pages' CDN caches index.html for several minutes, so a check right after a fresh
+  // deploy may still report "up to date" until that edge cache expires — an accepted limitation
+  // of the static-hosting setup, not a bug in the gesture itself.
+  (function initPullToRefresh(){
+    let startY = null, pulling = false, currentPull = 0, checking = false;
+    const THRESHOLD = 70;
+    let initialLastModified = null;
+
+    fetch(location.pathname, {method:'HEAD', cache:'no-store'})
+      .then(r => { initialLastModified = r.headers.get('Last-Modified'); })
+      .catch(()=>{});
+
+    const indicator = document.createElement('div');
+    indicator.className = 'pull-refresh-indicator';
+    indicator.innerHTML = '<i class="ti ti-rotate-clockwise"></i>';
+    document.body.appendChild(indicator);
+
+    function showToast(msg){
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      requestAnimationFrame(()=> t.classList.add('show'));
+      setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=> t.remove(), 300); }, 2200);
+    }
+
+    function resetIndicator(){
+      indicator.classList.remove('pulling','checking');
+      indicator.style.opacity = '';
+      indicator.style.transform = '';
+      currentPull = 0;
+    }
+
+    async function checkForUpdate(){
+      checking = true;
+      indicator.classList.add('checking');
+      indicator.classList.remove('pulling');
+      try{
+        const resp = await fetch(location.pathname, {method:'HEAD', cache:'no-store'});
+        const lm = resp.headers.get('Last-Modified');
+        if(initialLastModified && lm && lm !== initialLastModified){
+          showToast('Updated.');
+          setTimeout(()=> location.reload(), 400);
+        } else {
+          showToast('Up to date.');
+        }
+      }catch(e){
+        showToast("Couldn't check for updates");
+      }finally{
+        checking = false;
+        resetIndicator();
+      }
+    }
+
+    window.addEventListener('touchstart', (e)=>{
+      if(checking) return;
+      if(window.scrollY <= 0 && e.touches.length === 1){
+        startY = e.touches[0].clientY;
+        pulling = true;
+      } else {
+        startY = null; pulling = false;
+      }
+    }, {passive:true});
+
+    window.addEventListener('touchmove', (e)=>{
+      if(!pulling || startY == null || checking) return;
+      const dy = e.touches[0].clientY - startY;
+      if(dy > 0 && window.scrollY <= 0){
+        currentPull = Math.min(dy, 120);
+        indicator.classList.add('pulling');
+        indicator.style.opacity = String(Math.min(currentPull / THRESHOLD, 1));
+        indicator.style.transform = `translate(-50%, ${Math.min(currentPull, 60) - 34}px) rotate(${currentPull * 3}deg)`;
+      } else {
+        pulling = false;
+      }
+    }, {passive:true});
+
+    window.addEventListener('touchend', ()=>{
+      if(pulling && currentPull > THRESHOLD && !checking){
+        checkForUpdate();
+      } else if(!checking){
+        resetIndicator();
+      }
+      pulling = false;
+      startY = null;
+    }, {passive:true});
+  })();
 
   init();
 })();
