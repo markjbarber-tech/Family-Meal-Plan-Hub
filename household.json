@@ -134,7 +134,7 @@
     "published_at": null,
     "pantry_ingredients": [],
     "budget_saver_mode": false,
-    "board_notes": "The Family GP/Dietician and Child Nutritionist flagged Maddie's tomato dislike and lactose intolerance, so Tuesday's tacos and half of Friday's pizza go tomato-free, and dairy is spread lighter across the week. The Flavor Explorer leaned on Hamish's proven favourite (egg-and-soy fried rice with bacon), and salmon stays in the crumbed 'fish-finger' shape rather than the patty style that didn't land for him before. Winter week - every dinner and lunch stayed hot; no use-up ingredients flagged yet. UPDATE (Aug 11 feedback): Tuesday's dinner swapped to what the family is actually having - Old El Paso hard-shell tacos with seasoned beef instead of soft chicken tacos - keeping a build-your-own format with a tomato-free lane for Maddie. Diced tomato added as an optional topping and a tomato & cucumber side salad added to Wednesday's sausage bake (adults; kids get plain cucumber) to use up the 10 tomatoes on hand. Genevieve flagged that rich food is giving her indigestion, so excess fat is now drained from the beef and sausage before serving, and Sunday's gravy has been lightened (less oil/flour, extra fat skimmed, served sparingly) - worth keeping portions of richer dishes modest generally. UPDATE (Aug 11 feedback, round 2): two family members both asked for something much easier than pizza night, so Friday is now a one-tray oven bake of chicken nuggets, wedges & corn - the lowest-effort dinner of the week, with an optional side salad for the adults. Saturday's leftover lunch updated to match. UPDATE (Aug 12): Swapped Saturday's potato gems for oven-baked fries per the refresh-button test feedback, keeping the crumbed salmon fish-finger format and peas unchanged; updated the frozen shopping list accordingly (removed potato gems, added frozen fries). UPDATE (Aug 12): Migrated to structured per-meal ingredients (name/quantity/unit/category) so the shopping list is now computed live from whatever meals are actually in the week, instead of hand-maintained. UPDATE (Aug 12, feedback): Friday's dinner swapped from frozen chicken nuggets & frozen wedges to homemade oven-baked chicken tenders (real chicken breast, hand-crumbed) with fresh-cut roasted wedges, per feedback asking to minimise processed food — kept it a low-effort one-oven bake. Saturday's leftover lunch renamed to match.",
+    "board_notes": "The Family GP/Dietician and Child Nutritionist flagged Maddie's tomato dislike and lactose intolerance, so Tuesday's tacos and half of Friday's pizza go tomato-free, and dairy is spread lighter across the week. The Flavor Explorer leaned on Hamish's proven favourite (egg-and-soy fried rice with bacon), and salmon stays in the crumbed 'fish-finger' shape rather than the patty style that didn't land for him before. Winter week - every dinner and lunch stayed hot; no use-up ingredients flagged yet. UPDATE (Aug 11 feedback): Tuesday's dinner swapped to what the family is actually having - Old El Paso hard-shell tacos with seasoned beef instead of soft chicken tacos - keeping a build-your-own format with a tomato-free lane for Maddie. Diced tomato added as an optional topping and a tomato & cucumber side salad added to Wednesday's sausage bake (adults; kids get plain cucumber) to use up the 10 tomatoes on hand. Genevieve flagged that rich food is giving her indigestion, so excess fat is now drained from the beef and sausage before serving, and Sunday's gravy has been lightened (less oil/flour, extra fat skimmed, served sparingly) - worth keeping portions of richer dishes modest generally. UPDATE (Aug 11 feedback, round 2): two family members both asked for something much easier than pizza night, so Friday is now a one-tray oven bake of chicken nuggets, wedges & corn - the lowest-effort dinner of the week, with an optional side salad for the adults. Saturday's leftover lunch updated to match. UPDATE (Aug 12): Swapped Saturday's potato gems for oven-baked fries per the refresh-button test feedback, keeping the crumbed salmon fish-finger format and peas unchanged; updated the frozen shopping list accordingly (removed potato gems, added frozen fries). UPDATE (Aug 12): Migrated to structured per-meal ingredients (name/quantity/unit/category) so the shopping list is now computed live from whatever meals are actually in the week, instead of hand-maintained. UPDATE (Aug 12, feedback): Friday's dinner swapped from frozen chicken nuggets & frozen wedges to homemade oven-baked chicken tenders (real chicken breast, hand-crumbed) with fresh-cut roasted wedges, per feedback asking to minimise processed food — kept it a low-effort one-oven bake. Saturday's leftover lunch renamed to match. UPDATE (Aug 12): Removed One-pan sausage & rice bake, with a tomato & cucumber side salad from Wednesday's dinner — left empty.",
     "days": [
       {
         "day": "Monday",
@@ -375,77 +375,7 @@
       },
       {
         "day": "Wednesday",
-        "dinner": {
-          "name": "One-pan sausage & rice bake, with a tomato & cucumber side salad",
-          "new_or_repeat": "new",
-          "authored_by": "The Weeknight Realist",
-          "ingredients": [
-            {
-              "name": "sausages",
-              "quantity": 6,
-              "unit": "",
-              "category": "meat_deli",
-              "display": "6 sausages, leaner variety, casings removed"
-            },
-            {
-              "name": "long-grain rice",
-              "quantity": 1.5,
-              "unit": "cup",
-              "category": "pantry",
-              "display": "1.5 cups long-grain rice"
-            },
-            {
-              "name": "onion",
-              "quantity": 1,
-              "unit": "",
-              "category": "produce",
-              "display": "1 onion, diced"
-            },
-            {
-              "name": "garlic",
-              "quantity": 2,
-              "unit": "clove",
-              "category": "produce",
-              "display": "2 cloves garlic, minced"
-            },
-            {
-              "name": "chicken stock",
-              "quantity": 3,
-              "unit": "cup",
-              "category": "pantry",
-              "display": "3 cups chicken stock"
-            },
-            {
-              "name": "peas",
-              "quantity": 1,
-              "unit": "cup",
-              "category": "frozen",
-              "display": "1 cup frozen peas"
-            },
-            {
-              "name": "tomatoes",
-              "quantity": 6,
-              "unit": "",
-              "category": "produce",
-              "display": "6 tomatoes, sliced (side salad — kept off Maddie's plate)"
-            },
-            {
-              "name": "cucumber",
-              "quantity": 1,
-              "unit": "",
-              "category": "produce",
-              "display": "1 cucumber, sliced"
-            }
-          ],
-          "method": [
-            "Brown sausage meat in a large oven-proof pan, breaking it into small pieces, about 6 min; drain any excess fat.",
-            "Add onion and garlic, cook until soft, 3 min.",
-            "Stir in rice, then pour in stock and bring to a simmer.",
-            "Cover and cook 15-18 min until rice is tender and the liquid is absorbed, stirring in the peas for the last 5 min.",
-            "While the bake cooks, toss the sliced tomato and cucumber with a little olive oil and salt for a light side salad.",
-            "Serve as-is for the kids; pass the tomato-cucumber salad separately for the adults and Hamish — kept off Maddie's plate for the tomato, and light on any extra dairy for Genevieve."
-          ]
-        },
+        "dinner": null,
         "lunch": {
           "name": "Beef taco filling wraps (Tuesday's leftovers)",
           "ingredients": []
