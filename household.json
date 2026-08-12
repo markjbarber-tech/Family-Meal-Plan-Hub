@@ -83,13 +83,13 @@
     "status": "proposed",
     "proposed_at": "2026-08-10T07:00:00Z",
     "published_at": null,
-    "board_notes": "The Family GP/Dietician and Child Nutritionist flagged Maddie's tomato dislike and lactose intolerance, so Tuesday's tacos and half of Friday's pizza go tomato-free, and dairy is spread lighter across the week. The Flavor Explorer leaned on Hamish's proven favourite (egg-and-soy fried rice with bacon), and salmon stays in the crumbed 'fish-finger' shape rather than the patty style that didn't land for him before. Winter week - every dinner and lunch stayed hot; no use-up ingredients flagged yet. UPDATE (Aug 11 feedback): Tuesday's dinner swapped to what the family is actually having - Old El Paso hard-shell tacos with seasoned beef instead of soft chicken tacos - keeping a build-your-own format with a tomato-free lane for Maddie. Diced tomato added as an optional topping and a tomato & cucumber side salad added to Wednesday's sausage bake (adults; kids get plain cucumber) to use up the 10 tomatoes on hand. Genevieve flagged that rich food is giving her indigestion, so excess fat is now drained from the beef and sausage before serving, and Sunday's gravy has been lightened (less oil/flour, extra fat skimmed, served sparingly) - worth keeping portions of richer dishes modest generally. UPDATE (Aug 11 feedback, round 2): two family members both asked for something much easier than pizza night, so Friday is now a one-tray oven bake of chicken nuggets, wedges & corn - the lowest-effort dinner of the week, with an optional side salad for the adults. Saturday's leftover lunch updated to match.",
+    "board_notes": "The Family GP/Dietician and Child Nutritionist flagged Maddie's tomato dislike and lactose intolerance, so Tuesday's tacos and half of Friday's pizza go tomato-free, and dairy is spread lighter across the week. The Flavor Explorer leaned on Hamish's proven favourite (egg-and-soy fried rice with bacon), and salmon stays in the crumbed 'fish-finger' shape rather than the patty style that didn't land for him before. Winter week - every dinner and lunch stayed hot; no use-up ingredients flagged yet. UPDATE (Aug 11 feedback): Tuesday's dinner swapped to what the family is actually having - Old El Paso hard-shell tacos with seasoned beef instead of soft chicken tacos - keeping a build-your-own format with a tomato-free lane for Maddie. Diced tomato added as an optional topping and a tomato & cucumber side salad added to Wednesday's sausage bake (adults; kids get plain cucumber) to use up the 10 tomatoes on hand. Genevieve flagged that rich food is giving her indigestion, so excess fat is now drained from the beef and sausage before serving, and Sunday's gravy has been lightened (less oil/flour, extra fat skimmed, served sparingly) - worth keeping portions of richer dishes modest generally. UPDATE (Aug 11 feedback, round 2): two family members both asked for something much easier than pizza night, so Friday is now a one-tray oven bake of chicken nuggets, wedges & corn - the lowest-effort dinner of the week, with an optional side salad for the adults. Saturday's leftover lunch updated to match. UPDATE (Aug 12): Swapped Saturday's potato gems for oven-baked fries per the refresh-button test feedback, keeping the crumbed salmon fish-finger format and peas unchanged; updated the frozen shopping list accordingly (removed potato gems, added frozen fries).",
     "days": [
       {
         "day": "Monday",
         "dinner": {
           "name": "Soy-glazed baked chicken thighs, rice & steamed broccoli",
-          "new_or_repeat": "new (sauce variant)",
+          "new_or_repeat": "new",
           "authored_by": "The Weeknight Realist & The Child Nutritionist"
         },
         "lunch": {
@@ -103,7 +103,7 @@
         "day": "Tuesday",
         "dinner": {
           "name": "Build-your-own hard-shell tacos (Old El Paso), seasoned beef & toppings bar",
-          "new_or_repeat": "new (swapped to match the family's actual Tuesday - hard shells & beef, tomato-free lane kept for Maddie)",
+          "new_or_repeat": "new",
           "authored_by": "The Weeknight Realist & The Child Nutritionist"
         },
         "lunch": {
@@ -117,7 +117,7 @@
         "day": "Wednesday",
         "dinner": {
           "name": "One-pan sausage & rice bake, with a tomato & cucumber side salad",
-          "new_or_repeat": "new (replaces creamy gnocchi, lighter dairy; excess sausage fat drained; tomato-cucumber side added to use up tomatoes)",
+          "new_or_repeat": "new",
           "authored_by": "The Weeknight Realist"
         },
         "lunch": {
@@ -131,7 +131,7 @@
         "day": "Thursday",
         "dinner": {
           "name": "Egg & soy fried rice with bacon",
-          "new_or_repeat": "repeat of known favorite format",
+          "new_or_repeat": "repeat",
           "authored_by": "The Flavor Explorer & The Weeknight Realist"
         },
         "lunch": {
@@ -145,11 +145,11 @@
         "day": "Friday",
         "dinner": {
           "name": "Oven-tray chicken nuggets, wedges & corn (with a side salad for the grown-ups)",
-          "new_or_repeat": "new (swapped from pizza night - much easier, one-tray, per feedback)",
+          "new_or_repeat": "new",
           "authored_by": "The Weeknight Realist"
         },
         "lunch": {
-          "name": "Fried rice (Thursday's leftovers)"
+          "name": "Chicken nugget & wedge wraps (Friday's leftovers)"
         },
         "snack": {
           "name": "Rice crackers"
@@ -158,8 +158,8 @@
       {
         "day": "Saturday",
         "dinner": {
-          "name": "Crumbed salmon 'fish fingers', potato gems & peas",
-          "new_or_repeat": "repeat (2nd week of this format)",
+          "name": "Crumbed salmon 'fish fingers', oven-baked fries & peas",
+          "new_or_repeat": "new",
           "authored_by": "The Family GP/Dietician & The Child Nutritionist"
         },
         "lunch": {
@@ -173,7 +173,7 @@
         "day": "Sunday",
         "dinner": {
           "name": "Roast chicken, roast potatoes, broccoli & a lighter gravy",
-          "new_or_repeat": "repeat (gravy lightened after indigestion feedback)",
+          "new_or_repeat": "repeat",
           "authored_by": "The Weeknight Realist & The Family GP/Dietician"
         },
         "lunch": {
@@ -237,7 +237,7 @@
       "frozen": [
         "Peas",
         "Frozen peas & corn mix",
-        "Potato gems",
+        "Frozen fries (~500g)",
         "Chicken nuggets or tenders, frozen (~700g)",
         "Potato wedges, frozen (~750g)"
       ],
