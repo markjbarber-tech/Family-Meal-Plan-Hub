@@ -111,7 +111,7 @@
     "published_at": null,
     "pantry_ingredients": [],
     "budget_saver_mode": false,
-    "board_notes": "The Family GP/Dietician and Child Nutritionist flagged Maddie's tomato dislike and lactose intolerance, so Tuesday's tacos and half of Friday's pizza go tomato-free, and dairy is spread lighter across the week. The Flavor Explorer leaned on Hamish's proven favourite (egg-and-soy fried rice with bacon), and salmon stays in the crumbed 'fish-finger' shape rather than the patty style that didn't land for him before. Winter week - every dinner and lunch stayed hot; no use-up ingredients flagged yet. UPDATE (Aug 11 feedback): Tuesday's dinner swapped to what the family is actually having - Old El Paso hard-shell tacos with seasoned beef instead of soft chicken tacos - keeping a build-your-own format with a tomato-free lane for Maddie. Diced tomato added as an optional topping and a tomato & cucumber side salad added to Wednesday's sausage bake (adults; kids get plain cucumber) to use up the 10 tomatoes on hand. Genevieve flagged that rich food is giving her indigestion, so excess fat is now drained from the beef and sausage before serving, and Sunday's gravy has been lightened (less oil/flour, extra fat skimmed, served sparingly) - worth keeping portions of richer dishes modest generally. UPDATE (Aug 11 feedback, round 2): two family members both asked for something much easier than pizza night, so Friday is now a one-tray oven bake of chicken nuggets, wedges & corn - the lowest-effort dinner of the week, with an optional side salad for the adults. Saturday's leftover lunch updated to match. UPDATE (Aug 12): Swapped Saturday's potato gems for oven-baked fries per the refresh-button test feedback, keeping the crumbed salmon fish-finger format and peas unchanged; updated the frozen shopping list accordingly (removed potato gems, added frozen fries). UPDATE (Aug 12): Migrated to structured per-meal ingredients (name/quantity/unit/category) so the shopping list is now computed live from whatever meals are actually in the week, instead of hand-maintained.",
+    "board_notes": "The Family GP/Dietician and Child Nutritionist flagged Maddie's tomato dislike and lactose intolerance, so Tuesday's tacos and half of Friday's pizza go tomato-free, and dairy is spread lighter across the week. The Flavor Explorer leaned on Hamish's proven favourite (egg-and-soy fried rice with bacon), and salmon stays in the crumbed 'fish-finger' shape rather than the patty style that didn't land for him before. Winter week - every dinner and lunch stayed hot; no use-up ingredients flagged yet. UPDATE (Aug 11 feedback): Tuesday's dinner swapped to what the family is actually having - Old El Paso hard-shell tacos with seasoned beef instead of soft chicken tacos - keeping a build-your-own format with a tomato-free lane for Maddie. Diced tomato added as an optional topping and a tomato & cucumber side salad added to Wednesday's sausage bake (adults; kids get plain cucumber) to use up the 10 tomatoes on hand. Genevieve flagged that rich food is giving her indigestion, so excess fat is now drained from the beef and sausage before serving, and Sunday's gravy has been lightened (less oil/flour, extra fat skimmed, served sparingly) - worth keeping portions of richer dishes modest generally. UPDATE (Aug 11 feedback, round 2): two family members both asked for something much easier than pizza night, so Friday is now a one-tray oven bake of chicken nuggets, wedges & corn - the lowest-effort dinner of the week, with an optional side salad for the adults. Saturday's leftover lunch updated to match. UPDATE (Aug 12): Swapped Saturday's potato gems for oven-baked fries per the refresh-button test feedback, keeping the crumbed salmon fish-finger format and peas unchanged; updated the frozen shopping list accordingly (removed potato gems, added frozen fries). UPDATE (Aug 12): Migrated to structured per-meal ingredients (name/quantity/unit/category) so the shopping list is now computed live from whatever meals are actually in the week, instead of hand-maintained. UPDATE (Aug 12, feedback): Friday's dinner swapped from frozen chicken nuggets & frozen wedges to homemade oven-baked chicken tenders (real chicken breast, hand-crumbed) with fresh-cut roasted wedges, per feedback asking to minimise processed food — kept it a low-effort one-oven bake. Saturday's leftover lunch renamed to match.",
     "days": [
       {
         "day": "Monday",
@@ -265,23 +265,27 @@
       {
         "day": "Friday",
         "dinner": {
-          "name": "Oven-tray chicken nuggets, wedges & corn (with a side salad for the grown-ups)",
+          "name": "Oven-baked chicken tenders (homemade), roasted potato wedges & corn (with a side salad for the grown-ups)",
           "new_or_repeat": "new",
-          "authored_by": "The Weeknight Realist",
+          "authored_by": "The Weeknight Realist & The Family GP/Dietician",
           "ingredients": [
-            {"name":"chicken nuggets or tenders","quantity":1,"unit":"bag (~700g)","category":"frozen","display":"1 bag frozen chicken nuggets or tenders (~700g)"},
-            {"name":"potato wedges","quantity":1,"unit":"bag (~750g)","category":"frozen","display":"1 bag frozen potato wedges (~750g)"},
+            {"name":"chicken breast","quantity":700,"unit":"g","category":"meat_deli","display":"700g chicken breast, cut into tender-sized strips"},
+            {"name":"plain flour","quantity":0.5,"unit":"cup","category":"pantry","display":"1/2 cup flour"},
+            {"name":"eggs","quantity":2,"unit":"","category":"dairy","display":"2 eggs, beaten"},
+            {"name":"panko breadcrumbs","quantity":1.5,"unit":"cup","category":"pantry","display":"1.5 cups panko breadcrumbs"},
+            {"name":"potatoes","quantity":1,"unit":"kg","category":"produce","display":"1kg potatoes, cut into wedges"},
             {"name":"corn kernels","quantity":2,"unit":"cup","category":"produce","display":"2 cups corn kernels, fresh or tinned"},
             {"name":"salad greens","quantity":1,"unit":"bag","category":"produce","display":"Salad greens (adults only)"},
             {"name":"cucumber","quantity":1,"unit":"","category":"produce","display":"1 cucumber, for the adults' salad"}
           ],
           "method": [
-            "Preheat oven to the temperature on the nugget/wedge packets (usually 200°C).",
-            "Spread nuggets and wedges across one large tray (or two if crowded), spray lightly with oil.",
-            "Bake according to packet directions, turning once, until golden and cooked through — usually 18-22 min.",
+            "Preheat oven to 200°C (400°F) and line two trays.",
+            "Toss the potato wedges with oil, salt and pepper on one tray; roast 25-30 min, turning once, until golden.",
+            "Set up three shallow bowls: flour, beaten egg, and panko. Coat each chicken strip in flour, then egg, then panko, pressing the crumbs on firmly.",
+            "Lay the chicken tenders on the second tray, spray lightly with oil, and bake alongside the wedges for the last 15-18 min, turning once, until golden and cooked through.",
             "Steam or microwave the corn for the last 5 min.",
-            "Toss a quick side salad for the adults while everything else bakes.",
-            "Serve straight from the tray — the lowest-effort dinner of the week."
+            "Toss a quick side salad for the adults while everything bakes.",
+            "Serve straight from the trays — homemade tenders and fresh-cut wedges in place of last time's frozen versions, still a low-effort one-oven dinner."
           ]
         },
         "lunch": {
@@ -320,7 +324,7 @@
           ]
         },
         "lunch": {
-          "name": "Chicken nugget & wedge wraps (Friday's leftovers)",
+          "name": "Chicken tender & wedge wraps (Friday's leftovers)",
           "ingredients": []
         },
         "snack": {
