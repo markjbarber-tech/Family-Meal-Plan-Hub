@@ -378,7 +378,7 @@ body.auth-pending #hub{display:none;}
   </div>
 
   <div class="util-row">
-    <button class="util-btn" id="refreshPlanBtn"><i class="ti ti-refresh"></i>Refresh plan</button>
+    <button class="util-btn" id="refreshPlanBtn" disabled title="Meal generation is being upgraded to the new backend — back shortly"><i class="ti ti-refresh"></i>Refresh plan</button>
     <button class="util-btn" id="favouritesLinkBtn"><i class="ti ti-heart"></i>Favourites</button>
   </div>
   <div class="refresh-status-note" id="refreshStatusNote"></div>
@@ -415,7 +415,11 @@ body.auth-pending #hub{display:none;}
 
 <script>
 (function(){
-  // ---- Claude replaces WEEK_DATA, PRINCIPLES_TEXT, FAVOURITES, and (rarely) FEEDBACK_ENDPOINT ----
+  // ---- Multi-tenant re-platform in progress: WEEK_DATA/PRINCIPLES_TEXT/FAVOURITES are no
+  // longer baked in at generation time -- they're fetched live from Supabase per signed-in
+  // household in loadHouseholdData(), below. FEEDBACK_ENDPOINT/READ_KEY are legacy (the old
+  // Apps Script backend), still used only by the 3 AI-generation actions until they're
+  // ported to Supabase Edge Functions. ----
   const FEEDBACK_ENDPOINT = "https://script.google.com/macros/s/AKfycbwQXFwbeGLuhF8XA08NpEiWmCRscGNjxTt0wN3lGc73Pk-7PXLPMwU4dexHaRbQDRAWMw/exec";
   const FEEDBACK_EMAIL = "mark.j.barber@gmail.com";
   const READ_KEY = "family-menu-2026"; // must match Apps Script's READ_KEY — it's a light lock, not real security
@@ -428,849 +432,18 @@ body.auth-pending #hub{display:none;}
   const SUPABASE_ANON_KEY = "sb_publishable_psBedalpZIlxs5DaGQPf1g_yJ49IdI8";
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const WEEK_DATA = {
-    "week_id": "2026-W33",
-    "date_range": "Aug 10 - Aug 16, 2026",
-    "pantry_ingredients": [],
-    "budget_saver_mode": true,
-    "days": [
-        {
-            "day": "Monday",
-            "dinner": {
-                "name": "Creamy Chicken & Hidden-Veg Pasta Bake (Sunday's Roast Chicken)",
-                "ingredients": [
-                    {
-                        "name": "penne pasta",
-                        "quantity": 400,
-                        "unit": "g",
-                        "category": "pantry",
-                        "display": "Penne pasta"
-                    },
-                    {
-                        "name": "leftover roast chicken, shredded",
-                        "quantity": 2,
-                        "unit": "cups",
-                        "category": "meat_deli",
-                        "display": "Shredded leftover roast chicken"
-                    },
-                    {
-                        "name": "carrot",
-                        "quantity": 2,
-                        "unit": "medium",
-                        "category": "produce",
-                        "display": "Carrots, peeled and chopped"
-                    },
-                    {
-                        "name": "pumpkin",
-                        "quantity": 200,
-                        "unit": "g",
-                        "category": "produce",
-                        "display": "Pumpkin, peeled and cubed"
-                    },
-                    {
-                        "name": "onion",
-                        "quantity": 1,
-                        "unit": "small",
-                        "category": "produce",
-                        "display": "Onion, finely diced"
-                    },
-                    {
-                        "name": "garlic clove",
-                        "quantity": 2,
-                        "unit": "clove",
-                        "category": "produce",
-                        "display": "Garlic, minced"
-                    },
-                    {
-                        "name": "lactose-free milk",
-                        "quantity": 500,
-                        "unit": "ml",
-                        "category": "dairy",
-                        "display": "Lactose-free milk"
-                    },
-                    {
-                        "name": "olive oil",
-                        "quantity": 2,
-                        "unit": "tbsp",
-                        "category": "pantry",
-                        "display": "Olive oil"
-                    },
-                    {
-                        "name": "lactose-free cheese, shredded",
-                        "quantity": 100,
-                        "unit": "g",
-                        "category": "dairy",
-                        "display": "Shredded lactose-free cheese"
-                    },
-                    {
-                        "name": "chicken stock",
-                        "quantity": 250,
-                        "unit": "ml",
-                        "category": "pantry",
-                        "display": "Chicken stock"
-                    },
-                    {
-                        "name": "breadcrumbs",
-                        "quantity": 30,
-                        "unit": "g",
-                        "category": "pantry",
-                        "display": "Breadcrumbs for topping"
-                    },
-                    {
-                        "name": "parsley, chopped",
-                        "quantity": 1,
-                        "unit": "tbsp",
-                        "category": "produce",
-                        "display": "Fresh parsley, chopped (optional garnish)"
-                    }
-                ],
-                "new_or_repeat": "new",
-                "authored_by": "The Veg-Forward Stylist & The Weeknight Realist",
-                "method": [
-                    "Boil the pasta in salted water until just al dente, drain and set aside (reserve pot).",
-                    "Meanwhile, steam or boil the carrot and pumpkin until very soft, about 10 minutes.",
-                    "In a large pan, heat olive oil and sauté onion and garlic until soft, about 4 minutes.",
-                    "Add the softened carrot and pumpkin to the pan with the chicken stock and lactose-free milk, then blend with a stick blender until smooth and creamy (no visible veg chunks).",
-                    "Stir in most of the lactose-free cheese until melted, season lightly, then fold in the shredded roast chicken and cooked pasta.",
-                    "Transfer everything to a baking dish, top with remaining cheese and breadcrumbs, and bake at 200°C for 12-15 minutes until golden and bubbling.",
-                    "Rest for a few minutes, scatter with parsley for the adults, and serve - it's naturally tomato-free and lighter than a classic creamy bake."
-                ]
-            },
-            "lunch": {
-                "name": "Cheese quesadillas",
-                "ingredients": [
-                    {
-                        "name": "tortillas",
-                        "quantity": 4,
-                        "unit": "",
-                        "category": "pantry",
-                        "display": "4 tortillas"
-                    },
-                    {
-                        "name": "grated cheese",
-                        "quantity": 1,
-                        "unit": "cup",
-                        "category": "dairy",
-                        "display": "1 cup grated cheese"
-                    }
-                ]
-            },
-            "snack": {
-                "name": "Apple slices with peanut butter",
-                "ingredients": [
-                    {
-                        "name": "apples",
-                        "quantity": 2,
-                        "unit": "",
-                        "category": "produce",
-                        "display": "2 apples"
-                    },
-                    {
-                        "name": "peanut butter",
-                        "quantity": 2,
-                        "unit": "tbsp",
-                        "category": "pantry",
-                        "display": "2 tbsp peanut butter"
-                    }
-                ]
-            }
-        },
-        {
-            "day": "Tuesday",
-            "dinner": {
-                "name": "Build-your-own hard-shell tacos (Old El Paso), seasoned beef & toppings bar",
-                "new_or_repeat": "new",
-                "authored_by": "The Weeknight Realist & The Child Nutritionist",
-                "ingredients": [
-                    {
-                        "name": "beef mince",
-                        "quantity": 600,
-                        "unit": "g",
-                        "category": "meat_deli",
-                        "display": "600g beef mince"
-                    },
-                    {
-                        "name": "ground cumin",
-                        "quantity": 1,
-                        "unit": "tbsp",
-                        "category": "pantry",
-                        "display": "1 tbsp ground cumin"
-                    },
-                    {
-                        "name": "smoked paprika",
-                        "quantity": 1,
-                        "unit": "tbsp",
-                        "category": "pantry",
-                        "display": "1 tbsp smoked paprika"
-                    },
-                    {
-                        "name": "garlic powder",
-                        "quantity": 1,
-                        "unit": "tsp",
-                        "category": "pantry",
-                        "display": "1 tsp garlic powder"
-                    },
-                    {
-                        "name": "taco shells (Old El Paso)",
-                        "quantity": 12,
-                        "unit": "",
-                        "category": "pantry",
-                        "display": "12 Old El Paso hard taco shells"
-                    },
-                    {
-                        "name": "shredded lettuce",
-                        "quantity": 1,
-                        "unit": "cup",
-                        "category": "produce",
-                        "display": "1 cup shredded lettuce"
-                    },
-                    {
-                        "name": "grated cheese",
-                        "quantity": 1,
-                        "unit": "cup",
-                        "category": "dairy",
-                        "display": "1 cup grated cheese (+ lactose-free block for Maddie)"
-                    },
-                    {
-                        "name": "lactose-free cheese",
-                        "quantity": 1,
-                        "unit": "block",
-                        "category": "dairy",
-                        "display": "1 lactose-free cheese block, for Maddie"
-                    },
-                    {
-                        "name": "sour cream",
-                        "quantity": 0.5,
-                        "unit": "cup",
-                        "category": "dairy",
-                        "display": "1/2 cup sour cream"
-                    },
-                    {
-                        "name": "avocado",
-                        "quantity": 1,
-                        "unit": "",
-                        "category": "produce",
-                        "display": "1 avocado, sliced"
-                    },
-                    {
-                        "name": "tomatoes",
-                        "quantity": 4,
-                        "unit": "",
-                        "category": "produce",
-                        "display": "4 tomatoes, diced (topping — kept off Maddie's plate)"
-                    },
-                    {
-                        "name": "cucumber",
-                        "quantity": 1,
-                        "unit": "",
-                        "category": "produce",
-                        "display": "1 cucumber, sliced (tomato-free lane)"
-                    }
-                ],
-                "method": [
-                    "Brown beef mince in a large pan over medium-high heat, breaking it up, 6-8 min.",
-                    "Stir in cumin, paprika, garlic powder and salt, then a splash of water; simmer 3-4 min until thickened.",
-                    "Warm the taco shells according to packet directions.",
-                    "Set out beef, lettuce, cheese, sour cream, avocado, diced tomato and cucumber separately.",
-                    "Everyone builds their own — keep diced tomato and heavy cheese/sour cream light or off Maddie's plate, cucumber slices in its place."
-                ]
-            },
-            "lunch": {
-                "name": "Soy chicken & rice wraps (Monday's leftovers)",
-                "ingredients": []
-            },
-            "snack": {
-                "name": "Banana",
-                "ingredients": [
-                    {
-                        "name": "bananas",
-                        "quantity": 1,
-                        "unit": "bunch",
-                        "category": "produce",
-                        "display": "1 bunch bananas"
-                    }
-                ]
-            }
-        },
-        {
-            "day": "Wednesday",
-            "dinner": {
-                "name": "Build-Your-Own San Choy Bow Rice Bowls",
-                "ingredients": [
-                    {
-                        "name": "chicken mince",
-                        "quantity": 500,
-                        "unit": "g",
-                        "category": "meat_deli",
-                        "display": "500g chicken mince"
-                    },
-                    {
-                        "name": "jasmine rice",
-                        "quantity": 300,
-                        "unit": "g",
-                        "category": "pantry",
-                        "display": "300g jasmine rice"
-                    },
-                    {
-                        "name": "carrot",
-                        "quantity": 1,
-                        "unit": "whole",
-                        "category": "produce",
-                        "display": "1 carrot, grated"
-                    },
-                    {
-                        "name": "red capsicum",
-                        "quantity": 1,
-                        "unit": "whole",
-                        "category": "produce",
-                        "display": "1 red capsicum, finely diced"
-                    },
-                    {
-                        "name": "snow peas",
-                        "quantity": 100,
-                        "unit": "g",
-                        "category": "produce",
-                        "display": "100g snow peas, thinly sliced"
-                    },
-                    {
-                        "name": "spring onion",
-                        "quantity": 3,
-                        "unit": "stalks",
-                        "category": "produce",
-                        "display": "3 spring onions, sliced"
-                    },
-                    {
-                        "name": "garlic",
-                        "quantity": 2,
-                        "unit": "cloves",
-                        "category": "produce",
-                        "display": "2 garlic cloves, minced"
-                    },
-                    {
-                        "name": "ginger",
-                        "quantity": 1,
-                        "unit": "tsp",
-                        "category": "produce",
-                        "display": "1 tsp grated ginger"
-                    },
-                    {
-                        "name": "soy sauce",
-                        "quantity": 3,
-                        "unit": "tbsp",
-                        "category": "pantry",
-                        "display": "3 tbsp soy sauce"
-                    },
-                    {
-                        "name": "sesame oil",
-                        "quantity": 1,
-                        "unit": "tbsp",
-                        "category": "pantry",
-                        "display": "1 tbsp sesame oil"
-                    },
-                    {
-                        "name": "rice vinegar",
-                        "quantity": 1,
-                        "unit": "tbsp",
-                        "category": "pantry",
-                        "display": "1 tbsp rice vinegar"
-                    },
-                    {
-                        "name": "honey",
-                        "quantity": 1,
-                        "unit": "tsp",
-                        "category": "pantry",
-                        "display": "1 tsp honey"
-                    },
-                    {
-                        "name": "vegetable oil",
-                        "quantity": 1,
-                        "unit": "tbsp",
-                        "category": "pantry",
-                        "display": "1 tbsp vegetable oil"
-                    },
-                    {
-                        "name": "cos lettuce leaves",
-                        "quantity": 8,
-                        "unit": "leaves",
-                        "category": "produce",
-                        "display": "8 cos lettuce leaves, for wrapping (adults)"
-                    }
-                ],
-                "new_or_repeat": "new",
-                "authored_by": "The Flavor Explorer & The Weeknight Realist",
-                "method": [
-                    "Cook jasmine rice according to packet instructions; keep warm.",
-                    "Heat vegetable oil in a large pan or wok over high heat. Add garlic and ginger, stir for 30 seconds until fragrant.",
-                    "Add chicken mince and cook, breaking it up, until browned and cooked through (5-6 minutes).",
-                    "Add capsicum, carrot and snow peas; stir-fry for 3-4 minutes until just tender.",
-                    "Pour in soy sauce, sesame oil, rice vinegar and honey; toss to coat and simmer for 2 minutes.",
-                    "Stir through half the spring onion, reserving the rest for garnish.",
-                    "Serve rice in bowls topped with the mince mixture and a sprinkle of spring onion - kids can eat straight over rice.",
-                    "Set lettuce leaves, extra soy sauce and (for adults) chilli flakes on the table so everyone can build their own lettuce-wrapped bites if they like."
-                ]
-            },
-            "lunch": {
-                "name": "Beef taco filling wraps (Tuesday's leftovers)",
-                "ingredients": []
-            },
-            "snack": {
-                "name": "Mandarins",
-                "ingredients": [
-                    {
-                        "name": "mandarins",
-                        "quantity": 1,
-                        "unit": "bag",
-                        "category": "produce",
-                        "display": "1 bag mandarins"
-                    }
-                ]
-            }
-        },
-        {
-            "day": "Thursday",
-            "dinner": {
-                "name": "Egg & soy fried rice with bacon",
-                "new_or_repeat": "repeat",
-                "authored_by": "The Flavor Explorer & The Weeknight Realist",
-                "ingredients": [
-                    {
-                        "name": "bacon",
-                        "quantity": 4,
-                        "unit": "rasher",
-                        "category": "meat_deli",
-                        "display": "4 rashers bacon, diced"
-                    },
-                    {
-                        "name": "eggs",
-                        "quantity": 3,
-                        "unit": "",
-                        "category": "dairy",
-                        "display": "3 eggs, beaten"
-                    },
-                    {
-                        "name": "soy sauce",
-                        "quantity": 3,
-                        "unit": "tbsp",
-                        "category": "pantry",
-                        "display": "3 tbsp soy sauce"
-                    },
-                    {
-                        "name": "frozen peas and corn mix",
-                        "quantity": 1,
-                        "unit": "cup",
-                        "category": "frozen",
-                        "display": "1 cup frozen peas and corn mix"
-                    },
-                    {
-                        "name": "spring onions",
-                        "quantity": 2,
-                        "unit": "",
-                        "category": "produce",
-                        "display": "2 spring onions, sliced"
-                    }
-                ],
-                "method": [
-                    "Heat oil in a large pan or wok over high heat; cook bacon until crisp, about 4 min.",
-                    "Push bacon to one side, pour in the beaten egg and scramble until just set.",
-                    "Add 4 cups cold cooked rice (day-old if possible), breaking up clumps, and stir-fry 3-4 min.",
-                    "Add the peas and corn, soy sauce and spring onions; toss until heated through and everything is coated.",
-                    "Serve as-is — a proven favourite for Hamish (rice with soy sauce, egg), easy to portion small for Maddie."
-                ]
-            },
-            "lunch": {
-                "name": "Sausage rice bake (Wednesday's leftovers)",
-                "ingredients": []
-            },
-            "snack": {
-                "name": "Popcorn",
-                "ingredients": [
-                    {
-                        "name": "popcorn kernels",
-                        "quantity": 0.5,
-                        "unit": "cup",
-                        "category": "pantry",
-                        "display": "1/2 cup popcorn kernels"
-                    }
-                ]
-            }
-        },
-        {
-            "day": "Friday",
-            "dinner": {
-                "name": "Oven-baked chicken tenders (homemade), roasted potato wedges & corn (with a side salad for the grown-ups)",
-                "new_or_repeat": "new",
-                "authored_by": "The Weeknight Realist & The Family GP/Dietician",
-                "ingredients": [
-                    {
-                        "name": "chicken breast",
-                        "quantity": 700,
-                        "unit": "g",
-                        "category": "meat_deli",
-                        "display": "700g chicken breast, cut into tender-sized strips"
-                    },
-                    {
-                        "name": "plain flour",
-                        "quantity": 0.5,
-                        "unit": "cup",
-                        "category": "pantry",
-                        "display": "1/2 cup flour"
-                    },
-                    {
-                        "name": "eggs",
-                        "quantity": 2,
-                        "unit": "",
-                        "category": "dairy",
-                        "display": "2 eggs, beaten"
-                    },
-                    {
-                        "name": "panko breadcrumbs",
-                        "quantity": 1.5,
-                        "unit": "cup",
-                        "category": "pantry",
-                        "display": "1.5 cups panko breadcrumbs"
-                    },
-                    {
-                        "name": "potatoes",
-                        "quantity": 1,
-                        "unit": "kg",
-                        "category": "produce",
-                        "display": "1kg potatoes, cut into wedges"
-                    },
-                    {
-                        "name": "corn kernels",
-                        "quantity": 2,
-                        "unit": "cup",
-                        "category": "produce",
-                        "display": "2 cups corn kernels, fresh or tinned"
-                    },
-                    {
-                        "name": "salad greens",
-                        "quantity": 1,
-                        "unit": "bag",
-                        "category": "produce",
-                        "display": "Salad greens (adults only)"
-                    },
-                    {
-                        "name": "cucumber",
-                        "quantity": 1,
-                        "unit": "",
-                        "category": "produce",
-                        "display": "1 cucumber, for the adults' salad"
-                    }
-                ],
-                "method": [
-                    "Preheat oven to 200°C (400°F) and line two trays.",
-                    "Toss the potato wedges with oil, salt and pepper on one tray; roast 25-30 min, turning once, until golden.",
-                    "Set up three shallow bowls: flour, beaten egg, and panko. Coat each chicken strip in flour, then egg, then panko, pressing the crumbs on firmly.",
-                    "Lay the chicken tenders on the second tray, spray lightly with oil, and bake alongside the wedges for the last 15-18 min, turning once, until golden and cooked through.",
-                    "Steam or microwave the corn for the last 5 min.",
-                    "Toss a quick side salad for the adults while everything bakes.",
-                    "Serve straight from the trays — homemade tenders and fresh-cut wedges in place of last time's frozen versions, still a low-effort one-oven dinner."
-                ]
-            },
-            "lunch": {
-                "name": "Fried rice (Thursday's leftovers)",
-                "ingredients": []
-            },
-            "snack": {
-                "name": "Rice crackers",
-                "ingredients": [
-                    {
-                        "name": "rice crackers",
-                        "quantity": 1,
-                        "unit": "packet",
-                        "category": "pantry",
-                        "display": "1 packet rice crackers"
-                    }
-                ]
-            }
-        },
-        {
-            "day": "Saturday",
-            "dinner": {
-                "name": "Crumbed salmon 'fish fingers', oven potato wedges & peas",
-                "new_or_repeat": "new",
-                "authored_by": "The Family GP/Dietician & The Child Nutritionist",
-                "ingredients": [
-                    {
-                        "name": "salmon fillets",
-                        "quantity": 600,
-                        "unit": "g",
-                        "category": "meat_deli",
-                        "display": "600g skinless salmon fillets, cut into finger-width strips"
-                    },
-                    {
-                        "name": "plain flour",
-                        "quantity": 0.5,
-                        "unit": "cup",
-                        "category": "pantry",
-                        "display": "1/2 cup flour"
-                    },
-                    {
-                        "name": "eggs",
-                        "quantity": 2,
-                        "unit": "",
-                        "category": "dairy",
-                        "display": "2 eggs, beaten"
-                    },
-                    {
-                        "name": "panko breadcrumbs",
-                        "quantity": 1.5,
-                        "unit": "cup",
-                        "category": "pantry",
-                        "display": "1.5 cups panko breadcrumbs"
-                    },
-                    {
-                        "name": "potatoes",
-                        "quantity": 800,
-                        "unit": "g",
-                        "category": "produce",
-                        "display": "800g potatoes, cut into wedges"
-                    },
-                    {
-                        "name": "peas",
-                        "quantity": 1,
-                        "unit": "cup",
-                        "category": "frozen",
-                        "display": "Frozen peas, to serve"
-                    },
-                    {
-                        "name": "ketchup",
-                        "quantity": 1,
-                        "unit": "bottle",
-                        "category": "pantry",
-                        "display": "Ketchup, to serve"
-                    }
-                ],
-                "method": [
-                    "Preheat oven to 200°C (400°F) and line a tray.",
-                    "Set up three shallow bowls: flour, beaten egg, and panko.",
-                    "Coat each salmon strip in flour, then egg, then panko, pressing the crumbs on firmly.",
-                    "Toss the potato wedges with oil, salt and pepper on a separate tray; roast alongside the salmon for 25-30 min, turning once, until golden.",
-                    "Lay the salmon on its tray, spray lightly with oil, and bake for the last 12-15 min, turning once, until golden and just cooked through.",
-                    "Steam or microwave the peas.",
-                    "Serve with ketchup — same crumbed-and-fried approach that worked well before, fresh potato wedges this week so they share a base with Friday's and Sunday's potatoes (Budget Saver Mode)."
-                ]
-            },
-            "lunch": {
-                "name": "Chicken tender & wedge wraps (Friday's leftovers)",
-                "ingredients": []
-            },
-            "snack": {
-                "name": "Lactose-free yoghurt pouch (or fresh fruit if unavailable)",
-                "ingredients": [
-                    {
-                        "name": "lactose-free yoghurt pouches",
-                        "quantity": 4,
-                        "unit": "",
-                        "category": "dairy",
-                        "display": "4 lactose-free yoghurt pouches"
-                    }
-                ]
-            }
-        },
-        {
-            "day": "Sunday",
-            "dinner": {
-                "name": "Roast chicken, roast potatoes, broccoli & a lighter gravy",
-                "new_or_repeat": "repeat",
-                "authored_by": "The Weeknight Realist & The Family GP/Dietician",
-                "ingredients": [
-                    {
-                        "name": "whole chicken",
-                        "quantity": 1,
-                        "unit": "(~1.8kg)",
-                        "category": "meat_deli",
-                        "display": "1 whole chicken (~1.8kg)"
-                    },
-                    {
-                        "name": "potatoes",
-                        "quantity": 1.5,
-                        "unit": "kg",
-                        "category": "produce",
-                        "display": "1.5kg potatoes, quartered"
-                    },
-                    {
-                        "name": "garlic",
-                        "quantity": 2,
-                        "unit": "clove",
-                        "category": "produce",
-                        "display": "2 cloves garlic"
-                    },
-                    {
-                        "name": "lemon",
-                        "quantity": 1,
-                        "unit": "",
-                        "category": "produce",
-                        "display": "1 lemon, halved"
-                    },
-                    {
-                        "name": "fresh thyme",
-                        "quantity": 1,
-                        "unit": "bunch",
-                        "category": "produce",
-                        "display": "A few sprigs thyme"
-                    },
-                    {
-                        "name": "plain flour",
-                        "quantity": 1,
-                        "unit": "tbsp",
-                        "category": "pantry",
-                        "display": "1 tbsp flour, for the gravy"
-                    },
-                    {
-                        "name": "chicken stock",
-                        "quantity": 2,
-                        "unit": "cup",
-                        "category": "pantry",
-                        "display": "2 cups chicken stock (for gravy)"
-                    },
-                    {
-                        "name": "broccoli",
-                        "quantity": 1,
-                        "unit": "head",
-                        "category": "produce",
-                        "display": "1 head broccoli, steamed"
-                    }
-                ],
-                "method": [
-                    "Preheat oven to 200°C (400°F).",
-                    "Pat the chicken dry, rub with oil, salt and pepper; stuff the cavity with garlic, lemon and thyme.",
-                    "Place chicken in a large roasting tray, scatter potatoes around it tossed in oil, salt and pepper.",
-                    "Roast 70-80 min until juices run clear and potatoes are golden, basting once halfway.",
-                    "Rest chicken 10 min. Skim excess fat from the pan juices, whisk in flour over heat, then gradually add stock, simmering until thickened — go light on the flour/fat for a lighter gravy.",
-                    "Steam broccoli and serve alongside."
-                ]
-            },
-            "lunch": {
-                "name": "Salmon finger wraps (Saturday's leftovers)",
-                "ingredients": []
-            },
-            "snack": {
-                "name": "Cheese and crackers",
-                "ingredients": [
-                    {
-                        "name": "cheese",
-                        "quantity": 1,
-                        "unit": "block",
-                        "category": "dairy",
-                        "display": "1 block cheese"
-                    },
-                    {
-                        "name": "crackers",
-                        "quantity": 1,
-                        "unit": "packet",
-                        "category": "pantry",
-                        "display": "1 packet crackers"
-                    }
-                ]
-            }
-        }
-    ]
-};
+  let WEEK_DATA = null;
 
-  let PRINCIPLES_TEXT = `- Favor low-cleanup/one-pan (or one-pan-plus-one-pot) dinners on weeknights
-- Lean on 'build-your-own' formats (tacos, pizza, etc.) as a reliable way to introduce variety without a fight
-- Keep serving nutrition-forward meals (salmon, roast veg) even when not popular with the kids yet - look for kid-friendlier formats rather than dropping them
-- OK to hide vegetables in kid portions when it helps a dish land (e.g. blended into a sauce or mac and cheese)
-- Lunches and snacks should have real variety across the week, same as dinners - not a fixed rotation
-- Ensure avoid heavy rich foods as these give Genevieve indigestion.
-- Lunches and snacks are designed for adults rather than kids please
-- No strict repeat-avoidance rule - use judgment on spacing repeats rather than a fixed week count
-- Seasonal: household is in Australia - winter (Jun-Aug) prioritise hot dinners/lunches, summer (Dec-Feb) prioritise grilled food and salads
-- Maddie: mildly lactose intolerant (moderate dairy, lactose-free swaps where easy) and dislikes tomatoes/tomato sauce (offer a tomato-free option on build-your-own nights); states she dislikes salmon but keep gently offering it in kid-friendly formats
-- Hamish: avoid broccoli-forward dishes as the main event, salmon patties (crumbed 'fish finger' shape works better), roast veg stacks, and pie fillings — all previously flopped
-- Genevieve: prone to indigestion from rich/heavy food - go easy on cream, butter, deep-frying, and heavy cheese where possible`;
+  let PRINCIPLES_TEXT = '';
 
-  let FAVOURITES = [
-  {
-    "id": "soy-glazed-baked-chicken-thighs-rice-steamed-broccoli",
-    "name": "Soy-glazed baked chicken thighs, rice & steamed broccoli",
-    "authored_by": "The Weeknight Realist & The Child Nutritionist",
-    "recipe": {
-      "ingredients": [
-        "Chicken thighs (boneless, skinless)",
-        "Soy sauce",
-        "Honey",
-        "Garlic",
-        "Ginger",
-        "Jasmine rice",
-        "Broccoli"
-      ],
-      "method": [
-        "Whisk soy, honey, garlic and ginger; toss chicken to coat.",
-        "Bake chicken on a lined tray at 200°C for ~25 min, basting once.",
-        "Cook rice; steam broccoli until just tender.",
-        "Serve chicken over rice with broccoli on the side."
-      ]
-    },
-    "saved_at": "2026-08-12T05:00:00.567Z",
-    "requested_for_next_week": false
-  },
-  {
-    "id": "egg-soy-fried-rice-with-bacon",
-    "name": "Egg & soy fried rice with bacon",
-    "authored_by": "The Flavor Explorer & The Weeknight Realist",
-    "recipe": {
-      "ingredients": [
-        "4 rashers bacon, diced",
-        "3 eggs, beaten",
-        "3 tbsp soy sauce",
-        "1 cup frozen peas and corn mix",
-        "2 spring onions, sliced"
-      ],
-      "method": [
-        "Heat oil in a large pan or wok over high heat; cook bacon until crisp, about 4 min.",
-        "Push bacon to one side, pour in the beaten egg and scramble until just set.",
-        "Add 4 cups cold cooked rice (day-old if possible), breaking up clumps, and stir-fry 3-4 min.",
-        "Add the peas and corn, soy sauce and spring onions; toss until heated through and everything is coated.",
-        "Serve as-is — a proven favourite for Hamish (rice with soy sauce, egg), easy to portion small for Maddie."
-      ]
-    },
-    "saved_at": "2026-08-12T12:24:02.003Z",
-    "requested_for_next_week": false
-  },
-  {
-    "id": "build-your-own-san-choy-bow-rice-bowls",
-    "name": "Build-Your-Own San Choy Bow Rice Bowls",
-    "authored_by": "The Flavor Explorer & The Weeknight Realist",
-    "recipe": {
-      "ingredients": [
-        "500g chicken mince",
-        "300g jasmine rice",
-        "1 carrot, grated",
-        "1 red capsicum, finely diced",
-        "100g snow peas, thinly sliced",
-        "3 spring onions, sliced",
-        "2 garlic cloves, minced",
-        "1 tsp grated ginger",
-        "3 tbsp soy sauce",
-        "1 tbsp sesame oil",
-        "1 tbsp rice vinegar",
-        "1 tsp honey",
-        "1 tbsp vegetable oil",
-        "8 cos lettuce leaves, for wrapping (adults)"
-      ],
-      "method": [
-        "Cook jasmine rice according to packet instructions; keep warm.",
-        "Heat vegetable oil in a large pan or wok over high heat. Add garlic and ginger, stir for 30 seconds until fragrant.",
-        "Add chicken mince and cook, breaking it up, until browned and cooked through (5-6 minutes).",
-        "Add capsicum, carrot and snow peas; stir-fry for 3-4 minutes until just tender.",
-        "Pour in soy sauce, sesame oil, rice vinegar and honey; toss to coat and simmer for 2 minutes.",
-        "Stir through half the spring onion, reserving the rest for garnish.",
-        "Serve rice in bowls topped with the mince mixture and a sprinkle of spring onion - kids can eat straight over rice.",
-        "Set lettuce leaves, extra soy sauce and (for adults) chilli flakes on the table so everyone can build their own lettuce-wrapped bites if they like."
-      ]
-    },
-    "saved_at": "2026-08-12T12:47:14.529Z",
-    "requested_for_next_week": true
-  }
-];
+  let FAVOURITES = [];
 
   let dishStats = {};
   let shoppingState = {};
   let recipeTabIndex = 0;
   let recipeTabInitialized = false;
+  let currentHouseholdId = null; // = household.id = the signed-in auth user's id; set in loadHouseholdData()
+  let currentWeekRowId = null; // weeks.id (uuid) for the current week, needed to scope meals queries
 
   function slugify(name){ return String(name).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
   function shopItemKey(cat, name){ return cat + '::' + String(name).toLowerCase(); }
@@ -1387,19 +560,44 @@ body.auth-pending #hub{display:none;}
     }).then(r => r.json());
   }
 
+  // Mirrors Code.gs's getDishFeedbackStats() exactly: proven requires at least half the
+  // recorded reactions to be yes/mostly, and more positives than nos.
   async function fetchDishStats(){
     try{
-      const resp = await fetch(FEEDBACK_ENDPOINT + '?action=dish_stats&key=' + encodeURIComponent(READ_KEY));
-      const result = await resp.json();
-      if(result.status === 'ok') dishStats = result.stats || {};
+      const { data: rows, error } = await supabaseClient
+        .from('feedback').select('meal_name, kids_ate_it, parent_rating').eq('type', 'meal_feedback');
+      if(error) throw error;
+      const stats = {};
+      (rows || []).forEach(r => {
+        if(!r.meal_name) return;
+        const key = r.meal_name;
+        if(!stats[key]) stats[key] = { yes: 0, mostly: 0, no: 0, total: 0, ratingSum: 0, ratingCount: 0 };
+        const s = stats[key];
+        if(r.kids_ate_it === 'yes'){ s.yes++; s.total++; }
+        else if(r.kids_ate_it === 'mostly'){ s.mostly++; s.total++; }
+        else if(r.kids_ate_it === 'no'){ s.no++; s.total++; }
+        if(r.parent_rating){ s.ratingSum += Number(r.parent_rating); s.ratingCount++; }
+      });
+      Object.keys(stats).forEach(key => {
+        const s = stats[key];
+        const positive = s.yes + s.mostly;
+        s.status = (s.total > 0 && positive >= s.total / 2 && positive > s.no) ? 'proven' : 'new';
+        s.avg_parent_rating = s.ratingCount ? Math.round((s.ratingSum / s.ratingCount) * 10) / 10 : null;
+        delete s.ratingSum;
+        delete s.ratingCount;
+      });
+      dishStats = stats;
     }catch(e){ /* leave dishStats empty — everything just renders as "new attempt" */ }
   }
 
   async function fetchShoppingState(){
     try{
-      const resp = await fetch(FEEDBACK_ENDPOINT + '?action=shopping_state&week_id=' + encodeURIComponent(WEEK_DATA.week_id) + '&key=' + encodeURIComponent(READ_KEY));
-      const result = await resp.json();
-      if(result.status === 'ok') shoppingState = result.state || {};
+      const { data: rows, error } = await supabaseClient
+        .from('shopping_state').select('item_key, checked').eq('week_id', WEEK_DATA.week_id);
+      if(error) throw error;
+      const state = {};
+      (rows || []).forEach(r => { state[r.item_key] = r.checked; });
+      shoppingState = state;
     }catch(e){ shoppingState = {}; }
   }
 
@@ -1466,7 +664,11 @@ body.auth-pending #hub{display:none;}
       if(!plan_feedback && !pantry_ingredients && !budgetModeChanged){ note.textContent = "Add something in one of the boxes first"; return; }
       note.textContent = "Sending…";
       try{
-        await sendToSheet({type:"review_feedback", week_id: WEEK_DATA.week_id, plan_feedback, pantry_ingredients, budget_saver_mode});
+        const { error } = await supabaseClient.from('feedback').insert({
+          household_id: currentHouseholdId, type: "review_feedback", week_id: WEEK_DATA.week_id,
+          plan_feedback, pantry_ingredients, budget_saver_mode
+        });
+        if(error) throw error;
         note.textContent = "Sent ✓";
       }catch(e){
         note.textContent = "Couldn't send — reply to our email instead";
@@ -1568,7 +770,9 @@ body.auth-pending #hub{display:none;}
         const itemKey = row.dataset.key;
         shoppingState[itemKey] = checked;
         try{
-          await postJSON({type:"toggle_shopping_item", week_id: WEEK_DATA.week_id, item_key: itemKey, checked: checked});
+          const { error } = await supabaseClient.from('shopping_state')
+            .upsert({ household_id: currentHouseholdId, week_id: WEEK_DATA.week_id, item_key: itemKey, checked }, { onConflict: 'household_id,week_id,item_key' });
+          if(error) throw error;
         }catch(err){ /* optimistic UI already applied; next reload resyncs from the server */ }
       });
     });
@@ -1650,18 +854,18 @@ body.auth-pending #hub{display:none;}
       method: info.method || []
     };
     try{
-      const result = await postJSON({type: "save_favourite", name: name, authored_by: authored_by, recipe: recipe});
-      if(result.status === "ok"){
-        FAVOURITES = result.favourites;
-        btn.innerHTML = '<i class="ti ti-heart"></i>Saved to favourites';
-        btn.classList.add("saved");
-        note.textContent = "Saved ✓ — find it under Favourites";
-      } else {
-        note.textContent = "Couldn't save: " + (result.message || "unknown error");
-        btn.disabled = false;
-      }
+      const id = slugify(name);
+      const { error } = await supabaseClient.from('favourites').upsert({
+        id, household_id: currentHouseholdId, name, authored_by: authored_by || '',
+        recipe, saved_at: new Date().toISOString(), requested_for_next_week: false
+      });
+      if(error) throw error;
+      await refreshFavourites();
+      btn.innerHTML = '<i class="ti ti-heart"></i>Saved to favourites';
+      btn.classList.add("saved");
+      note.textContent = "Saved ✓ — find it under Favourites";
     }catch(e){
-      note.textContent = "Couldn't reach the server — try again in a moment.";
+      note.textContent = "Couldn't save: " + (e.message || "unknown error");
       btn.disabled = false;
     }
   }
@@ -1694,16 +898,15 @@ body.auth-pending #hub{display:none;}
       const note = backdrop.querySelector("#removeStatusNote");
       btn.disabled = true; btn.textContent = "Removing…";
       try{
-        const result = await postJSON({type:"remove_meal", week_id: WEEK_DATA.week_id, day, meal});
-        if(result.status === "ok"){
-          applyWeekPatch(result.week_data);
-          backdrop.remove();
-        } else {
-          note.innerHTML = `<i class="ti ti-alert-triangle"></i> Couldn't remove: ${result.message || 'unknown error'}`;
-          btn.disabled = false; btn.textContent = "Remove";
-        }
+        const { error } = await supabaseClient.from('meals').update({
+          name: null, ingredients: [], method: null, source: null, new_or_repeat: null,
+          authored_by: null, prep_time: null, cook_time: null, hands_off_time: null, prep_ahead_note: null
+        }).eq('week_id', currentWeekRowId).eq('day', day).eq('slot', meal);
+        if(error) throw error;
+        applyWeekPatch(await fetchCurrentWeekData());
+        backdrop.remove();
       }catch(e){
-        note.innerHTML = `<i class="ti ti-alert-triangle"></i> Couldn't reach the server — try again.`;
+        note.innerHTML = `<i class="ti ti-alert-triangle"></i> Couldn't remove: ${e.message || 'unknown error'}`;
         btn.disabled = false; btn.textContent = "Remove";
       }
     });
@@ -1716,14 +919,13 @@ body.auth-pending #hub{display:none;}
       <div class="modal">
         <h3>Add a meal</h3>
         <div class="meal-sub">${day} · ${meal}</div>
-        <button class="review-submit-btn" id="genMealBtn"><i class="ti ti-sparkles"></i> Generate a meal</button>
-        <button class="favourite-btn add-link-btn" id="linkMealBtn"><i class="ti ti-link"></i> Add from a link</button>
+        <div class="modal-status-note">Meal generation and adding from a link are being upgraded to the new backend — back shortly.</div>
+        <button class="review-submit-btn" id="genMealBtn" disabled><i class="ti ti-sparkles"></i> Generate a meal</button>
+        <button class="favourite-btn add-link-btn" id="linkMealBtn" disabled><i class="ti ti-link"></i> Add from a link</button>
         <button class="cancel-link" id="cancelAddBtn">Cancel</button>
       </div>`;
     document.getElementById("hub").appendChild(backdrop);
     backdrop.querySelector("#cancelAddBtn").addEventListener("click", ()=> backdrop.remove());
-    backdrop.querySelector("#genMealBtn").addEventListener("click", ()=> regenerateMealFlow(day, meal, backdrop));
-    backdrop.querySelector("#linkMealBtn").addEventListener("click", ()=> showAddFromLinkForm(day, meal, backdrop));
   }
 
   // Shared loading indicator (weekly-board-loading-animation-spec.md): a two-stage
@@ -1938,16 +1140,18 @@ body.auth-pending #hub{display:none;}
       const statusNote = backdrop.querySelector("#modalStatusNote");
       statusNote.textContent = "Sending…";
       try{
-        await sendToSheet({
+        const { error } = await supabaseClient.from('feedback').insert({
+          household_id: currentHouseholdId,
           type: "meal_feedback",
           week_id: WEEK_DATA.week_id,
           day: modalState.day,
           meal: modalState.meal,
           meal_name: name,
-          kids_ate_it: modalState.kids_ate_it || "",
-          parent_rating: modalState.parent_rating || "",
-          note: modalState.note || ""
+          kids_ate_it: modalState.kids_ate_it || null,
+          parent_rating: modalState.parent_rating || null,
+          note: modalState.note || null
         });
+        if(error) throw error;
         markLoggedLocally(modalState.day, modalState.meal);
         backdrop.remove();
         renderDays();
@@ -2054,10 +1258,16 @@ body.auth-pending #hub{display:none;}
       if(!text.trim()){ note.textContent = "Add some text first"; return; }
       note.textContent = "Sending…";
       try{
-        await sendToSheet({type: "principles_update", week_id: WEEK_DATA.week_id, plan_feedback: text});
+        const key_principles = text.split('\n').map(l => l.trim().replace(/^-\s*/, '')).filter(Boolean);
+        const { error: updateErr } = await supabaseClient.from('households')
+          .update({ key_principles }).eq('id', currentHouseholdId);
+        if(updateErr) throw updateErr;
+        await supabaseClient.from('feedback').insert({
+          household_id: currentHouseholdId, type: "principles_update", week_id: WEEK_DATA.week_id, plan_feedback: text
+        });
         PRINCIPLES_TEXT = text;
         principlesDirty = false;
-        note.textContent = "Saved ✓ — applies next time the planner runs";
+        note.textContent = "Saved ✓";
       }catch(e){
         note.textContent = "Couldn't send — try again in a moment";
       }
@@ -2180,22 +1390,25 @@ body.auth-pending #hub{display:none;}
         const url = container.querySelector("#historyLinkInput").value.trim();
         const freeNote = container.querySelector("#historyNoteInput").value.trim();
         try{
-          const result = await postJSON({
-            type: "add_history_meal",
-            description: desc,
-            source_url: url || undefined,
-            ingredients: fetchedRecipe ? fetchedRecipe.ingredients : undefined,
+          const { error } = await supabaseClient.from('feedback').insert({
+            household_id: currentHouseholdId,
+            type: "meal_feedback",
+            day: null,
+            meal: "History upload",
+            meal_name: desc,
+            source_url: url || null,
+            ingredients_json: fetchedRecipe ? fetchedRecipe.ingredients : null,
             kids_ate_it: feedback || "yes",
-            note: freeNote || undefined
+            note: freeNote || null
           });
-          if(result.status === "ok"){
+          if(!error){
             sessionCount++;
             markHistoryUploaded();
             renderHistoryBanner();
             updateSessionNote();
             renderForm();
           } else {
-            note.textContent = "Couldn't save: " + (result.message || "unknown error");
+            note.textContent = "Couldn't save: " + (error.message || "unknown error");
             btn.disabled = false; btn.textContent = "Save & add another";
           }
         }catch(e){
@@ -2292,16 +1505,13 @@ body.auth-pending #hub{display:none;}
         btn.disabled = true;
         btn.textContent = "Updating…";
         try{
-          const result = await postJSON({type: "toggle_favourite_request", id: id, requested: newRequested});
-          if(result.status === "ok"){
-            FAVOURITES = result.favourites;
-            renderFavouritesList(page);
-          } else {
-            btn.textContent = "Couldn't update — try again";
-            btn.disabled = false;
-          }
+          const { error } = await supabaseClient.from('favourites')
+            .update({ requested_for_next_week: newRequested }).eq('id', id);
+          if(error) throw error;
+          await refreshFavourites();
+          renderFavouritesList(page);
         }catch(e){
-          btn.textContent = "Couldn't reach the server — try again";
+          btn.textContent = "Couldn't update — try again";
           btn.disabled = false;
         }
       });
@@ -2364,17 +1574,110 @@ body.auth-pending #hub{display:none;}
     tab.addEventListener("click", ()=> switchTab(tab.dataset.tab));
   });
 
-  async function init(){
+  const DAY_NAMES = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  const MEAL_FIELDS = ["name","ingredients","method","source","new_or_repeat","authored_by",
+    "prep_time","cook_time","hands_off_time","prep_ahead_note"];
+
+  // Fetches this signed-in household's own data (RLS scopes every query to auth.uid()
+  // automatically — no household_id filter needed anywhere here) and populates
+  // WEEK_DATA/PRINCIPLES_TEXT/FAVOURITES in the shape the rest of the app already expects,
+  // so no other render function needs to change. Returns false if no household row exists
+  // yet (a signed-in user who hasn't been onboarded — task for a later step).
+  async function refreshFavourites(){
+    const { data: favourites, error } = await supabaseClient.from('favourites').select('*').order('saved_at');
+    if(error) throw error;
+    FAVOURITES = (favourites || []).map(f => ({
+      id: f.id, name: f.name, authored_by: f.authored_by, recipe: f.recipe,
+      saved_at: f.saved_at, requested_for_next_week: f.requested_for_next_week
+    }));
+    return FAVOURITES;
+  }
+
+  async function loadHouseholdData(){
+    const { data: households, error: hErr } = await supabaseClient.from('households').select('*').limit(1);
+    if(hErr) throw hErr;
+    const household = households && households[0];
+    if(!household) return false;
+    currentHouseholdId = household.id;
+
+    await refreshFavourites();
+
+    PRINCIPLES_TEXT = (household.key_principles || [])
+      .map(p => (String(p).trim().charAt(0) === '-' ? p : '- ' + p)).join('\n');
+
+    WEEK_DATA = await fetchCurrentWeekData();
+
+    return true;
+  }
+
+  // Rebuilds the WEEK_DATA-shaped object from the current `weeks` + `meals` rows. Used on
+  // initial load and after any mutation that changes a meal, so the UI reflects the real
+  // database state rather than an optimistic local patch.
+  async function fetchCurrentWeekData(){
+    const { data: weeks, error: wErr } = await supabaseClient
+      .from('weeks').select('*').eq('is_current', true).limit(1);
+    if(wErr) throw wErr;
+    const week = weeks && weeks[0];
+    currentWeekRowId = week ? week.id : null;
+
+    let days = DAY_NAMES.map(day => ({ day, dinner: null, lunch: null, snack: null }));
+    if(week){
+      const { data: meals, error: mErr } = await supabaseClient
+        .from('meals').select('*').eq('week_id', week.id);
+      if(mErr) throw mErr;
+      days = DAY_NAMES.map(day => {
+        const dayObj = { day };
+        ["dinner","lunch","snack"].forEach(slot => {
+          const m = (meals || []).find(x => x.day === day && x.slot === slot);
+          if(!m || !m.name){ dayObj[slot] = null; return; }
+          const info = {};
+          MEAL_FIELDS.forEach(field => {
+            const val = m[field];
+            if(val !== null && val !== undefined && !(Array.isArray(val) && val.length === 0 && field !== "ingredients")){
+              info[field] = val;
+            }
+          });
+          if(!info.ingredients) info.ingredients = [];
+          dayObj[slot] = info;
+        });
+        return dayObj;
+      });
+    }
+
+    return week ? {
+      week_id: week.week_id,
+      date_range: week.date_range,
+      pantry_ingredients: week.pantry_ingredients || [],
+      budget_saver_mode: week.budget_saver_mode,
+      board_notes: week.board_notes,
+      days,
+    } : { week_id: '', date_range: 'No plan generated yet', pantry_ingredients: [], budget_saver_mode: false, days };
+  }
+
+  async function init(stopLoading){
+    let loaded = false;
+    try{
+      loaded = await loadHouseholdData();
+    }catch(e){
+      stopLoading();
+      document.getElementById("authCard").innerHTML = `<div class="no-recipe">Couldn't load your household data — try reloading the page.</div>`;
+      return;
+    }
+
+    if(!loaded){
+      stopLoading();
+      document.getElementById("authCard").innerHTML = `<div class="no-recipe">Your account isn't set up with a household yet.</div>`;
+      return;
+    }
+
     document.getElementById("headerTitle").textContent = "This week";
     document.getElementById("headerSub").textContent = (WEEK_DATA.date_range || "—").toUpperCase();
-
-    // Render immediately from local data — the plan itself never depends on the network.
-    // dish_stats/shopping_state (status badges, checkbox state) are fetched in the
-    // background and applied with a re-render once they land, so a slow or cold-started
-    // Apps Script backend never leaves the Plan tab looking empty.
     renderPlan();
     renderShopping();
     renderHistoryBanner();
+
+    stopLoading();
+    document.body.classList.remove('auth-pending');
 
     await Promise.all([fetchDishStats(), fetchShoppingState()]);
     renderPlan();
@@ -2481,8 +1784,13 @@ body.auth-pending #hub{display:none;}
   function showApp(){
     if(appStarted) return;
     appStarted = true;
-    document.body.classList.remove('auth-pending');
-    init();
+    // Keep the auth gate up (with a loading state in its card) until the household's data
+    // has actually loaded — reveals #hub only once there's something real to show, instead
+    // of flashing its empty shell while the fetch is in flight.
+    const card = document.getElementById('authCard');
+    card.innerHTML = '';
+    const stopLoading = showLoadingIndicator(card, 'Loading your household…');
+    init(stopLoading);
   }
 
   function showAuthGate(){
