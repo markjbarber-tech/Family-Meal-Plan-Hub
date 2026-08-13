@@ -86,6 +86,16 @@ body{
 .budget-toggle-row{display:flex !important;align-items:center;gap:8px;font-family:var(--font-body) !important;font-size:0.82rem !important;text-transform:none !important;color:var(--ink) !important;letter-spacing:normal !important;margin-bottom:12px;cursor:pointer;}
 .budget-toggle-row input{accent-color:var(--teal);width:16px;height:16px;flex-shrink:0;}
 
+/* Compact/collapsed review box (always visible, low-emphasis by default) */
+.review-box-compact{display:flex;align-items:center;gap:8px;width:100%;background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);border-radius:12px;padding:9px 14px;margin-bottom:16px;cursor:pointer;font-family:var(--font-body);font-size:0.8rem;color:var(--ink-soft);text-align:left;}
+.review-box-compact:hover{background:var(--glass-strong);color:var(--ink);}
+.review-box-compact:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.review-box-compact i{font-size:16px;flex-shrink:0;}
+.review-box-compact .chevron{margin-left:auto;}
+.review-box-collapse{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--ink-faint);font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.03em;cursor:pointer;padding:0;margin-bottom:10px;}
+.review-box-collapse:hover{color:var(--ink-soft);}
+.review-box-collapse:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+
 /* Scoreboard */
 .scoreboard{font-family:var(--font-mono);font-size:0.74rem;color:var(--ink-soft);background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);border-radius:12px;padding:9px 14px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle;}
@@ -381,7 +391,6 @@ body{
   const WEEK_DATA = {
     "week_id": "2026-W33",
     "date_range": "Aug 10 - Aug 16, 2026",
-    "status": "proposed",
     "pantry_ingredients": [],
     "budget_saver_mode": true,
     "days": [
@@ -1325,43 +1334,62 @@ body{
     return (s && s.status === 'proven') ? 'proven' : 'new';
   }
 
+  // Always visible for the current week (no proposed/published status gate — see
+  // weekly-board-single-state-prd.md). Collapsed/compact by default so it reads as a
+  // persistent low-emphasis input rather than a permanent banner; expands on tap.
+  let reviewBoxExpanded = false;
+
   function renderReviewBox(){
     const container = document.getElementById("reviewBoxContainer");
-    if(WEEK_DATA.status === "proposed"){
-      const pantryValue = (WEEK_DATA.pantry_ingredients || []).join(', ');
+    if(!reviewBoxExpanded){
       container.innerHTML = `
-        <div class="review-box">
-          <div class="rb-title">Anything to flag before this plan goes out?</div>
-          <div class="rb-sub">Note plan changes or fridge/pantry items that need using up — this lands in the same log read before next week's planning.</div>
-          <label>Plan feedback</label>
-          <textarea id="planFeedbackInput" placeholder="e.g. can we swap Wednesday's sausage bake for something else?"></textarea>
-          <label>What ingredients do you already have?</label>
-          <textarea id="pantryInput" placeholder="e.g. half a bag of spinach, leftover ham, chicken thighs, capsicum">${pantryValue}</textarea>
-          <label class="budget-toggle-row">
-            <input type="checkbox" id="budgetSaverInput" ${WEEK_DATA.budget_saver_mode ? 'checked' : ''}>
-            <span>Budget Saver Mode — chain meals together to shrink this week's shopping list</span>
-          </label>
-          <div class="review-saved-note" id="reviewSavedNote"></div>
-          <button class="review-submit-btn" id="saveReviewBtn">Send feedback</button>
-        </div>`;
-      container.querySelector("#saveReviewBtn").addEventListener("click", async ()=>{
-        const plan_feedback = container.querySelector("#planFeedbackInput").value;
-        const pantry_ingredients = container.querySelector("#pantryInput").value;
-        const budget_saver_mode = container.querySelector("#budgetSaverInput").checked;
-        const note = container.querySelector("#reviewSavedNote");
-        const budgetModeChanged = budget_saver_mode !== !!WEEK_DATA.budget_saver_mode;
-        if(!plan_feedback && !pantry_ingredients && !budgetModeChanged){ note.textContent = "Add something in one of the boxes first"; return; }
-        note.textContent = "Sending…";
-        try{
-          await sendToSheet({type:"review_feedback", week_id: WEEK_DATA.week_id, plan_feedback, pantry_ingredients, budget_saver_mode});
-          note.textContent = "Sent ✓";
-        }catch(e){
-          note.textContent = "Couldn't send — reply to our email instead";
-        }
+        <button class="review-box-compact" id="reviewBoxToggle">
+          <i class="ti ti-message-2"></i>
+          <span>Feedback or ingredients on hand?</span>
+          <i class="ti ti-chevron-down chevron"></i>
+        </button>`;
+      container.querySelector("#reviewBoxToggle").addEventListener("click", ()=>{
+        reviewBoxExpanded = true;
+        renderReviewBox();
       });
-    } else {
-      container.innerHTML = "";
+      return;
     }
+    const pantryValue = (WEEK_DATA.pantry_ingredients || []).join(', ');
+    container.innerHTML = `
+      <div class="review-box">
+        <button class="review-box-collapse" id="reviewBoxCollapse"><i class="ti ti-chevron-up"></i>Collapse</button>
+        <div class="rb-title">Feedback or ingredients on hand?</div>
+        <div class="rb-sub">Note plan changes or ingredients that need using up — checked regularly and folded into the plan.</div>
+        <label>Plan feedback</label>
+        <textarea id="planFeedbackInput" placeholder="e.g. can we swap Wednesday's sausage bake for something else?"></textarea>
+        <label>What ingredients do you already have?</label>
+        <textarea id="pantryInput" placeholder="e.g. half a bag of spinach, leftover ham, chicken thighs, capsicum">${pantryValue}</textarea>
+        <label class="budget-toggle-row">
+          <input type="checkbox" id="budgetSaverInput" ${WEEK_DATA.budget_saver_mode ? 'checked' : ''}>
+          <span>Budget Saver Mode — chain meals together to shrink this week's shopping list</span>
+        </label>
+        <div class="review-saved-note" id="reviewSavedNote"></div>
+        <button class="review-submit-btn" id="saveReviewBtn">Send feedback</button>
+      </div>`;
+    container.querySelector("#reviewBoxCollapse").addEventListener("click", ()=>{
+      reviewBoxExpanded = false;
+      renderReviewBox();
+    });
+    container.querySelector("#saveReviewBtn").addEventListener("click", async ()=>{
+      const plan_feedback = container.querySelector("#planFeedbackInput").value;
+      const pantry_ingredients = container.querySelector("#pantryInput").value;
+      const budget_saver_mode = container.querySelector("#budgetSaverInput").checked;
+      const note = container.querySelector("#reviewSavedNote");
+      const budgetModeChanged = budget_saver_mode !== !!WEEK_DATA.budget_saver_mode;
+      if(!plan_feedback && !pantry_ingredients && !budgetModeChanged){ note.textContent = "Add something in one of the boxes first"; return; }
+      note.textContent = "Sending…";
+      try{
+        await sendToSheet({type:"review_feedback", week_id: WEEK_DATA.week_id, plan_feedback, pantry_ingredients, budget_saver_mode});
+        note.textContent = "Sent ✓";
+      }catch(e){
+        note.textContent = "Couldn't send — reply to our email instead";
+      }
+    });
   }
 
   function renderScoreboard(){

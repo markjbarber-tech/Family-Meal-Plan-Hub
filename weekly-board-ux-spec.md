@@ -8,9 +8,11 @@ Three tabs: **Plan** (default) · **Shopping** · **Recipe**. Tab state is local
 ## Plan tab
 
 ### Review box
-- Visible only when the current week's `status` is `"proposed"`.
-- Hidden automatically once `status` becomes `"published"`.
-- Free-text field. On submit, appends to that week's `board_notes` / review data — does not require a separate save button beyond standard form submission (auto-save on blur is acceptable).
+**Superseded by `weekly-board-single-state-prd.md`** — there is no proposed/published `status` field any more; a week is live, editable, and open to feedback the moment it's generated, and stays that way (no separate publish step, no email draft). Current behavior:
+- Always visible for the current week — not gated by any status.
+- Collapsed/compact by default (a low-emphasis single-line toggle), since it's now a permanent fixture rather than a temporary review-window banner. Expands on tap to reveal the full form; collapses back on request.
+- Combines three inputs behind one "Send feedback" button: free-text plan feedback, a free-text "What ingredients do you already have?" field (see `weekly-board-sticky-nav-ingredients-prd.md`), and the Budget Saver Mode toggle. Submitting is an explicit button action, not auto-save on blur.
+- This submit action is the *only* thing that triggers a full-week regeneration — day-card Yes/Mostly/No feedback stamps never do (they only save that day's feedback for the proven/new-attempt computation).
 
 ### Scoreboard
 - Header strip showing count of proven vs. new-attempt days for the current week.
@@ -46,7 +48,7 @@ Auto-computed per dish, not set manually:
 
 ## Data source
 - All content (`WEEK`, `SHOPPING`) must be read from persistent storage / the household data source at load time — the hardcoded arrays in the prototype file were for visual review only and must be replaced with live data reads before this goes further.
-- Empty/loading state: if no week data is found for the current period, show a simple "No plan published yet" message in place of the day cards rather than an empty screen.
+- Empty/loading state: if no week data is found for the current period, show a simple "No plan generated yet" message in place of the day cards rather than an empty screen.
 
 ## Out of scope for this pass
 - Lunch/snack recipe views
