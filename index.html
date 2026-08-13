@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.46.0/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{
   --font-head:'Sora',-apple-system,'Helvetica Neue',Arial,sans-serif;
@@ -173,6 +174,26 @@ body{
 /* Full-page overlays (Principles / Favourites / Favourite recipe detail) */
 .overlay-page{position:fixed;inset:0;background:linear-gradient(160deg,#CFE0EC 0%,#BFE6E0 45%,#EAF4E6 100%);background-attachment:fixed;z-index:60;overflow-y:auto;}
 .overlay-inner{max-width:640px;margin:0 auto;padding:26px 16px 40px;}
+
+/* Auth gate */
+body:not(.auth-pending) #authGate{display:none;}
+body.auth-pending #hub{display:none;}
+#authGate{z-index:100;display:flex;align-items:center;justify-content:center;}
+.auth-inner{display:flex;flex-direction:column;align-items:center;width:100%;padding:26px 20px;}
+.auth-brand{font-family:var(--font-head);letter-spacing:-0.01em;font-weight:700;font-size:1.3rem;color:var(--ink);margin-bottom:20px;}
+.auth-card{width:100%;max-width:360px;background:var(--glass-strong);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--glass-border);border-radius:18px;padding:24px 22px;}
+.auth-card h2{font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;font-size:1.15rem;margin:0 0 4px;}
+.auth-card .section-sub{font-size:0.8rem;color:var(--ink-soft);margin-bottom:16px;}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:16px 0;font-family:var(--font-mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-faint);}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--glass-border);}
+.auth-oauth-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-head);font-weight:600;font-size:0.85rem;color:var(--ink);background:rgba(255,255,255,0.7);border:1px solid var(--glass-border);border-radius:12px;padding:10px;cursor:pointer;margin-bottom:10px;}
+.auth-oauth-btn:hover{background:var(--white);}
+.auth-oauth-btn:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.auth-switch-row{text-align:center;font-size:0.8rem;color:var(--ink-soft);margin-top:14px;}
+.auth-link-btn{background:none;border:none;padding:0;font:inherit;font-weight:600;color:var(--teal-dark);cursor:pointer;text-decoration:underline;}
+.auth-forgot-row{text-align:right;margin:-8px 0 14px;}
+.auth-status-note{font-family:var(--font-mono);font-size:0.7rem;color:var(--status-caution);min-height:14px;margin-bottom:10px;}
+.auth-status-note.ok{color:var(--status-proven);}
 .overlay-close{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-head);font-size:0.8rem;font-weight:600;color:var(--teal-dark);background:none;border:none;cursor:pointer;padding:0;margin-bottom:16px;}
 .overlay-close:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
 .overlay-title{font-family:var(--font-head);letter-spacing:-0.01em;font-size:1.4rem;font-weight:600;color:var(--ink);margin:0 0 4px;}
@@ -338,7 +359,15 @@ body{
 }
 </style>
 </head>
-<body>
+<body class="auth-pending">
+
+<div class="overlay-page" id="authGate">
+  <div class="overlay-inner auth-inner">
+    <div class="auth-brand">Family Menu Hub</div>
+    <div class="auth-card" id="authCard"></div>
+  </div>
+</div>
+
 <div class="wrap" id="hub">
 
   <button class="settings-btn" id="settingsBtn" aria-label="Settings"><i class="ti ti-settings"></i></button>
@@ -390,6 +419,14 @@ body{
   const FEEDBACK_ENDPOINT = "https://script.google.com/macros/s/AKfycbwQXFwbeGLuhF8XA08NpEiWmCRscGNjxTt0wN3lGc73Pk-7PXLPMwU4dexHaRbQDRAWMw/exec";
   const FEEDBACK_EMAIL = "mark.j.barber@gmail.com";
   const READ_KEY = "family-menu-2026"; // must match Apps Script's READ_KEY — it's a light lock, not real security
+
+  // Safe to expose publicly — this is Supabase's anon/publishable key, meant to sit in
+  // frontend code. Real data isolation is enforced at the database layer by Row-Level
+  // Security policies keyed on the signed-in household's own auth user id, not by
+  // hiding this key. Never put the service_role/secret key here.
+  const SUPABASE_URL = "https://jpofeslziyjbysotycfl.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_psBedalpZIlxs5DaGQPf1g_yJ49IdI8";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const WEEK_DATA = {
     "week_id": "2026-W33",
@@ -1966,8 +2003,15 @@ body{
           <div class="section-sub">Add your family's past meals — including ones from before this app — so the board has a richer picture of what's worked.</div>
           <button class="primary-btn" id="addHistoryBtn"><i class="ti ti-history"></i> Add meal history</button>
         </div>
+
+        <div class="settings-section">
+          <h3>Account</h3>
+          <div class="section-sub">Shared by everyone in your household.</div>
+          <button class="favourite-btn" id="signOutBtn"><i class="ti ti-logout"></i> Sign out</button>
+        </div>
       </div>`;
     document.getElementById("hub").appendChild(page);
+    page.querySelector("#signOutBtn").addEventListener("click", ()=> supabaseClient.auth.signOut());
 
     let principlesDirty = false;
     const markDirty = ()=>{ principlesDirty = true; };
@@ -2426,7 +2470,150 @@ body{
     }, {passive:true});
   })();
 
-  init();
+  // ---------------- Auth gate (Supabase) ----------------
+  // Apple sign-in and passkey enrollment are deferred fast-follows (Apple needs an
+  // Apple Developer Program membership; passkey enrollment happens from an
+  // authenticated session, so it belongs in Settings once onboarding exists) — for
+  // now this covers email/password and Google, per the current build-order checkpoint.
+  let authMode = 'signin'; // 'signin' | 'signup' | 'forgot'
+  let appStarted = false;
+
+  function showApp(){
+    if(appStarted) return;
+    appStarted = true;
+    document.body.classList.remove('auth-pending');
+    init();
+  }
+
+  function showAuthGate(){
+    appStarted = false;
+    document.body.classList.add('auth-pending');
+    authMode = 'signin';
+    renderAuthCard();
+  }
+
+  function renderAuthCard(){
+    const card = document.getElementById('authCard');
+
+    if(authMode === 'forgot'){
+      card.innerHTML = `
+        <h2>Reset your password</h2>
+        <div class="section-sub">Enter your email and we will send a reset link.</div>
+        <input type="email" id="authForgotEmail" class="text-input" placeholder="Email" autocomplete="email">
+        <div class="auth-status-note" id="authStatusNote"></div>
+        <button class="primary-btn" id="authForgotBtn">Send reset link</button>
+        <div class="auth-switch-row"><button class="auth-link-btn" id="authBackBtn">Back to sign in</button></div>`;
+      card.querySelector('#authBackBtn').addEventListener('click', ()=>{ authMode = 'signin'; renderAuthCard(); });
+      card.querySelector('#authForgotBtn').addEventListener('click', async ()=>{
+        const email = card.querySelector('#authForgotEmail').value.trim();
+        const note = card.querySelector('#authStatusNote');
+        if(!email){ note.textContent = 'Enter your email first'; note.classList.remove('ok'); return; }
+        const btn = card.querySelector('#authForgotBtn');
+        btn.disabled = true; note.textContent = 'Sending…'; note.classList.remove('ok');
+        try{
+          const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+          if(error) throw error;
+          note.textContent = 'Check your email for a reset link.'; note.classList.add('ok');
+        }catch(e){
+          note.textContent = e.message || 'Could not send reset link.'; note.classList.remove('ok');
+          btn.disabled = false;
+        }
+      });
+      return;
+    }
+
+    const isSignup = authMode === 'signup';
+    card.innerHTML = `
+      <h2>${isSignup ? 'Create your household account' : 'Sign in'}</h2>
+      <div class="section-sub">${isSignup ? 'One shared login for your whole household.' : 'Welcome back.'}</div>
+      <input type="email" id="authEmail" class="text-input" placeholder="Email" autocomplete="email">
+      <input type="password" id="authPassword" class="text-input" placeholder="Password" autocomplete="${isSignup ? 'new-password' : 'current-password'}">
+      ${isSignup ? '' : '<div class="auth-forgot-row"><button class="auth-link-btn" id="authForgotLink">Forgot password?</button></div>'}
+      <div class="auth-status-note" id="authStatusNote"></div>
+      <button class="primary-btn" id="authSubmitBtn">${isSignup ? 'Create account' : 'Sign in'}</button>
+      <div class="auth-divider">or</div>
+      <button class="auth-oauth-btn" id="authGoogleBtn"><i class="ti ti-brand-google"></i>Continue with Google</button>
+      <div class="auth-switch-row">
+        ${isSignup ? 'Already have an account? ' : 'New household? '}
+        <button class="auth-link-btn" id="authSwitchBtn">${isSignup ? 'Sign in' : 'Create one'}</button>
+      </div>`;
+
+    if(!isSignup){
+      card.querySelector('#authForgotLink').addEventListener('click', ()=>{ authMode = 'forgot'; renderAuthCard(); });
+    }
+    card.querySelector('#authSwitchBtn').addEventListener('click', ()=>{ authMode = isSignup ? 'signin' : 'signup'; renderAuthCard(); });
+    card.querySelector('#authGoogleBtn').addEventListener('click', ()=>{
+      supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
+    });
+    card.querySelector('#authSubmitBtn').addEventListener('click', async ()=>{
+      const email = card.querySelector('#authEmail').value.trim();
+      const password = card.querySelector('#authPassword').value;
+      const note = card.querySelector('#authStatusNote');
+      const btn = card.querySelector('#authSubmitBtn');
+      if(!email || !password){ note.textContent = 'Enter an email and password'; note.classList.remove('ok'); return; }
+      btn.disabled = true; note.textContent = isSignup ? 'Creating account…' : 'Signing in…'; note.classList.remove('ok');
+      try{
+        const { error } = isSignup
+          ? await supabaseClient.auth.signUp({ email, password })
+          : await supabaseClient.auth.signInWithPassword({ email, password });
+        if(error) throw error;
+        if(isSignup){
+          note.textContent = 'Check your email to confirm your account, then sign in.'; note.classList.add('ok');
+          btn.disabled = false;
+        }
+        // On a successful sign-in, onAuthStateChange's SIGNED_IN event takes it from here.
+      }catch(e){
+        note.textContent = e.message || 'Something went wrong.'; note.classList.remove('ok');
+        btn.disabled = false;
+      }
+    });
+  }
+
+  function renderResetPasswordForm(){
+    const card = document.getElementById('authCard');
+    card.innerHTML = `
+      <h2>Set a new password</h2>
+      <div class="section-sub">Choose a new password for your account.</div>
+      <input type="password" id="authNewPassword" class="text-input" placeholder="New password" autocomplete="new-password">
+      <div class="auth-status-note" id="authStatusNote"></div>
+      <button class="primary-btn" id="authSetPasswordBtn">Set password</button>`;
+    card.querySelector('#authSetPasswordBtn').addEventListener('click', async ()=>{
+      const password = card.querySelector('#authNewPassword').value;
+      const note = card.querySelector('#authStatusNote');
+      const btn = card.querySelector('#authSetPasswordBtn');
+      if(!password || password.length < 6){ note.textContent = 'Password must be at least 6 characters'; note.classList.remove('ok'); return; }
+      btn.disabled = true; note.textContent = 'Saving…'; note.classList.remove('ok');
+      try{
+        const { error } = await supabaseClient.auth.updateUser({ password });
+        if(error) throw error;
+        note.textContent = 'Password updated — signing you in…'; note.classList.add('ok');
+        setTimeout(showApp, 800);
+      }catch(e){
+        note.textContent = e.message || 'Could not update password.'; note.classList.remove('ok');
+        btn.disabled = false;
+      }
+    });
+  }
+
+  // null = not yet determined (only true on the very first callback). Guards against
+  // a redundant "still signed out" event re-rendering the auth card out from under a
+  // signup/forgot-password interaction the user is already mid-way through.
+  let knownSignedIn = null;
+
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if(event === 'PASSWORD_RECOVERY'){
+      document.body.classList.add('auth-pending');
+      renderResetPasswordForm();
+      return;
+    }
+    if(session){
+      knownSignedIn = true;
+      showApp();
+    } else if(knownSignedIn !== false){
+      knownSignedIn = false;
+      showAuthGate();
+    }
+  });
 })();
 </script>
 </body>
