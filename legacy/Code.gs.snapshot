@@ -1,0 +1,698 @@
+// Family Menu Hub — Feedback + On-Demand Regenerate endpoint (v3)
+// Paste this over EVERYTHING in Extensions > Apps Script, then redeploy
+// (Deploy > Manage deployments > pencil/edit icon > Version: New version > Deploy).
+// The web app URL stays the same when you do it this way.
+//
+// Script Properties required for the "Refresh plan" button (Project Settings, gear icon,
+// left sidebar > Script Properties > Add script property):
+//   ANTHROPIC_API_KEY  — an API key from console.anthropic.com
+//   GITHUB_TOKEN       — a fine-grained GitHub PAT with Contents: Read and write on the repo below
+//   GITHUB_OWNER       — e.g. markjbarber-tech
+//   GITHUB_REPO        — e.g. Family-Meal-Plan-Hub
+
+var READ_KEY = "family-menu-2026"; // change this to anything you like — it's just a light lock so randoms can't read your feedback sheet
+
+function getOrCreateSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Feedback');
+  if (!sheet) {
+    sheet = ss.insertSheet('Feedback');
+    sheet.appendRow(['Timestamp', 'Type', 'Week ID', 'Day', 'Meal', 'Meal Name', 'Kids Ate It', 'Parent Rating', 'Note', 'Plan Feedback', 'Use Up Ingredients', 'Pantry Ingredients', 'Budget Saver Mode']);
+  } else {
+    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    if (headers.indexOf('Pantry Ingredients') === -1) {
+      sheet.getRange(1, headers.length + 1, 1, 2).setValues([['Pantry Ingredients', 'Budget Saver Mode']]);
+    }
+    if (headers.indexOf('Source URL') === -1) {
+            sheet.getRange(1, sheet.getLastColumn() + 1, 1, 2).setValues([['Source URL', 'Ingredients JSON']]);
+                }
+                      } 
+       return sheet;
+}
+
+function readAllFeedbackRows() {
+  var sheet = getOrCreateSheet();
+  var values = sheet.getDataRange().getValues();
+  var headers = values[0];
+  var rows = [];
+  for (var i = 1; i < values.length; i++) {
+    var row = {};
+    for (var j = 0; j < headers.length; j++) {
+      var key = String(headers[j]).replace(/\s+/g, '_').toLowerCase();
+      var val = values[i][j];
+      if (val instanceof Date) val = val.toISOString();
+      row[key] = val;
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+
+    if (data.type === 'regenerate_now') {
+      var sheet = getOrCreateSheet();
+      sheet.appendRow([new Date(), 'regenerate_now', data.week_id || '', '', '', '', '', '', '', '', '']);
+      var result = regenerateMealPlan();
+      return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (data.type === 'save_favourite') {
+      var favourites = saveFavourite(data.name, data.authored_by, data.recipe);
+      return ContentService.createTextOutput(JSON.stringify({status: 'ok', favourites: favourites})).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (data.type === 'toggle_favourite_request') {
+      var favourites2 = toggleFavouriteRequest(data.id, data.requested);
+      return ContentService.createTextOutput(JSON.stringify({status: 'ok', favourites: favourites2})).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (data.type === 'toggle_shopping_item') {
+      var shopState = setShoppingItemState(data.week_id, data.item_key, !!data.checked);
+      return ContentService.createTextOutput(JSON.stringify({status: 'ok', state: shopState})).setMimeType(ContentService.MimeType.JSON);
+    }
+    if (data.type === 'remove_meal') {
+      var removeResult = removeMeal(data.week_id, data.day, data.meal);
+      return ContentService.createTextOutput(JSON.stringify({status: 'ok', week_data: removeResult.week_data})).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (data.type === 'regenerate_meal') {
+      var regenResult = regenerateMealSlot(data.week_id, data.day, data.meal);
+      return ContentService.createTextOutput(JSON.stringify({status: 'ok', week_data: regenResult.week_data})).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (data.type === 'preview_external_recipe') {
+      var previewResult = previewExternalRecipe(data.url);
+      return ContentService.createTextOutput(JSON.stringify({status: 'ok', recipe: previewResult})).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (data.type === 'add_external_recipe') {
+      var addResult = addExternalRecipe(data.week_id, data.day, data.meal, data.title, data.source_url, data.ingredients, data.prep_time, data.cook_time);
+      return ContentService.createTextOutput(JSON.stringify({status: 'ok', week_data: addResult.week_data})).setMimeType(ContentService.MimeType.JSON);
+    }
+        if (data.type === 'add_history_meal') { addHistoryMeal(data.description, data.source_url, data.ingredients, data.kids_ate_it, data.note); return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON); }
+
+
+    var sheet2 = getOrCreateSheet();
+    sheet2.appendRow([
+      new Date(),
+      data.type || '',
+      data.week_id || '',
+      data.day || '',
+      data.meal || '',
+      data.meal_name || '',
+      data.kids_ate_it || '',
+      data.parent_rating || '',
+      data.note || '',
+      data.plan_feedback || '',
+      data.use_up || '',
+      data.pantry_ingredients || '',
+      (typeof data.budget_saver_mode === 'boolean') ? data.budget_saver_mode : ''
+    ]);
+    return ContentService.createTextOutput(JSON.stringify({status: 'ok'})).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({status: 'error', message: String(err)})).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  var action = e && e.parameter ? e.parameter.action : null;
+
+  if (action === 'feedback') {
+    var key = e.parameter.key;
+    if (key !== READ_KEY) {
+      return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'bad key'})).setMimeType(ContentService.MimeType.JSON);
+    }
+    var rows = readAllFeedbackRows();
+    return ContentService.createTextOutput(JSON.stringify({status: 'ok', rows: rows})).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (action === 'dish_stats') {
+    var key2 = e.parameter.key;
+    if (key2 !== READ_KEY) {
+      return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'bad key'})).setMimeType(ContentService.MimeType.JSON);
+    }
+    var stats = getDishFeedbackStats();
+    return ContentService.createTextOutput(JSON.stringify({status: 'ok', stats: stats})).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (action === 'shopping_state') {
+    var key3 = e.parameter.key;
+    if (key3 !== READ_KEY) {
+      return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'bad key'})).setMimeType(ContentService.MimeType.JSON);
+    }
+    var weekId = e.parameter.week_id || '';
+    var state = getShoppingState(weekId);
+    return ContentService.createTextOutput(JSON.stringify({status: 'ok', state: state})).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  return ContentService.createTextOutput('Family Menu Hub feedback endpoint is running.');
+}
+
+// ---------------- On-demand regenerate ----------------
+
+function getScriptProp(name) {
+  var v = PropertiesService.getScriptProperties().getProperty(name);
+  if (!v) throw new Error('Missing script property: ' + name + ' — set it in Project Settings > Script Properties.');
+  return v;
+}
+
+function githubGetFile(path) {
+  var owner = getScriptProp('GITHUB_OWNER');
+  var repo = getScriptProp('GITHUB_REPO');
+  var token = getScriptProp('GITHUB_TOKEN');
+  var url = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + path;
+  var resp = UrlFetchApp.fetch(url, {
+    method: 'get',
+    headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' },
+    muteHttpExceptions: true
+  });
+  if (resp.getResponseCode() >= 300) throw new Error('GitHub read failed for ' + path + ': ' + resp.getContentText());
+  var json = JSON.parse(resp.getContentText());
+  var content = Utilities.newBlob(Utilities.base64Decode(json.content.replace(/\n/g, '')), 'text/plain').getDataAsString('UTF-8');
+  return { content: content, sha: json.sha };
+}
+
+function githubPutFile(path, content, sha, message) {
+  var owner = getScriptProp('GITHUB_OWNER');
+  var repo = getScriptProp('GITHUB_REPO');
+  var token = getScriptProp('GITHUB_TOKEN');
+  var url = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + path;
+  var body = {
+    message: message,
+    content: Utilities.base64Encode(content, Utilities.Charset.UTF_8),
+    sha: sha
+  };
+  var resp = UrlFetchApp.fetch(url, {
+    method: 'put',
+    contentType: 'application/json',
+    headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' },
+    payload: JSON.stringify(body),
+    muteHttpExceptions: true
+  });
+  if (resp.getResponseCode() >= 300) throw new Error('GitHub write failed for ' + path + ': ' + resp.getContentText());
+  return JSON.parse(resp.getContentText()).content.sha;
+}
+
+var CATEGORY_KEYS = ['produce', 'meat_deli', 'dairy', 'pantry', 'frozen', 'other'];
+var CATEGORY_LABELS = {
+  produce: 'Produce',
+  meat_deli: 'Meat & deli',
+  dairy: 'Dairy',
+  pantry: 'Pantry',
+  frozen: 'Frozen',
+  other: 'Other'
+};
+
+function buildPrinciplesText(principles) {
+  return principles.map(function (p) { return '- ' + p; }).join('\n');
+}
+
+// Prevents user-typed principles text from breaking out of the `...` template
+// literal it gets embedded into, and prevents any generated text from
+// prematurely closing the <script> tag it lives inside.
+function escapeForTemplateLiteral(s) {
+  return String(s).replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
+}
+function escapeScriptClose(s) {
+  return String(s).replace(/<\/script/gi, '<\\/script');
+}
+
+function callClaude(systemPrompt, userPrompt, maxTokens) {
+  var apiKey = getScriptProp('ANTHROPIC_API_KEY');
+  var resp = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    payload: JSON.stringify({
+      model: 'claude-sonnet-5',
+      max_tokens: maxTokens || 8000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }]
+    }),
+    muteHttpExceptions: true
+  });
+  if (resp.getResponseCode() >= 300) throw new Error('Anthropic API error: ' + resp.getContentText());
+  var json = JSON.parse(resp.getContentText());
+  var text = null;
+  for (var i = 0; i < (json.content || []).length; i++) {
+    if (json.content[i].type === 'text') { text = json.content[i].text; break; }
+  }
+  if (text == null) throw new Error('No text block in Anthropic response (stop_reason: ' + json.stop_reason + '): ' + resp.getContentText().slice(0, 1500));
+  text = text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    throw new Error('Could not parse Claude response as JSON: ' + String(e) + ' — raw text: ' + text.slice(0, 1500));
+  }
+}
+
+function regenerateMealPlan() {
+  var hhFile = githubGetFile('household.json');
+  var household = JSON.parse(hhFile.content);
+
+  var stateFile = githubGetFile('.menu-state.json');
+  var state = {};
+  try { state = JSON.parse(stateFile.content); } catch (e) { state = {}; }
+
+  var rows = readAllFeedbackRows();
+  var currentWeek = household.current_week;
+  var lastFeedbackAt = state.last_processed_feedback_at || null;
+  var lastPrinciplesAt = state.last_processed_principles_update_at || null;
+
+  var newReviewFeedback = rows.filter(function (r) {
+    return r.type === 'review_feedback' && r.week_id === currentWeek.week_id &&
+      (!lastFeedbackAt || r.timestamp > lastFeedbackAt);
+  });
+  var newPrinciplesUpdates = rows.filter(function (r) {
+    return r.type === 'principles_update' && (!lastPrinciplesAt || r.timestamp > lastPrinciplesAt);
+  });
+
+  if (!newReviewFeedback.length && !newPrinciplesUpdates.length) {
+    return { status: 'no_changes', message: 'No new feedback or principle edits since the current plan was generated.' };
+  }
+
+  if (newPrinciplesUpdates.length) {
+    var latestPrinciples = newPrinciplesUpdates[newPrinciplesUpdates.length - 1];
+    var principleLines = String(latestPrinciples.plan_feedback || '')
+      .split('\n')
+      .map(function (l) { return l.replace(/^\s*-\s*/, '').trim(); })
+      .filter(function (l) { return l; });
+    if (principleLines.length) household.household.key_principles = principleLines;
+  }
+
+  if (newReviewFeedback.length) {
+    var latestReview = newReviewFeedback[newReviewFeedback.length - 1];
+    if (typeof latestReview.pantry_ingredients === 'string') {
+      currentWeek.pantry_ingredients = latestReview.pantry_ingredients.split(',')
+        .map(function (s) { return s.trim(); }).filter(function (s) { return s; });
+    }
+    if (typeof latestReview.budget_saver_mode === 'boolean') {
+      currentWeek.budget_saver_mode = latestReview.budget_saver_mode;
+    }
+  }
+
+  var combinedFeedback = newReviewFeedback.map(function (r) {
+    var t = r.plan_feedback || '';    
+      return t;
+  }).join('\n');
+
+  var dishStats = getDishFeedbackStats();
+  var dishReputationLines = Object.keys(dishStats).map(function (name) {
+    var s = dishStats[name];
+    return '- "' + name + '": ' + s.status + ' (yes=' + s.yes + ' mostly=' + s.mostly + ' no=' + s.no + ')' +
+      (s.avg_parent_rating != null ? ', avg parent rating ' + s.avg_parent_rating + '/5' : '');
+  });
+
+  var systemPrompt = 'You are the meal-planning board (five personas: Weeknight Realist, Flavor Explorer, ' +
+    'Veg-Forward Stylist, Child Nutritionist, Family GP/Dietician) revising a family\'s current weekly meal plan. ' +
+    'You must respond with ONLY a single valid JSON object — no markdown fences, no commentary before or after.';
+
+  var userPrompt = 'Household info:\n' + JSON.stringify(household.household, null, 2) +
+    '\n\nBoard of advisors (credit dinners to these personas):\n' + JSON.stringify(household.board_of_advisors, null, 2) +
+    '\n\nCurrent week being revised (week_id: ' + currentWeek.week_id + ', date_range: ' + currentWeek.date_range + '):\n' + JSON.stringify(currentWeek, null, 2) +
+    (combinedFeedback ? '\n\nNew family feedback to incorporate:\n' + combinedFeedback : '') +
+    (currentWeek.pantry_ingredients && currentWeek.pantry_ingredients.length ? '\n\nPrioritise building meals around these pantry ingredients the family wants used: ' +
+      currentWeek.pantry_ingredients.join(', ') + '. If any of them conflicts with a stated allergy/dislike, don\'t force it in — mention the conflict in your board_note instead of silently including or dropping it.' : '') +
+    (currentWeek.budget_saver_mode ? '\n\nBudget Saver Mode is on — where realistic, chain a shared base across two or more meals this week to shrink the shopping list (e.g. bolognese sauce Monday into lasagna Wednesday).' : '') +
+    (dishReputationLines.length ? '\n\nHistorical dish feedback (from every "Log" submission ever made, any week) — ' +
+      'if you touch a dinner below, prefer repeating a "proven" dish over a fresh idea when it fits, and avoid reintroducing ' +
+      'a poorly-received ("new" status with mostly "no") dish in the same format:\n' + dishReputationLines.join('\n') : '') +
+    '\n\nRevise ONLY the days/meals that need to change to address the feedback above and/or the ' +
+    '(possibly updated) household principles above — leave every other day exactly as it was unless it ' +
+    'truly needs to change. Keep the leftover-lunch day-after rule intact (Tuesday lunch = Monday dinner leftovers, etc.). ' +
+    'A day\'s dinner/lunch/snack may be null (an empty slot the family removed on purpose) — leave it null unless the ' +
+    'feedback specifically asks you to fill it. Never invent a method for a meal that has a "source" field (an externally-linked ' +
+    'recipe) — leave it as-is or replace it outright with a fresh board-authored meal. ' +
+    'Give every present meal a structured "ingredients" array: [{"name":"...","quantity":<number>,"unit":"...",' +
+    '"category":"produce|meat_deli|dairy|pantry|frozen|other","display":"natural prose form, e.g. \'2 cloves garlic, minced\'"}] ' +
+    '— leftover-based lunches/snacks get "ingredients": []. Dinners also get a "method" array of prose steps. ' +
+        'Every ingredient named or implied anywhere in the method must appear in the ingredients array for that dinner, with a real quantity — nothing introduced mid-method that was not listed upfront, and no vague amounts. If a dinner needs a componentized or prep-ahead ingredient (something that itself needs advance prep, like cold cooked rice for a fried rice dish), give it its own early method step with explicit day-before timing rather than assuming it is ready to use, and set the prep_ahead_note field on that dinner to a short instruction describing that step (omit the field entirely when there is no such step). Give every dinner prep_time and cook_time as separate figures (e.g. "15 min"), plus hands_off_time only for a genuine passive period like marinating or resting (omit it, not an empty string, when there is not one). ' +
+    'Original board-authored recipes only, no external recipe links. Respond with this exact JSON shape (all 7 days, ' +
+    'even unchanged ones, and do not include a shopping_list — it is computed separately):\n' +
+    '{\n' +
+    '  "days": [ { "day": "Monday", "dinner": {"name": "...", "new": true, "authored_by": "...", "ingredients": [...], "method": ["..."], "prep_time": "...", "cook_time": "...", "hands_off_time": "... (omit if none)", "prep_ahead_note": "... (omit if none)"}, "lunch": {"name": "...", "ingredients": [...]}, "snack": {"name": "...", "ingredients": [...]} }, ... ],\n' +
+    '  "board_note": "one or two sentences on what changed and why",\n' +
+    '  "commit_summary": "a short one-line summary suitable as a git commit message"\n' +
+    '}';
+
+  var plan = callClaude(systemPrompt, userPrompt);
+
+  var trimmedDays = plan.days.map(function (d) {
+    var out = { day: d.day };
+    ['dinner', 'lunch', 'snack'].forEach(function (mealType) {
+      out[mealType] = d[mealType] ? trimMeal(d[mealType], mealType) : null;
+    });
+    return out;
+  });
+
+  currentWeek.days = trimmedDays;
+  currentWeek.board_notes = (currentWeek.board_notes || '') +
+    ' UPDATE (' + Utilities.formatDate(new Date(), 'Australia/Sydney', 'MMM d') + '): ' +
+    (plan.board_note || 'Refreshed via on-demand regenerate.');
+
+  var commitMsg = plan.commit_summary || 'On-demand meal plan refresh';
+  var pushed = pushWeekUpdate(household, hhFile, commitMsg);
+
+  if (newReviewFeedback.length) state.last_processed_feedback_at = newReviewFeedback[newReviewFeedback.length - 1].timestamp;
+  if (newPrinciplesUpdates.length) state.last_processed_principles_update_at = newPrinciplesUpdates[newPrinciplesUpdates.length - 1].timestamp;
+  githubPutFile('.menu-state.json', JSON.stringify(state, null, 2), stateFile.sha, 'Update watermarks after on-demand regenerate');
+
+  return { status: 'ok', week_data: pushed.week_data, principles_text: pushed.principles_text, summary: plan.board_note };
+}
+
+// ---------------- Shared helpers: single-meal generation, remove/add/regenerate a slot ----------------
+
+function trimIngredients(list) {
+  if (!list || !list.length) return [];
+  return list.map(function (ing) {
+    return {
+      name: String((ing && ing.name) || ''),
+      quantity: (ing && typeof ing.quantity === 'number') ? ing.quantity : null,
+      unit: String((ing && ing.unit) || ''),
+      category: (ing && CATEGORY_KEYS.indexOf(ing.category) !== -1) ? ing.category : 'other',
+      display: String((ing && (ing.display || ing.name)) || '')
+    };
+  });
+}
+
+function trimMeal(mealObj, mealType) {
+  var out = { name: mealObj.name, ingredients: trimIngredients(mealObj.ingredients) };
+  if (mealType === 'dinner') {
+    if (mealObj.source && mealObj.source.type === 'external_url') {
+      out.source = { type: 'external_url', url: mealObj.source.url };
+    } else {
+      out.new_or_repeat = mealObj.new === false ? 'repeat' : (mealObj.new_or_repeat || 'new');
+      out.authored_by = mealObj.authored_by || '';
+      out.method = mealObj.method || [];
+            out.prep_time = mealObj.prep_time || '';
+                  out.cook_time = mealObj.cook_time || '';
+                        if (mealObj.hands_off_time) out.hands_off_time = mealObj.hands_off_time;
+                              if (mealObj.prep_ahead_note) out.prep_ahead_note = mealObj.prep_ahead_note;
+    }
+  }
+  return out;
+}
+
+// Pushes an already-modified `household` object (household.current_week edited in place by the
+// caller) to household.json, then mirrors household.current_week into index.html's WEEK_DATA.
+// Shared by regenerateMealPlan and every single-slot mutation below so the two files can't drift.
+function pushWeekUpdate(household, hhFile, commitMsg) {
+  var newHouseholdContent = JSON.stringify(household, null, 2);
+  githubPutFile('household.json', newHouseholdContent, hhFile.sha, commitMsg);
+
+  var currentWeek = household.current_week;
+  var idxFile = githubGetFile('index.html');
+  var htmlWeekData = {
+    week_id: currentWeek.week_id,
+    date_range: currentWeek.date_range,    pantry_ingredients: currentWeek.pantry_ingredients || [],
+    budget_saver_mode: !!currentWeek.budget_saver_mode,
+    days: currentWeek.days
+  };
+  var principlesText = buildPrinciplesText(household.household.key_principles);
+
+  var weekDataJson = escapeScriptClose(JSON.stringify(htmlWeekData, null, 4));
+  var htmlContent = replaceBetween(idxFile.content, 'const WEEK_DATA = ', ';\n\n  let PRINCIPLES_TEXT', weekDataJson);
+  htmlContent = replaceBetween(htmlContent, 'let PRINCIPLES_TEXT = `', '`;', escapeScriptClose(escapeForTemplateLiteral(principlesText)));
+
+  githubPutFile('index.html', htmlContent, idxFile.sha, commitMsg);
+
+  return { week_data: htmlWeekData, principles_text: principlesText };
+}
+
+function findDay(currentWeek, day) {
+  var found = null;
+  currentWeek.days.forEach(function (d) { if (d.day === day) found = d; });
+  if (!found) throw new Error('Day not found: ' + day);
+  return found;
+}
+
+function generateSingleMeal(household, currentWeek, day, meal, excludeName) {
+  var dishStats = getDishFeedbackStats();
+  var dishReputationLines = Object.keys(dishStats).map(function (name) {
+    var s = dishStats[name];
+    return '- "' + name + '": ' + s.status + ' (yes=' + s.yes + ' mostly=' + s.mostly + ' no=' + s.no + ')' +
+      (s.avg_parent_rating != null ? ', avg parent rating ' + s.avg_parent_rating + '/5' : '');
+  });
+  var otherMealNames = [];
+  currentWeek.days.forEach(function (d) {
+    ['dinner', 'lunch', 'snack'].forEach(function (m) {
+      if (d[m] && d[m].name && !(d.day === day && m === meal)) otherMealNames.push(d[m].name);
+    });
+  });
+
+  var systemPrompt = 'You are the meal-planning board (five personas: Weeknight Realist, Flavor Explorer, ' +
+    'Veg-Forward Stylist, Child Nutritionist, Family GP/Dietician) generating a single replacement ' + meal +
+    ' for one day of a family\'s weekly meal plan. ' +
+    'You must respond with ONLY a single valid JSON object — no markdown fences, no commentary before or after.';
+
+  var userPrompt = 'Household info:\n' + JSON.stringify(household.household, null, 2) +
+    '\n\nBoard of advisors (credit dinners to these personas):\n' + JSON.stringify(household.board_of_advisors, null, 2) +
+    '\n\nGenerate a ' + meal + ' for ' + day + '.' +
+    (excludeName ? ' Do not suggest "' + excludeName + '" again — it was just removed from this slot.' : '') +
+    (otherMealNames.length ? '\n\nOther meals already in this week (avoid repeating any of these): ' + otherMealNames.join(', ') : '') +
+    (dishReputationLines.length ? '\n\nHistorical dish feedback (from every "Log" submission ever made, any week) — prefer repeating a "proven" dish over a fresh idea when it fits, and avoid reintroducing a poorly-received ("new" status with mostly "no") dish in the same format:\n' + dishReputationLines.join('\n') : '') +
+    (currentWeek.pantry_ingredients && currentWeek.pantry_ingredients.length ? '\n\nPrioritise building this meal around these pantry ingredients the family wants used: ' +
+      currentWeek.pantry_ingredients.join(', ') + '. If any conflicts with a stated allergy/dislike, don\'t force it in — mention the conflict in your board_note instead.' : '') +
+    (currentWeek.budget_saver_mode ? '\n\nBudget Saver Mode is on — if realistic, chain this meal\'s base off another meal already in the week to shrink the week\'s shopping list.' : '') +
+        (meal === 'dinner' ? '\n\nEvery ingredient named or implied anywhere in the method must appear in the ingredients array with a real quantity — nothing introduced mid-method that was not listed upfront, and no vague amounts. If this dinner needs a componentized or prep-ahead ingredient (something that itself needs advance prep, like cold cooked rice for a fried rice dish), give it its own early method step with explicit day-before timing rather than assuming it is ready to use, and set prep_ahead_note to a short instruction describing that step (omit the field entirely when there is no such step). Give prep_time and cook_time as separate figures (e.g. "15 min"), plus hands_off_time only for a genuine passive period like is not one).' : '') +
+    '\n\nRespond with this exact JSON shape' + (meal === 'dinner' ?
+      ':\n{"name": "...", "new": true, "authored_by": "...", "ingredients": [{"name":"...","quantity":<number>,"unit":"...","category":"produce|meat_deli|dairy|pantry|frozen|other","display":"..."}], "method": ["...", "..."], "prep_time": "...", "cook_time": "...", "hands_off_time": "... (omit if none)", "prep_ahead_note": "... (omit if none)","board_note": "one sentence on what this is and why"}' :
+      ' (no method or authored_by needed for lunch/snack):\n{"name": "...", "ingredients": [{"name":"...","quantity":<number>,"unit":"...","category":"produce|meat_deli|dairy|pantry|frozen|other","display":"..."}], "board_note": "one sentence on what this is and why"}');
+
+  var result = callClaude(systemPrompt, userPrompt, 2000);
+  if (!result || !result.name || !result.ingredients) throw new Error('The board did not return a usable meal — try again.');
+  var mealObj = trimMeal(result, meal);
+  mealObj._board_note = result.board_note || '';
+  return mealObj;
+}
+
+function removeMeal(weekId, day, meal) {
+  var hhFile = githubGetFile('household.json');
+  var household = JSON.parse(hhFile.content);
+  var currentWeek = household.current_week;
+  if (currentWeek.week_id !== weekId) throw new Error('That week is no longer current — refresh the page.');
+  var dayObj = findDay(currentWeek, day);
+  var removedName = dayObj[meal] ? dayObj[meal].name : null;
+  dayObj[meal] = null;
+  currentWeek.board_notes = (currentWeek.board_notes || '') +
+    ' UPDATE (' + Utilities.formatDate(new Date(), 'Australia/Sydney', 'MMM d') + '): Removed ' +
+    (removedName || 'a meal') + ' from ' + day + '\'s ' + meal + ' — left empty.';
+  var commitMsg = 'Remove ' + day + ' ' + meal + (removedName ? ' (' + removedName + ')' : '');
+  return pushWeekUpdate(household, hhFile, commitMsg);
+}
+
+function regenerateMealSlot(weekId, day, meal) {
+  var hhFile = githubGetFile('household.json');
+  var household = JSON.parse(hhFile.content);
+  var currentWeek = household.current_week;
+  if (currentWeek.week_id !== weekId) throw new Error('That week is no longer current — refresh the page.');
+  var dayObj = findDay(currentWeek, day);
+  var excludeName = dayObj[meal] ? dayObj[meal].name : null;
+  var newMeal = generateSingleMeal(household, currentWeek, day, meal, excludeName);
+  var boardNote = newMeal._board_note;
+  delete newMeal._board_note;
+  dayObj[meal] = newMeal;
+  currentWeek.board_notes = (currentWeek.board_notes || '') +
+    ' UPDATE (' + Utilities.formatDate(new Date(), 'Australia/Sydney', 'MMM d') + '): Added a new ' + meal +
+    ' for ' + day + ' (' + newMeal.name + ')' + (boardNote ? ' — ' + boardNote : '') + '.';
+  var commitMsg = 'Add ' + meal + ' for ' + day + ': ' + newMeal.name;
+  return pushWeekUpdate(household, hhFile, commitMsg);
+}
+
+function previewExternalRecipe(url) {
+  if (!url) throw new Error('Missing url');
+  var resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true, followRedirects: true });
+  if (resp.getResponseCode() >= 300) throw new Error('That page returned an error (status ' + resp.getResponseCode() + ')');
+  var html = resp.getContentText();
+  var text = html.replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 15000);
+  if (!text) throw new Error('That page had no readable content');
+
+  var systemPrompt = 'You extract a recipe title and ingredient list from raw web page text. ' +
+    'You must respond with ONLY a single valid JSON object — no markdown fences, no commentary. ' +
+    'Never include any method, instructions, or steps text in your response — copyright constraint, title and ingredients only. You may include a stated prep time and/or cook time if the page states them — never invent one if it does not.';
+  var userPrompt = 'Extract the recipe title and ingredient list from this page text. ' +
+    'If this does not look like a recipe page, respond with {"error": "not a recipe page"}. ' +
+    'Best-effort parse vague quantities (e.g. "a pinch of salt") rather than skipping the ingredient. ' +
+    'Respond with this exact JSON shape: {"title": "...", "ingredients": [{"name":"...", "quantity": <number or null>, ' +
+        '"unit":"...", "category":"produce|meat_deli|dairy|pantry|frozen|other","display":"natural prose form, e.g. \'2 cloves garlic, minced\'"}], "prep_time": "... omit this field if the page does not state one", "cook_time": "... omit this field if the page does not state one"}.' +
+    '\n\nPage text:\n' + text;
+
+  var parsed = callClaude(systemPrompt, userPrompt, 2500);
+  if (!parsed || parsed.error || !parsed.title || !parsed.ingredients || !parsed.ingredients.length) {
+    throw new Error('Couldn’t read a recipe from that page');
+  }
+  return { title: String(parsed.title), ingredients: trimIngredients(parsed.ingredients), source_url: url, prep_time: parsed.prep_time, cook_time: parsed.cook_time };
+}
+
+function addExternalRecipe(weekId, day, meal, title, sourceUrl, ingredients, prepTime, cookTime) {
+  if (!title || !sourceUrl) throw new Error('Missing title or source_url');
+  var hhFile = githubGetFile('household.json');
+  var household = JSON.parse(hhFile.content);
+  var currentWeek = household.current_week;
+  if (currentWeek.week_id !== weekId) throw new Error('That week is no longer current — refresh the page.');
+  var dayObj = findDay(currentWeek, day);
+  dayObj[meal] = {
+    name: String(title),
+    ingredients: trimIngredients(ingredients),
+    source: { type: 'external_url', url: String(sourceUrl) },
+    prep_time: prepTime || undefined,
+    cook_time: cookTime || undefined
+  };
+  currentWeek.board_notes = (currentWeek.board_notes || '') +
+    ' UPDATE (' + Utilities.formatDate(new Date(), 'Australia/Sydney', 'MMM d') + '): Added "' + title +
+    '" from an external link for ' + day + '\'s ' + meal + '.';
+  var commitMsg = 'Add external recipe: ' + title + ' (' + day + ' ' + meal + ')';
+  return pushWeekUpdate(household, hhFile, commitMsg);
+}
+function addHistoryMeal(description, sourceUrl, ingredients, kidsAteIt, note) { if (!description) throw new Error('add_history_meal requires a description'); var sheet = getOrCreateSheet(); sheet.appendRow([new Date(), 'meal_feedback', '', 'History upload', '', description, kidsAteIt || 'yes', '', note || '', '', '', '', '', sourceUrl || '', (ingredients && ingredients.length) ? JSON.stringify(ingredients) : '']); }
+function replaceBetween(content, startMarker, endMarker, newInner) {
+  var startIdx = content.indexOf(startMarker);
+  if (startIdx === -1) throw new Error('Could not find start marker: ' + startMarker);
+  var searchFrom = startIdx + startMarker.length;
+  var endIdx = content.indexOf(endMarker, searchFrom);
+  if (endIdx === -1) throw new Error('Could not find end marker: ' + endMarker);
+  return content.slice(0, startIdx) + startMarker + newInner + content.slice(endIdx);
+}
+
+// ---------------- Favourites ----------------
+
+function slugify(name) {
+  return String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+function updateFavouritesInIndexHtml(favourites) {
+  var idxFile = githubGetFile('index.html');
+  var favJson = escapeScriptClose(JSON.stringify(favourites, null, 2));
+  var htmlContent = replaceBetween(idxFile.content, 'let FAVOURITES = ', ';\n\n  let dishStats', favJson);
+  githubPutFile('index.html', htmlContent, idxFile.sha, 'Sync favourites into index.html');
+}
+
+function saveFavourite(name, authored_by, recipe) {
+  if (!name || !recipe || !recipe.ingredients || !recipe.method) {
+    throw new Error('save_favourite requires name, authored_by, and a recipe with ingredients and method');
+  }
+  var hhFile = githubGetFile('household.json');
+  var household = JSON.parse(hhFile.content);
+  if (!household.favourites) household.favourites = [];
+
+  var id = slugify(name);
+  var favourites = household.favourites.filter(function (f) { return f.id !== id; });
+  favourites.push({
+    id: id,
+    name: name,
+    authored_by: authored_by || '',
+    recipe: { ingredients: recipe.ingredients, method: recipe.method },
+    saved_at: new Date().toISOString(),
+    requested_for_next_week: false
+  });
+  household.favourites = favourites;
+
+  githubPutFile('household.json', JSON.stringify(household, null, 2), hhFile.sha, 'Save favourite: ' + name);
+  updateFavouritesInIndexHtml(favourites);
+
+  return favourites;
+}
+
+function toggleFavouriteRequest(id, requested) {
+  if (!id) throw new Error('toggle_favourite_request requires an id');
+  var hhFile = githubGetFile('household.json');
+  var household = JSON.parse(hhFile.content);
+  if (!household.favourites) household.favourites = [];
+
+  var found = false;
+  household.favourites.forEach(function (f) {
+    if (f.id === id) { f.requested_for_next_week = !!requested; found = true; }
+  });
+  if (!found) throw new Error('Favourite not found: ' + id);
+
+  githubPutFile('household.json', JSON.stringify(household, null, 2), hhFile.sha,
+    (requested ? 'Request' : 'Un-request') + ' favourite for next week: ' + id);
+  updateFavouritesInIndexHtml(household.favourites);
+
+  return household.favourites;
+}
+
+// ---------------- Dish feedback stats (proven vs. new attempt) ----------------
+
+// Aggregates every meal_feedback row ever logged, by exact meal_name, into a
+// proven/new status per the UX spec's rule: proven = has been served before
+// AND feedback is predominantly yes/mostly; new = first time, OR predominantly
+// "no", OR (client-side judgement call, not computed here) a meaningfully
+// different format of a previously-poor dish.
+function getDishFeedbackStats() {
+  var rows = readAllFeedbackRows();
+  var stats = {};
+  rows.forEach(function (r) {
+    if (r.type !== 'meal_feedback' || !r.meal_name) return;
+    var key = r.meal_name;
+    if (!stats[key]) stats[key] = { yes: 0, mostly: 0, no: 0, total: 0, ratingSum: 0, ratingCount: 0 };
+    var s = stats[key];
+    if (r.kids_ate_it === 'yes') { s.yes++; s.total++; }
+    else if (r.kids_ate_it === 'mostly') { s.mostly++; s.total++; }
+    else if (r.kids_ate_it === 'no') { s.no++; s.total++; }
+    if (r.parent_rating) { s.ratingSum += Number(r.parent_rating); s.ratingCount++; }
+  });
+  Object.keys(stats).forEach(function (key) {
+    var s = stats[key];
+    var positive = s.yes + s.mostly;
+    s.status = (s.total > 0 && positive >= s.total / 2 && positive > s.no) ? 'proven' : 'new';
+    s.avg_parent_rating = s.ratingCount ? Math.round((s.ratingSum / s.ratingCount) * 10) / 10 : null;
+    delete s.ratingSum;
+    delete s.ratingCount;
+  });
+  return stats;
+}
+
+// ---------------- Shared shopping-checkbox sync ----------------
+// Sheet-backed (not GitHub-backed) deliberately — checkbox taps are frequent,
+// small writes, and don't need version history or to trigger a GitHub Pages
+// rebuild. Scoped by week_id + item_key so each new week starts unchecked.
+
+function getOrCreateShoppingStateSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('ShoppingState');
+  if (!sheet) {
+    sheet = ss.insertSheet('ShoppingState');
+    sheet.appendRow(['Week ID', 'Item Key', 'Checked', 'Updated At']);
+  }
+  return sheet;
+}
+
+function getShoppingState(weekId) {
+  var sheet = getOrCreateShoppingStateSheet();
+  var values = sheet.getDataRange().getValues();
+  var state = {};
+  for (var i = 1; i < values.length; i++) {
+    if (values[i][0] === weekId) state[values[i][1]] = !!values[i][2];
+  }
+  return state;
+}
+
+function setShoppingItemState(weekId, itemKey, checked) {
+  if (!weekId || !itemKey) throw new Error('toggle_shopping_item requires week_id and item_key');
+  var sheet = getOrCreateShoppingStateSheet();
+  var values = sheet.getDataRange().getValues();
+  var foundRow = -1;
+  for (var i = 1; i < values.length; i++) {
+    if (values[i][0] === weekId && values[i][1] === itemKey) { foundRow = i + 1; break; }
+  }
+  if (foundRow === -1) {
+    sheet.appendRow([weekId, itemKey, checked, new Date()]);
+  } else {
+    sheet.getRange(foundRow, 3).setValue(checked);
+    sheet.getRange(foundRow, 4).setValue(new Date());
+  }
+  return getShoppingState(weekId);
+}
