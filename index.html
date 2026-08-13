@@ -175,12 +175,70 @@ body{
 .primary-btn:focus-visible{outline:3px solid var(--status-new);outline-offset:2px;}
 
 /* Shared loading indicator (AI plan generation, recipe fetch, sign-in) */
-.loading-indicator{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px 0;}
-.loading-pulse{position:relative;width:40px;height:40px;flex-shrink:0;}
-.loading-pulse::before,.loading-pulse::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--teal);opacity:0.55;animation:loading-ripple 1.8s ease-out infinite;}
-.loading-pulse::after{animation-delay:0.9s;}
+.loading-indicator{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 0;}
+.loading-stage{height:44px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;position:relative;}
+.loading-stage > *{position:absolute;opacity:0;transition:opacity 0.35s ease;}
+.loading-stage.show-bars .loading-bars{opacity:1;}
+.loading-stage.show-gear .loading-gear-wrap{opacity:1;}
+
+.loading-bars{display:flex;align-items:center;justify-content:center;gap:5px;height:40px;}
+.loading-bars .bar{width:5px;border-radius:3px;background:var(--teal);height:10px;}
+.loading-stage.show-bars .bar{animation-name:loading-bob;animation-duration:1.2s;animation-timing-function:ease-in-out;animation-iteration-count:infinite;}
+/* IMPORTANT: keep animation-delay as its own separate rule (do not fold into
+   an animation shorthand on a more specific selector) — a shorthand on a
+   higher-specificity rule will silently reset delay to 0 and kill the stagger,
+   which is what actually creates the traveling-wave look. */
+.loading-bars .bar:nth-child(1){animation-delay:0.00s;}
+.loading-bars .bar:nth-child(2){animation-delay:0.10s;}
+.loading-bars .bar:nth-child(3){animation-delay:0.20s;}
+.loading-bars .bar:nth-child(4){animation-delay:0.30s;}
+.loading-bars .bar:nth-child(5){animation-delay:0.40s;}
+.loading-bars .bar:nth-child(6){animation-delay:0.50s;}
+.loading-bars .bar:nth-child(7){animation-delay:0.60s;}
+.loading-bars .bar:nth-child(8){animation-delay:0.70s;}
+.loading-bars .bar:nth-child(9){animation-delay:0.80s;}
+@keyframes loading-bob{0%,100%{height:10px;opacity:0.55;}50%{height:36px;opacity:1;}}
+
+.loading-gear-wrap{width:36px;height:36px;}
+.loading-gear{width:100%;height:100%;}
+.loading-stage.show-gear .loading-gear{animation:loading-cranked-turn 6.4s linear infinite;transform-origin:50% 50%;}
+@keyframes loading-cranked-turn{
+  0%      { transform:rotate(0deg); }
+  5.6%    { transform:rotate(-3deg); }
+  7.5%    { transform:rotate(50deg); }
+  9.4%    { transform:rotate(42deg); }
+  12.5%   { transform:rotate(45deg); }
+  18.1%   { transform:rotate(42deg); }
+  20%     { transform:rotate(95deg); }
+  21.9%   { transform:rotate(87deg); }
+  25%     { transform:rotate(90deg); }
+  30.6%   { transform:rotate(87deg); }
+  32.5%   { transform:rotate(140deg); }
+  34.4%   { transform:rotate(132deg); }
+  37.5%   { transform:rotate(135deg); }
+  43.1%   { transform:rotate(132deg); }
+  45%     { transform:rotate(185deg); }
+  46.9%   { transform:rotate(177deg); }
+  50%     { transform:rotate(180deg); }
+  55.6%   { transform:rotate(177deg); }
+  57.5%   { transform:rotate(230deg); }
+  59.4%   { transform:rotate(222deg); }
+  62.5%   { transform:rotate(225deg); }
+  68.1%   { transform:rotate(222deg); }
+  70%     { transform:rotate(275deg); }
+  71.9%   { transform:rotate(267deg); }
+  75%     { transform:rotate(270deg); }
+  80.6%   { transform:rotate(267deg); }
+  82.5%   { transform:rotate(320deg); }
+  84.4%   { transform:rotate(312deg); }
+  87.5%   { transform:rotate(315deg); }
+  93.1%   { transform:rotate(312deg); }
+  95%     { transform:rotate(365deg); }
+  96.9%   { transform:rotate(357deg); }
+  100%    { transform:rotate(360deg); }
+}
+
 .loading-label{font-family:var(--font-head);font-size:0.85rem;color:var(--ink-soft);text-align:center;}
-@keyframes loading-ripple{0%{transform:scale(0.35);opacity:0.6;}100%{transform:scale(1);opacity:0;}}
 
 /* Default meal planning principles checklist */
 .principles-defaults-list{margin-bottom:14px;}
@@ -255,7 +313,15 @@ body{
 .toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,10px);background:var(--ink);color:var(--white);font-family:var(--font-head);font-size:0.8rem;padding:9px 18px;border-radius:20px;opacity:0;transition:opacity .2s ease, transform .2s ease;z-index:90;white-space:nowrap;}
 .toast.show{opacity:1;transform:translate(-50%,0);}
 
-@media (prefers-reduced-motion:reduce){*{transition:none !important;} .pull-refresh-indicator.checking i{animation:none !important;} .loading-pulse::before,.loading-pulse::after{animation:none !important;opacity:0.5 !important;transform:scale(1) !important;}}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important;}
+  .pull-refresh-indicator.checking i{animation:none !important;}
+  .loading-stage{height:auto;position:static;display:block;}
+  .loading-stage > *{position:static;opacity:1 !important;transition:none;}
+  .loading-bars, .loading-gear-wrap{display:none;}
+  .loading-stage::before{content:"";display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--teal);}
+  .loading-bars .bar, .loading-gear{animation:none !important;}
+}
 </style>
 </head>
 <body>
@@ -1548,17 +1614,69 @@ body{
     backdrop.querySelector("#linkMealBtn").addEventListener("click", ()=> showAddFromLinkForm(day, meal, backdrop));
   }
 
-  // Shared loading indicator (design system: soft pulsing/rippling teal shape + label,
-  // reused everywhere a real network/processing wait applies).
-  function loadingIndicatorHTML(label){
-    return `<div class="loading-indicator"><div class="loading-pulse"></div><div class="loading-label">${label}</div></div>`;
+  // Shared loading indicator (weekly-board-loading-animation-spec.md): a two-stage
+  // looping animation — bar wave, then a cranked gear turning against resistance —
+  // cross-fading into each other, reused everywhere a real network/processing wait
+  // applies. Renders into `container` and starts the loop; returns a function that
+  // stops the loop, which every call site must invoke once the wait ends.
+  function showLoadingIndicator(container, labelText){
+    container.innerHTML = `
+      <div class="loading-indicator">
+        <div class="loading-stage show-bars">
+          <div class="loading-bars">
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          </div>
+          <div class="loading-gear-wrap">
+            <svg class="loading-gear" viewBox="0 0 36 36">
+              <g fill="var(--teal)">
+                <circle cx="18" cy="18" r="8"/>
+                <rect x="16" y="3" width="4" height="6" rx="1.5"/>
+                <rect x="16" y="27" width="4" height="6" rx="1.5"/>
+                <rect x="16" y="3" width="4" height="6" rx="1.5" transform="rotate(45 18 18)"/>
+                <rect x="16" y="27" width="4" height="6" rx="1.5" transform="rotate(45 18 18)"/>
+                <rect x="16" y="3" width="4" height="6" rx="1.5" transform="rotate(90 18 18)"/>
+                <rect x="16" y="27" width="4" height="6" rx="1.5" transform="rotate(90 18 18)"/>
+                <rect x="16" y="3" width="4" height="6" rx="1.5" transform="rotate(135 18 18)"/>
+                <rect x="16" y="27" width="4" height="6" rx="1.5" transform="rotate(135 18 18)"/>
+              </g>
+              <circle cx="18" cy="18" r="3.5" fill="var(--glass-strong)"/>
+            </svg>
+          </div>
+        </div>
+        <div class="loading-label"></div>
+      </div>`;
+    return startLoadingAnimation(container.querySelector(".loading-stage"), container.querySelector(".loading-label"), labelText);
+  }
+
+  function startLoadingAnimation(stageEl, labelEl, labelText){
+    labelEl.textContent = labelText;
+    const BAR_MS = 2400;
+    const GEAR_MS = 6400;
+    let cancelled = false;
+    function loop(){
+      if(cancelled) return;
+      stageEl.classList.remove('show-gear');
+      stageEl.classList.add('show-bars');
+      setTimeout(() => {
+        if(cancelled) return;
+        stageEl.classList.remove('show-bars');
+        stageEl.classList.add('show-gear');
+        setTimeout(loop, GEAR_MS);
+      }, BAR_MS);
+    }
+    loop();
+    return () => { cancelled = true; };
   }
 
   async function regenerateMealFlow(day, meal, backdrop){
     const modal = backdrop.querySelector(".modal");
-    modal.innerHTML = `<h3>Generating…</h3><div class="meal-sub">${day} · ${meal}</div>${loadingIndicatorHTML("This can take up to two minutes — keep this tab open.")}`;
+    modal.innerHTML = `<h3>Generating…</h3><div class="meal-sub">${day} · ${meal}</div><div class="loadingSlot"></div>`;
+    const stopLoading = showLoadingIndicator(modal.querySelector(".loadingSlot"), "This can take up to two minutes — keep this tab open.");
     try{
       const result = await postJSON({type:"regenerate_meal", week_id: WEEK_DATA.week_id, day, meal});
+      stopLoading();
       if(result.status === "ok"){
         applyWeekPatch(result.week_data);
         backdrop.remove();
@@ -1566,6 +1684,7 @@ body{
         renderRegenerateRetry(day, meal, backdrop, result.message || "Unknown error");
       }
     }catch(e){
+      stopLoading();
       renderRegenerateRetry(day, meal, backdrop, "Lost the connection while waiting — it may have still gone through. Check the Plan tab before trying again.");
     }
   }
@@ -1598,9 +1717,11 @@ body{
       const note = modal.querySelector("#linkFetchNote");
       const btn = modal.querySelector("#fetchLinkBtn");
       if(!url){ note.textContent = "Paste a URL first"; return; }
-      btn.disabled = true; btn.textContent = "Fetching…"; note.innerHTML = loadingIndicatorHTML("Reading that recipe…");
+      btn.disabled = true; btn.textContent = "Fetching…";
+      const stopLoading = showLoadingIndicator(note, "Reading that recipe…");
       try{
         const result = await postJSON({type:"preview_external_recipe", url});
+        stopLoading();
         if(result.status === "ok"){
           showExternalRecipePreview(day, meal, backdrop, result.recipe);
         } else {
@@ -1608,6 +1729,7 @@ body{
           btn.disabled = false; btn.textContent = "Fetch recipe";
         }
       }catch(e){
+        stopLoading();
         note.innerHTML = `<i class="ti ti-alert-triangle"></i> Couldn't read that page — try a different link, or generate a meal instead.`;
         btn.disabled = false; btn.textContent = "Fetch recipe";
       }
@@ -1907,9 +2029,11 @@ body{
         const btn = container.querySelector("#historyFetchLinkBtn");
         const previewEl = container.querySelector("#historyIngredientsPreview");
         if(!url){ note.textContent = "Paste a URL first"; return; }
-        btn.disabled = true; btn.textContent = "Fetching…"; note.innerHTML = loadingIndicatorHTML("Reading that recipe…"); previewEl.innerHTML = "";
+        btn.disabled = true; btn.textContent = "Fetching…"; previewEl.innerHTML = "";
+        const stopLoading = showLoadingIndicator(note, "Reading that recipe…");
         try{
           const result = await postJSON({type:"preview_external_recipe", url});
+          stopLoading();
           if(result.status === "ok"){
             fetchedRecipe = result.recipe;
             previewEl.innerHTML = `<ul class="preview-ingredients">${result.recipe.ingredients.map(i => `<li>${i.display || i.name}</li>`).join('')}</ul>`;
@@ -1919,6 +2043,7 @@ body{
             note.innerHTML = `<i class="ti ti-alert-triangle"></i> Couldn't read that link — the meal will still save without it.`;
           }
         }catch(e){
+          stopLoading();
           fetchedRecipe = null;
           note.innerHTML = `<i class="ti ti-alert-triangle"></i> Couldn't read that link — the meal will still save without it.`;
         }finally{
@@ -2070,9 +2195,10 @@ body{
     btn.disabled = true;
     const originalLabel = btn.innerHTML;
     btn.innerHTML = '<i class="ti ti-refresh"></i>Refreshing… (up to a few minutes)';
-    note.innerHTML = loadingIndicatorHTML("Generating your plan…");
+    const stopLoading = showLoadingIndicator(note, "Generating your plan…");
     try{
       const result = await postJSON({type: "regenerate_now", week_id: WEEK_DATA.week_id});
+      stopLoading();
       if(result.status === "ok"){
         PRINCIPLES_TEXT = result.principles_text;
         note.textContent = "Updated ✓" + (result.summary ? " — " + result.summary : "");
@@ -2084,6 +2210,7 @@ body{
         note.textContent = "Refresh failed: " + (result.message || "unknown error");
       }
     }catch(e){
+      stopLoading();
       note.textContent = "Lost the connection while waiting — it may have still gone through. Reload in a moment to check before trying again.";
     }finally{
       btn.disabled = false;
