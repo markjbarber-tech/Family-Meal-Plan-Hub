@@ -61,7 +61,8 @@ body{
 .refresh-status-note{text-align:center;font-family:var(--font-mono);font-size:0.68rem;color:var(--ink-soft);margin-bottom:14px;min-height:14px;}
 
 /* Tabs */
-.tabs{display:flex;gap:6px;background:rgba(255,255,255,0.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);border-radius:16px;padding:5px;margin-bottom:18px;}
+.tabs{display:flex;gap:6px;background:rgba(255,255,255,0.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);border-radius:16px;padding:5px;margin-bottom:18px;position:sticky;top:12px;z-index:40;}
+.panel{padding-top:8px;}
 .tab{flex:1;font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;font-size:0.85rem;text-align:center;padding:9px 4px;background:transparent;color:var(--ink-soft);border:none;border-radius:12px;cursor:pointer;transition:background .15s ease, color .15s ease, box-shadow .15s ease;display:flex;align-items:center;justify-content:center;}
 .tab:hover{color:var(--ink);}
 .tab.active{background:var(--white);color:var(--teal-dark);box-shadow:0 3px 10px rgba(42,59,76,0.15);}
@@ -1334,10 +1335,8 @@ body{
           <div class="rb-sub">Note plan changes or fridge/pantry items that need using up — this lands in the same log read before next week's planning.</div>
           <label>Plan feedback</label>
           <textarea id="planFeedbackInput" placeholder="e.g. can we swap Wednesday's sausage bake for something else?"></textarea>
-          <label>Ingredients to use up</label>
-          <textarea id="useUpInput" placeholder="e.g. half a bag of spinach, leftover ham"></textarea>
-          <label>Pantry ingredients to build around</label>
-          <textarea id="pantryInput" placeholder="e.g. chicken thighs, capsicum">${pantryValue}</textarea>
+          <label>What ingredients do you already have?</label>
+          <textarea id="pantryInput" placeholder="e.g. half a bag of spinach, leftover ham, chicken thighs, capsicum">${pantryValue}</textarea>
           <label class="budget-toggle-row">
             <input type="checkbox" id="budgetSaverInput" ${WEEK_DATA.budget_saver_mode ? 'checked' : ''}>
             <span>Budget Saver Mode — chain meals together to shrink this week's shopping list</span>
@@ -1347,15 +1346,14 @@ body{
         </div>`;
       container.querySelector("#saveReviewBtn").addEventListener("click", async ()=>{
         const plan_feedback = container.querySelector("#planFeedbackInput").value;
-        const use_up = container.querySelector("#useUpInput").value;
         const pantry_ingredients = container.querySelector("#pantryInput").value;
         const budget_saver_mode = container.querySelector("#budgetSaverInput").checked;
         const note = container.querySelector("#reviewSavedNote");
         const budgetModeChanged = budget_saver_mode !== !!WEEK_DATA.budget_saver_mode;
-        if(!plan_feedback && !use_up && !pantry_ingredients && !budgetModeChanged){ note.textContent = "Add something in one of the boxes first"; return; }
+        if(!plan_feedback && !pantry_ingredients && !budgetModeChanged){ note.textContent = "Add something in one of the boxes first"; return; }
         note.textContent = "Sending…";
         try{
-          await sendToSheet({type:"review_feedback", week_id: WEEK_DATA.week_id, plan_feedback, use_up, pantry_ingredients, budget_saver_mode});
+          await sendToSheet({type:"review_feedback", week_id: WEEK_DATA.week_id, plan_feedback, pantry_ingredients, budget_saver_mode});
           note.textContent = "Sent ✓";
         }catch(e){
           note.textContent = "Couldn't send — reply to our email instead";
