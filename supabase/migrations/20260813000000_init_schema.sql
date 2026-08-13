@@ -157,13 +157,9 @@ create policy "own household only" on meals
 
 -- Keep-alive heartbeat --------------------------------------------------------
 -- Belt-and-suspenders against Supabase's free-tier 7-day inactivity pause,
--- independent of whether the scheduled generation job runs on time. Requires
--- the pg_cron extension, which Supabase projects can enable from
--- Database > Extensions in the dashboard (or via `create extension pg_cron;`
--- if the role running this migration has permission — it commonly doesn't on
--- hosted Supabase, so this is left as a manual one-time dashboard step rather
--- than baked into this migration).
---
--- Once pg_cron is enabled, run once (not part of this migration file, since
--- it depends on the extension being enabled first):
---   select cron.schedule('heartbeat', '0 */6 * * *', $$select 1$$);
+-- independent of whether the scheduled generation job runs on time. Applied
+-- directly (this project's role had permission to enable the extension):
+--   create extension if not exists pg_cron;
+--   select cron.schedule('heartbeat', '0 */6 * * *', 'select 1');
+-- Confirmed live in this project as cron job "heartbeat" (job id 1), running
+-- every 6 hours.
