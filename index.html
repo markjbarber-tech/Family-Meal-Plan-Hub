@@ -130,6 +130,8 @@ body{
 .add-meal-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--font-mono);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.03em;color:var(--ink-faint);background:none;border:1.5px dashed var(--glass-border);border-radius:10px;padding:8px;cursor:pointer;}
 .add-meal-btn:hover{color:var(--teal-dark);border-color:var(--teal);}
 .add-meal-btn:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.prep-ahead-note{display:flex;align-items:flex-start;gap:6px;font-size:0.78rem;color:var(--status-new);background:rgba(201,138,62,0.1);border-radius:10px;padding:7px 10px;margin-bottom:10px;line-height:1.4;}
+.prep-ahead-note i{margin-top:1px;flex-shrink:0;}
 
 /* Shopping */
 .shop-card{background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:18px;padding:20px 18px 22px;}
@@ -154,6 +156,7 @@ body{
 .recipe-card{background:var(--glass-strong);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--glass-border);border-radius:18px;padding:20px 20px 22px;}
 .recipe-card h3{font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;font-size:1.2rem;margin:0 0 2px;}
 .recipe-card .by{font-size:0.75rem;font-style:italic;color:var(--ink-soft);margin-bottom:12px;}
+.recipe-time-estimate{font-family:var(--font-mono);font-size:0.68rem;color:var(--ink-faint);letter-spacing:0.02em;margin-bottom:10px;}
 .recipe-card h4{font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--teal-dark);margin:14px 0 6px;}
 .recipe-card ul, .recipe-card ol{margin:0;padding-left:22px;font-size:0.86rem;line-height:1.65;}
 .recipe-card li{margin-bottom:3px;}
@@ -1254,6 +1257,19 @@ body{
     return `${formatQuantityUnit(x.quantity, x.unit)} ${x.name}`.replace(/\s+/g,' ').trim();
   }
 
+  // Low-emphasis "Prep: 15 min · Cook: 25 min" label, appending hands-off time when present.
+  // Renders nothing if neither prep_time nor cook_time is set (e.g. an external recipe whose
+  // source page didn't state one).
+  function timeEstimateHtml(info){
+    if(!info.prep_time && !info.cook_time) return '';
+    const parts = [];
+    if(info.prep_time) parts.push(`Prep: ${info.prep_time}`);
+    if(info.cook_time) parts.push(`Cook: ${info.cook_time}`);
+    let text = parts.join(' · ');
+    if(info.hands_off_time) text += ` · Plus ${info.hands_off_time}`;
+    return `<div class="recipe-time-estimate">${text}</div>`;
+  }
+
   // Computed aggregation across every meal still in the week — dropping a meal drops its
   // ingredients automatically, adding one merges in. Sums quantities only when an ingredient's
   // canonical name AND unit match exactly across meals; otherwise lists them separately
@@ -1360,10 +1376,17 @@ body{
   // persistent low-emphasis input rather than a permanent banner; expands on tap.
   let reviewBoxExpanded = false;
 
+  function mondayPrepAheadNoteHtml(){
+    const monday = WEEK_DATA.days[0];
+    const note = monday && monday.dinner && monday.dinner.prep_ahead_note;
+    return note ? `<div class="prep-ahead-note"><i class="ti ti-clock"></i>For Monday: ${note}</div>` : '';
+  }
+
   function renderReviewBox(){
     const container = document.getElementById("reviewBoxContainer");
     if(!reviewBoxExpanded){
       container.innerHTML = `
+        ${mondayPrepAheadNoteHtml()}
         <button class="review-box-compact" id="reviewBoxToggle">
           <i class="ti ti-message-2"></i>
           <span>Feedback or ingredients on hand?</span>
@@ -1377,6 +1400,7 @@ body{
     }
     const pantryValue = (WEEK_DATA.pantry_ingredients || []).join(', ');
     container.innerHTML = `
+      ${mondayPrepAheadNoteHtml()}
       <div class="review-box">
         <button class="review-box-collapse" id="reviewBoxCollapse"><i class="ti ti-chevron-up"></i>Collapse</button>
         <div class="rb-title">Feedback or ingredients on hand?</div>
@@ -1430,12 +1454,15 @@ body{
     list.innerHTML = WEEK_DATA.days.map((d, dayIndex) => {
       const status = d.dinner ? dishStatus(d.dinner.name) : 'new';
       const meals = ["lunch","snack","dinner"];
+      const nextDay = WEEK_DATA.days[dayIndex + 1];
+      const prepAheadNote = nextDay && nextDay.dinner && nextDay.dinner.prep_ahead_note;
       return `<div class="day-card">
         <div class="glow ${status}"></div>
         <div class="day-head">
           <span class="day-name">${d.day}</span>
           <span class="day-status">${status === 'proven' ? 'proven' : 'new attempt'}</span>
         </div>
+        ${prepAheadNote ? `<div class="prep-ahead-note"><i class="ti ti-clock"></i>For tomorrow: ${prepAheadNote}</div>` : ''}
         ${meals.map(m=>{
           const info = d[m];
           if(!info){
@@ -1561,6 +1588,7 @@ body{
     card.innerHTML = `
       <h3>${info.name}</h3>
       ${info.authored_by ? `<div class="by">${info.authored_by}</div>` : ''}
+      ${timeEstimateHtml(info)}
       <button class="favourite-btn ${alreadySaved?'saved':''}" id="recipeSaveFavBtn" ${alreadySaved?'disabled':''}>
         <i class="ti ti-heart"></i>${alreadySaved ? 'Saved to favourites' : 'Save to favourites'}
       </button>
@@ -1788,6 +1816,7 @@ body{
     modal.innerHTML = `
       <h3>${recipe.title}</h3>
       <div class="meal-sub">${day} · ${meal} · <a href="${recipe.source_url}" target="_blank" rel="noopener">source</a></div>
+      ${timeEstimateHtml(recipe)}
       <div class="modal-label">Ingredients</div>
       <ul class="preview-ingredients">${recipe.ingredients.map(i => `<li>${i.display || i.name}</li>`).join('')}</ul>
       <div class="modal-status-note" id="confirmLinkNote"></div>
@@ -1799,7 +1828,7 @@ body{
       const note = modal.querySelector("#confirmLinkNote");
       btn.disabled = true; btn.textContent = "Adding…";
       try{
-        const result = await postJSON({type:"add_external_recipe", week_id: WEEK_DATA.week_id, day, meal, title: recipe.title, source_url: recipe.source_url, ingredients: recipe.ingredients});
+        const result = await postJSON({type:"add_external_recipe", week_id: WEEK_DATA.week_id, day, meal, title: recipe.title, source_url: recipe.source_url, ingredients: recipe.ingredients, prep_time: recipe.prep_time, cook_time: recipe.cook_time});
         if(result.status === "ok"){
           applyWeekPatch(result.week_data);
           backdrop.remove();
