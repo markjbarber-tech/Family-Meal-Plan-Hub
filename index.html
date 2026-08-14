@@ -378,7 +378,7 @@ body.auth-pending #hub{display:none;}
   </div>
 
   <div class="util-row">
-    <button class="util-btn" id="refreshPlanBtn" disabled title="Meal generation is being upgraded to the new backend — back shortly"><i class="ti ti-refresh"></i>Refresh plan</button>
+    <button class="util-btn" id="refreshPlanBtn"><i class="ti ti-refresh"></i>Refresh plan</button>
     <button class="util-btn" id="favouritesLinkBtn"><i class="ti ti-heart"></i>Favourites</button>
   </div>
   <div class="refresh-status-note" id="refreshStatusNote"></div>
@@ -415,11 +415,11 @@ body.auth-pending #hub{display:none;}
 
 <script>
 (function(){
-  // ---- Multi-tenant re-platform in progress: WEEK_DATA/PRINCIPLES_TEXT/FAVOURITES are no
-  // longer baked in at generation time -- they're fetched live from Supabase per signed-in
-  // household in loadHouseholdData(), below. FEEDBACK_ENDPOINT/READ_KEY are legacy (the old
-  // Apps Script backend), still used only by the 3 AI-generation actions until they're
-  // ported to Supabase Edge Functions. ----
+  // ---- Multi-tenant re-platform: WEEK_DATA/PRINCIPLES_TEXT/FAVOURITES are fetched live from
+  // Supabase per signed-in household in loadHouseholdData(), below. The 3 AI-generation actions
+  // (refresh plan, generate a meal, read a recipe link) call Supabase Edge Functions directly,
+  // authenticated with the signed-in user's own JWT -- see callEdgeFunction(). FEEDBACK_ENDPOINT/
+  // READ_KEY below are legacy (the old Apps Script backend) and no longer used by this file. ----
   const FEEDBACK_ENDPOINT = "https://script.google.com/macros/s/AKfycbwQXFwbeGLuhF8XA08NpEiWmCRscGNjxTt0wN3lGc73Pk-7PXLPMwU4dexHaRbQDRAWMw/exec";
   const FEEDBACK_EMAIL = "mark.j.barber@gmail.com";
   const READ_KEY = "family-menu-2026"; // must match Apps Script's READ_KEY — it's a light lock, not real security
@@ -431,6 +431,20 @@ body.auth-pending #hub{display:none;}
   const SUPABASE_URL = "https://jpofeslziyjbysotycfl.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_psBedalpZIlxs5DaGQPf1g_yJ49IdI8";
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Calls one of the 3 AI-generation Edge Functions, forwarding the signed-in user's own access
+  // token so the function's RLS-scoped Supabase client only ever sees this household's data.
+  // Always returns the parsed JSON body, since every Edge Function responds with a
+  // {status:"error", message} shape on failure rather than relying on HTTP status alone.
+  async function callEdgeFunction(name, payload){
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+      body: JSON.stringify(payload)
+    });
+    return resp.json();
+  }
 
   let WEEK_DATA = null;
 
@@ -546,18 +560,6 @@ body.auth-pending #hub{display:none;}
       headers: {'Content-Type': 'text/plain;charset=utf-8'},
       body: JSON.stringify(payload)
     });
-  }
-
-  // Regular (readable-response) POST — used wherever we need the server's JSON back
-  // (refresh, favourites, shopping sync). Content-Type text/plain keeps this a "simple
-  // request" so it still avoids a CORS preflight, but WITHOUT no-cors so the response
-  // body is actually readable.
-  function postJSON(payload){
-    return fetch(FEEDBACK_ENDPOINT, {
-      method: 'POST',
-      headers: {'Content-Type': 'text/plain;charset=utf-8'},
-      body: JSON.stringify(payload)
-    }).then(r => r.json());
   }
 
   // Mirrors Code.gs's getDishFeedbackStats() exactly: proven requires at least half the
@@ -919,13 +921,14 @@ body.auth-pending #hub{display:none;}
       <div class="modal">
         <h3>Add a meal</h3>
         <div class="meal-sub">${day} · ${meal}</div>
-        <div class="modal-status-note">Meal generation and adding from a link are being upgraded to the new backend — back shortly.</div>
-        <button class="review-submit-btn" id="genMealBtn" disabled><i class="ti ti-sparkles"></i> Generate a meal</button>
-        <button class="favourite-btn add-link-btn" id="linkMealBtn" disabled><i class="ti ti-link"></i> Add from a link</button>
+        <button class="review-submit-btn" id="genMealBtn"><i class="ti ti-sparkles"></i> Generate a meal</button>
+        <button class="favourite-btn add-link-btn" id="linkMealBtn"><i class="ti ti-link"></i> Add from a link</button>
         <button class="cancel-link" id="cancelAddBtn">Cancel</button>
       </div>`;
     document.getElementById("hub").appendChild(backdrop);
     backdrop.querySelector("#cancelAddBtn").addEventListener("click", ()=> backdrop.remove());
+    backdrop.querySelector("#genMealBtn").addEventListener("click", ()=> regenerateMealFlow(day, meal, backdrop));
+    backdrop.querySelector("#linkMealBtn").addEventListener("click", ()=> showAddFromLinkForm(day, meal, backdrop));
   }
 
   // Shared loading indicator (weekly-board-loading-animation-spec.md): a two-stage
@@ -989,10 +992,10 @@ body.auth-pending #hub{display:none;}
     modal.innerHTML = `<h3>Generating…</h3><div class="meal-sub">${day} · ${meal}</div><div class="loadingSlot"></div>`;
     const stopLoading = showLoadingIndicator(modal.querySelector(".loadingSlot"), "This can take up to two minutes — keep this tab open.");
     try{
-      const result = await postJSON({type:"regenerate_meal", week_id: WEEK_DATA.week_id, day, meal});
+      const result = await callEdgeFunction('regenerate-meal', {day, meal});
       stopLoading();
       if(result.status === "ok"){
-        applyWeekPatch(result.week_data);
+        applyWeekPatch(await fetchCurrentWeekData());
         backdrop.remove();
       } else {
         renderRegenerateRetry(day, meal, backdrop, result.message || "Unknown error");
@@ -1034,7 +1037,7 @@ body.auth-pending #hub{display:none;}
       btn.disabled = true; btn.textContent = "Fetching…";
       const stopLoading = showLoadingIndicator(note, "Reading that recipe…");
       try{
-        const result = await postJSON({type:"preview_external_recipe", url});
+        const result = await callEdgeFunction('preview-external-recipe', {url});
         stopLoading();
         if(result.status === "ok"){
           showExternalRecipePreview(day, meal, backdrop, result.recipe);
@@ -1067,16 +1070,20 @@ body.auth-pending #hub{display:none;}
       const note = modal.querySelector("#confirmLinkNote");
       btn.disabled = true; btn.textContent = "Adding…";
       try{
-        const result = await postJSON({type:"add_external_recipe", week_id: WEEK_DATA.week_id, day, meal, title: recipe.title, source_url: recipe.source_url, ingredients: recipe.ingredients, prep_time: recipe.prep_time, cook_time: recipe.cook_time});
-        if(result.status === "ok"){
-          applyWeekPatch(result.week_data);
-          backdrop.remove();
-        } else {
-          note.textContent = "Couldn't add: " + (result.message || "unknown error");
-          btn.disabled = false; btn.textContent = "Add this recipe";
-        }
+        // Mechanical write, no AI call needed -- preview-external-recipe already did the
+        // parsing. Every day/slot has a pre-existing row, so this is an update, not an insert.
+        const { error } = await supabaseClient.from('meals').update({
+          name: recipe.title, ingredients: recipe.ingredients,
+          method: null, source: { type: "external_url", url: recipe.source_url },
+          new_or_repeat: null, authored_by: null,
+          prep_time: recipe.prep_time || null, cook_time: recipe.cook_time || null,
+          hands_off_time: null, prep_ahead_note: null
+        }).eq('week_id', currentWeekRowId).eq('day', day).eq('slot', meal);
+        if(error) throw error;
+        applyWeekPatch(await fetchCurrentWeekData());
+        backdrop.remove();
       }catch(e){
-        note.textContent = "Couldn't reach the server — try again.";
+        note.textContent = "Couldn't add: " + (e.message || "unknown error");
         btn.disabled = false; btn.textContent = "Add this recipe";
       }
     });
@@ -1362,7 +1369,7 @@ body.auth-pending #hub{display:none;}
         btn.disabled = true; btn.textContent = "Fetching…"; previewEl.innerHTML = "";
         const stopLoading = showLoadingIndicator(note, "Reading that recipe…");
         try{
-          const result = await postJSON({type:"preview_external_recipe", url});
+          const result = await callEdgeFunction('preview-external-recipe', {url});
           stopLoading();
           if(result.status === "ok"){
             fetchedRecipe = result.recipe;
@@ -1527,13 +1534,12 @@ body.auth-pending #hub{display:none;}
     btn.innerHTML = '<i class="ti ti-refresh"></i>Refreshing… (up to a few minutes)';
     const stopLoading = showLoadingIndicator(note, "Generating your plan…");
     try{
-      const result = await postJSON({type: "regenerate_now", week_id: WEEK_DATA.week_id});
+      const result = await callEdgeFunction('regenerate-now', {});
       stopLoading();
       if(result.status === "ok"){
-        PRINCIPLES_TEXT = result.principles_text;
         note.textContent = "Updated ✓" + (result.summary ? " — " + result.summary : "");
         await fetchShoppingState();
-        applyWeekPatch(result.week_data);
+        applyWeekPatch(await fetchCurrentWeekData());
       } else if(result.status === "no_changes"){
         note.textContent = "Nothing new to incorporate — plan is already up to date.";
       } else {
