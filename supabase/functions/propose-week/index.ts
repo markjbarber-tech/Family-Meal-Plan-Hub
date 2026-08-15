@@ -7,13 +7,23 @@
 // Saturday in Sydney and a proposal hasn't already gone out today, rolls the current week into
 // history and drafts a fresh one.
 //
-// Unlike the other 3 edge functions, this one has no signed-in caller to forward a JWT from --
-// it's invoked by pg_cron, not a browser. It authenticates via a shared secret (CRON_SECRET)
-// and uses the service_role key internally to read/write across all households, bypassing RLS
-// deliberately (the same way a trusted server-side job would).
+// Unlike the other 3 edge functions, this one was originally built with no signed-in caller to
+// forward a JWT from -- pg_cron invokes it, not a browser -- so it authenticates via a shared
+// secret (CRON_SECRET) and uses the service_role key internally to read/write across all
+// households, bypassing RLS deliberately (the same way a trusted server-side job would).
+//
+// Onboarding's Completion screen (see index.html) needs to trigger this same generation logic
+// for exactly one household -- the caller's own -- synchronously, from the browser, under a
+// real user session. Rather than duplicate proposeForHousehold()'s logic in a second function,
+// this adds a second auth branch: a valid user JWT is accepted as an alternative to
+// CRON_SECRET, using the same RLS-scoped-client pattern as the other 3 functions (forwarded
+// Authorization header, auth.getUser() to identify the caller) so it can only ever operate on
+// that user's own household -- never a body-supplied household_id, and always forced (no
+// Saturday/last_proposed_date gate), since onboarding always wants immediate generation.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const SUPABASE_URL = "https://jpofeslziyjbysotycfl.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_psBedalpZIlxs5DaGQPf1g_yJ49IdI8";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -264,8 +274,10 @@ async function proposeForHousehold(supabase: any, household: any, todaySydney: D
 
   // Drafting all 7 days from scratch (21 meal slots, each with full ingredients/method/timing)
   // is the largest payload of any of these functions -- the 8000-token default that's enough
-  // for regenerate-now's partial revisions truncates here, so give it real headroom.
-  const plan = await callClaude(systemPrompt, userPrompt, 16000);
+  // for regenerate-now's partial revisions truncates here, and even 16000 wasn't always enough
+  // for a fully verbose week (a real onboarding test truncated past 16000 -- see commit
+  // history), so this has real headroom rather than a value tuned to just barely fit.
+  const plan = await callClaude(systemPrompt, userPrompt, 24000);
   if (!plan || !plan.days || !Array.isArray(plan.days) || plan.days.length !== 7) {
     return { household_id: household.id, status: "error", message: "The board did not return a usable plan." };
   }
@@ -327,35 +339,54 @@ Deno.serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization") || "";
     const cronSecret = Deno.env.get("CRON_SECRET");
-    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-      return jsonResponse({ status: "error", message: "Unauthorized" }, 401);
-    }
+    const isCronCall = !!cronSecret && authHeader === `Bearer ${cronSecret}`;
 
-    const supabase = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-
-    // household_id/force are an operator override (still behind CRON_SECRET, not a public
-    // surface) for triggering a specific household's proposal on demand -- outside the
-    // Saturday/last_proposed_date gate -- rather than only on the daily schedule. Useful both
-    // for manual runs and for testing the gate logic itself.
     let body: any = {};
     try { body = await req.json(); } catch { /* no body (plain pg_cron call) */ }
 
-    let householdsQuery = supabase.from("households").select("*");
-    if (body.household_id) householdsQuery = householdsQuery.eq("id", body.household_id);
-    const { data: households, error: hErr } = await householdsQuery;
-    if (hErr) throw hErr;
+    if (isCronCall) {
+      const supabase = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-    const todaySydney = sydneyToday();
-    const results = [];
-    for (const household of households || []) {
-      try {
-        results.push(await proposeForHousehold(supabase, household, todaySydney, !!body.force));
-      } catch (e) {
-        results.push({ household_id: household.id, status: "error", message: (e as Error).message });
+      // household_id/force are an operator override (still behind CRON_SECRET, not a public
+      // surface) for triggering a specific household's proposal on demand -- outside the
+      // Saturday/last_proposed_date gate -- rather than only on the daily schedule. Useful both
+      // for manual runs and for testing the gate logic itself.
+      let householdsQuery = supabase.from("households").select("*");
+      if (body.household_id) householdsQuery = householdsQuery.eq("id", body.household_id);
+      const { data: households, error: hErr } = await householdsQuery;
+      if (hErr) throw hErr;
+
+      const todaySydney = sydneyToday();
+      const results = [];
+      for (const household of households || []) {
+        try {
+          results.push(await proposeForHousehold(supabase, household, todaySydney, !!body.force));
+        } catch (e) {
+          results.push({ household_id: household.id, status: "error", message: (e as Error).message });
+        }
       }
+      return jsonResponse({ status: "ok", results });
     }
 
-    return jsonResponse({ status: "ok", results });
+    // Not a cron call -- try it as a real signed-in user (onboarding's Completion screen).
+    // RLS-scoped client on the forwarded JWT, same pattern as the other 3 edge functions --
+    // this can only ever see/write the caller's own household, so body.household_id is never
+    // consulted here at all, not just ignored.
+    if (!authHeader) return jsonResponse({ status: "error", message: "Unauthorized" }, 401);
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return jsonResponse({ status: "error", message: "Unauthorized" }, 401);
+
+    const { data: households, error: hErr } = await supabase.from("households").select("*").limit(1);
+    if (hErr) throw hErr;
+    const household = households && households[0];
+    if (!household) return jsonResponse({ status: "error", message: "No household found" }, 404);
+
+    const todaySydney = sydneyToday();
+    const result = await proposeForHousehold(supabase, household, todaySydney, true);
+    return jsonResponse({ status: "ok", results: [result] });
   } catch (e) {
     return jsonResponse({ status: "error", message: (e as Error).message }, 500);
   }

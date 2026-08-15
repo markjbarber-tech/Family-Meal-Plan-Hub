@@ -199,6 +199,43 @@ body.auth-pending #hub{display:none;}
 .overlay-title{font-family:var(--font-head);letter-spacing:-0.01em;font-size:1.4rem;font-weight:600;color:var(--ink);margin:0 0 4px;}
 .overlay-sub{font-size:0.82rem;color:var(--ink-soft);margin-bottom:16px;}
 
+/* Onboarding */
+.onboarding-icon{width:72px;height:72px;border-radius:20px;background:var(--glass-strong);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;font-size:32px;margin:22px auto 20px;box-shadow:0 8px 20px rgba(42,59,76,0.1);}
+.onboarding-center{text-align:center;}
+.onboarding-pitch-row{display:flex;gap:8px;margin:18px 0 22px;}
+.onboarding-pitch-item{flex:1;background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);border-radius:12px;padding:12px 8px;text-align:center;font-size:0.7rem;color:var(--ink-soft);font-weight:600;line-height:1.35;}
+.onboarding-pitch-item .icon{display:block;font-size:18px;margin-bottom:5px;}
+.onboarding-section-label{font-family:var(--font-head);font-weight:600;font-size:0.9rem;color:var(--ink);display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.onboarding-tag{font-family:var(--font-mono);font-size:0.6rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;padding:2px 7px;border-radius:999px;}
+.onboarding-tag.required{color:#a05a13;background:rgba(201,138,62,0.15);border:1px solid rgba(201,138,62,0.35);}
+.onboarding-tag.optional{color:var(--teal-dark);background:rgba(255,255,255,0.6);border:1px solid var(--glass-border);}
+.onboarding-hint{font-size:0.76rem;color:var(--ink-soft);margin:0 0 12px;line-height:1.45;}
+.stepper-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
+.stepper-row:last-child{margin-bottom:0;}
+.stepper-label{font-family:var(--font-head);font-weight:600;font-size:0.85rem;color:var(--ink);}
+.stepper-control{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.7);border:1px solid var(--glass-border);border-radius:12px;padding:5px 6px;}
+.stepper-btn{width:28px;height:28px;border-radius:8px;border:none;background:var(--teal);color:var(--white);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+.stepper-btn:hover{background:var(--teal-dark);}
+.stepper-btn:disabled{opacity:0.35;cursor:default;}
+.stepper-btn:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.stepper-value{min-width:20px;text-align:center;font-family:var(--font-mono);font-size:0.9rem;font-weight:600;color:var(--ink);}
+.onboarding-field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.onboarding-field-grid .full{grid-column:1/-1;}
+.onboarding-preview-card{background:linear-gradient(180deg,rgba(255,255,255,0.75) 0%,rgba(230,246,239,0.55) 100%);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--glass-border);border-radius:18px;padding:14px 16px;margin-bottom:14px;position:relative;transition:box-shadow .4s ease;}
+.onboarding-preview-card.pulse{box-shadow:0 0 0 3px rgba(47,143,138,0.35);}
+.onboarding-preview-eyebrow{font-family:var(--font-mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;color:var(--teal-dark);margin-bottom:8px;}
+.onboarding-preview-close{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--ink-faint);font-size:16px;cursor:pointer;line-height:1;padding:2px;}
+.onboarding-preview-close:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.onboarding-preview-line{font-size:0.82rem;color:var(--ink);line-height:1.6;}
+.onboarding-preview-line b{font-weight:600;}
+.onboarding-meal-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.7);border:1px solid var(--glass-border);border-radius:12px;padding:9px 12px;font-size:0.82rem;margin-bottom:8px;color:var(--ink);}
+.onboarding-meal-chip .dot{width:7px;height:7px;border-radius:50%;background:var(--status-proven);flex-shrink:0;}
+.onboarding-done-icon{width:68px;height:68px;border-radius:50%;background:var(--teal);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:30px;margin:24px auto 18px;}
+.onboarding-summary-line{display:flex;align-items:center;gap:10px;font-size:0.82rem;color:var(--ink-soft);padding:9px 0;border-top:1px solid rgba(42,59,76,0.08);}
+.onboarding-summary-line:first-child{border-top:none;}
+.onboarding-summary-line .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0;}
+.onboarding-error-note{font-family:var(--font-mono);font-size:0.7rem;color:var(--status-caution);font-weight:600;margin:8px 0;min-height:14px;}
+
 /* Principles page */
 .principles-card{background:var(--glass-strong);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:18px;padding:18px;}
 .principles-card textarea{width:100%;min-height:280px;font-size:0.85rem;line-height:1.6;font-family:var(--font-body);background:rgba(255,255,255,0.7);border:1px solid var(--glass-border);border-radius:10px;padding:14px;margin-bottom:10px;resize:vertical;color:var(--ink);}
@@ -457,6 +494,8 @@ body.auth-pending #hub{display:none;}
   let recipeTabIndex = 0;
   let recipeTabInitialized = false;
   let currentHouseholdId = null; // = household.id = the signed-in auth user's id; set in loadHouseholdData()
+  let householdOnboardingIncomplete = false; // true only for a just-skipped household viewing the app this visit
+  let currentHouseholdRow = null; // full row, cached only when householdOnboardingIncomplete — see renderHistoryBanner()'s "Finish setup"
   let currentWeekRowId = null; // weeks.id (uuid) for the current week, needed to scope meals queries
 
   function slugify(name){ return String(name).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
@@ -1222,7 +1261,7 @@ body.auth-pending #hub{display:none;}
         </div>
       </div>`;
     document.getElementById("hub").appendChild(page);
-    page.querySelector("#signOutBtn").addEventListener("click", ()=> supabaseClient.auth.signOut());
+    page.querySelector("#signOutBtn").addEventListener("click", ()=>{ explicitSignOut = true; supabaseClient.auth.signOut(); });
 
     let principlesDirty = false;
     const markDirty = ()=>{ principlesDirty = true; };
@@ -1293,6 +1332,21 @@ body.auth-pending #hub{display:none;}
   function renderHistoryBanner(){
     const container = document.getElementById("historyBannerContainer");
     if(!container) return;
+    // A skipped household is missing more than just meal history — principles and the board of
+    // advisors were never set up either (Completion's automatic seeding never ran). Nudge
+    // toward finishing setup rather than just meal history in that case.
+    if(householdOnboardingIncomplete){
+      container.innerHTML = `
+        <div class="history-banner">
+          <i class="ti ti-list-check"></i>
+          <div class="hb-text">
+            You skipped setup — add your household details and we'll build you a real first plan.<br>
+            <button class="hb-link" id="historyBannerLink">Finish setup</button>
+          </div>
+        </div>`;
+      container.querySelector("#historyBannerLink").addEventListener("click", ()=> startOnboarding(currentHouseholdRow));
+      return;
+    }
     if(historyUploaded()){ container.innerHTML = ""; return; }
     container.innerHTML = `
       <div class="history-banner">
@@ -1305,27 +1359,12 @@ body.auth-pending #hub{display:none;}
     container.querySelector("#historyBannerLink").addEventListener("click", ()=> openMealHistoryUpload());
   }
 
-  function openMealHistoryUpload(){
-    let sessionCount = 0;
-    const page = document.createElement("div");
-    page.className = "overlay-page";
-    page.innerHTML = `
-      <div class="overlay-inner">
-        <button class="overlay-close" id="historyFinishBtn"><i class="ti ti-check"></i>Finish</button>
-        <div class="overlay-title">Add meal history</div>
-        <div class="overlay-sub">Add one meal at a time — description required, link and feedback optional. Tap Finish whenever you're done.</div>
-        <div class="history-session-note" id="historySessionNote"></div>
-        <div id="historyFormContainer"></div>
-      </div>`;
-    document.getElementById("hub").appendChild(page);
-
-    function updateSessionNote(){
-      const note = page.querySelector("#historySessionNote");
-      note.textContent = sessionCount > 0 ? `${sessionCount} meal${sessionCount === 1 ? '' : 's'} added this session` : "";
-    }
-
-    function renderForm(){
-      const container = page.querySelector("#historyFormContainer");
+  // Shared by the Settings-triggered "Add meal history" flow and onboarding Screen 3 -- same
+  // form, same save action (a type:"meal_feedback" row), exactly one place this logic lives.
+  // onSaved(description) fires after each successful save so each caller can update its own
+  // chrome (session note / running chip list / onboarding's live preview) without this helper
+  // knowing which context it's in.
+  function renderMealHistoryFormInto(container, onSaved){
       let fetchedRecipe = null;
       let feedback = null;
       container.innerHTML = `
@@ -1409,11 +1448,10 @@ body.auth-pending #hub{display:none;}
             note: freeNote || null
           });
           if(!error){
-            sessionCount++;
             markHistoryUploaded();
             renderHistoryBanner();
-            updateSessionNote();
-            renderForm();
+            onSaved(desc);
+            renderMealHistoryFormInto(container, onSaved);
           } else {
             note.textContent = "Couldn't save: " + (error.message || "unknown error");
             btn.disabled = false; btn.textContent = "Save & add another";
@@ -1423,9 +1461,31 @@ body.auth-pending #hub{display:none;}
           btn.disabled = false; btn.textContent = "Save & add another";
         }
       });
+  }
+
+  function openMealHistoryUpload(){
+    let sessionCount = 0;
+    const page = document.createElement("div");
+    page.className = "overlay-page";
+    page.innerHTML = `
+      <div class="overlay-inner">
+        <button class="overlay-close" id="historyFinishBtn"><i class="ti ti-check"></i>Finish</button>
+        <div class="overlay-title">Add meal history</div>
+        <div class="overlay-sub">Add one meal at a time — description required, link and feedback optional. Tap Finish whenever you're done.</div>
+        <div class="history-session-note" id="historySessionNote"></div>
+        <div id="historyFormContainer"></div>
+      </div>`;
+    document.getElementById("hub").appendChild(page);
+
+    function updateSessionNote(){
+      const note = page.querySelector("#historySessionNote");
+      note.textContent = sessionCount > 0 ? `${sessionCount} meal${sessionCount === 1 ? '' : 's'} added this session` : "";
     }
 
-    renderForm();
+    renderMealHistoryFormInto(page.querySelector("#historyFormContainer"), ()=>{
+      sessionCount++;
+      updateSessionNote();
+    });
 
     page.querySelector("#historyFinishBtn").addEventListener("click", ()=>{
       document.querySelectorAll(".overlay-page").forEach(p => p.remove());
@@ -1599,11 +1659,25 @@ body.auth-pending #hub{display:none;}
     return FAVOURITES;
   }
 
-  async function loadHouseholdData(){
+  // Returns {status:'no_household'} | {status:'onboarding_incomplete', household} | {status:'ready'}.
+  // onboarding_completed_at (not just "does a households row exist") gates the app shell — see
+  // startOnboarding() below, which handles both incomplete states identically to resumability.
+  // ignoreOnboardingGate lets a just-skipped onboarding session enter the app shell for *this*
+  // visit without a fresh onboarding_completed_at — see endOnboardingSkipped(). A later fresh
+  // load still goes through the normal gate and correctly resumes onboarding: this flag only
+  // ever applies to the in-session transition immediately after clicking Skip, never persists.
+  async function loadHouseholdData(opts){
+    opts = opts || {};
     const { data: households, error: hErr } = await supabaseClient.from('households').select('*').limit(1);
     if(hErr) throw hErr;
     const household = households && households[0];
-    if(!household) return false;
+    if(!household) return { status: 'no_household' };
+    if(!household.onboarding_completed_at && !opts.ignoreOnboardingGate) return { status: 'onboarding_incomplete', household };
+    // Only ever true via the ignoreOnboardingGate path (a just-skipped household entering the
+    // app for this visit) -- renderHistoryBanner() reads this to nudge about the skipped
+    // principles/household/board setup, not just meal history.
+    householdOnboardingIncomplete = !household.onboarding_completed_at;
+    currentHouseholdRow = householdOnboardingIncomplete ? household : null;
     currentHouseholdId = household.id;
 
     await refreshFavourites();
@@ -1613,7 +1687,7 @@ body.auth-pending #hub{display:none;}
 
     WEEK_DATA = await fetchCurrentWeekData();
 
-    return true;
+    return { status: 'ready' };
   }
 
   // Rebuilds the WEEK_DATA-shaped object from the current `weeks` + `meals` rows. Used on
@@ -1661,21 +1735,30 @@ body.auth-pending #hub{display:none;}
   }
 
   async function init(stopLoading){
-    let loaded = false;
+    let result;
     try{
-      loaded = await loadHouseholdData();
+      result = await loadHouseholdData();
     }catch(e){
       stopLoading();
       document.getElementById("authCard").innerHTML = `<div class="no-recipe">Couldn't load your household data — try reloading the page.</div>`;
       return;
     }
 
-    if(!loaded){
+    if(result.status !== 'ready'){
       stopLoading();
-      document.getElementById("authCard").innerHTML = `<div class="no-recipe">Your account isn't set up with a household yet.</div>`;
+      // Both "no households row at all" and "row exists but onboarding never finished" resume
+      // into onboarding at the correct screen — see startOnboarding()'s own branching.
+      startOnboarding(result.household || null);
       return;
     }
 
+    await renderAppShellReady(stopLoading);
+  }
+
+  // Shared by init()'s normal ready path and endOnboardingSkipped()'s in-session bypass —
+  // exactly one place that reveals #hub and populates it from whatever WEEK_DATA/PRINCIPLES_TEXT
+  // loadHouseholdData() just set, so there's no risk of the two paths drifting apart.
+  async function renderAppShellReady(stopLoading){
     document.getElementById("headerTitle").textContent = "This week";
     document.getElementById("headerSub").textContent = (WEEK_DATA.date_range || "—").toUpperCase();
     renderPlan();
@@ -1780,12 +1863,18 @@ body.auth-pending #hub{display:none;}
   })();
 
   // ---------------- Auth gate (Supabase) ----------------
-  // Apple sign-in and passkey enrollment are deferred fast-follows (Apple needs an
-  // Apple Developer Program membership; passkey enrollment happens from an
-  // authenticated session, so it belongs in Settings once onboarding exists) — for
-  // now this covers email/password and Google, per the current build-order checkpoint.
+  // Email/password only for now. Google sign-in has a code path (checkAuthLinkError's
+  // access_denied branch) ready for whenever the button comes back, but no OAuth client is
+  // configured in Supabase yet -- see the removed-button note in renderAuthCard(). Apple
+  // sign-in and passkey enrollment are further-out fast-follows (Apple needs an Apple
+  // Developer Program membership; passkeys enroll from an authenticated session, so that
+  // belongs in Settings).
   let authMode = 'signin'; // 'signin' | 'signup' | 'forgot'
   let appStarted = false;
+  // Set right before a user-initiated signOut() call so the SIGNED_OUT handler below can tell
+  // that apart from an involuntary session expiry (revoked/expired refresh token) -- both fire
+  // the same event, but only the latter should show "Your session expired" messaging.
+  let explicitSignOut = false;
 
   function showApp(){
     if(appStarted) return;
@@ -1799,14 +1888,49 @@ body.auth-pending #hub{display:none;}
     init(stopLoading);
   }
 
-  function showAuthGate(){
-    appStarted = false;
-    document.body.classList.add('auth-pending');
-    authMode = 'signin';
-    renderAuthCard();
+  // Both an expired/used password-reset link AND a cancelled Google consent screen redirect
+  // back here with #error=...&error_description=... in the URL hash rather than firing a
+  // normal Supabase auth event -- without this check either would silently fall through to an
+  // ordinary sign-in form with no explanation of what just happened. Branches on error_code
+  // since the two cases need different copy (one's a dead link, the other's just a change of
+  // mind) even though Supabase reports both the same shape.
+  function checkAuthLinkError(){
+    const hash = location.hash.startsWith('#') ? location.hash.slice(1) : location.hash;
+    const params = new URLSearchParams(hash);
+    const description = params.get('error_description');
+    const errorCode = params.get('error_code') || params.get('error') || '';
+    if(!description) return false;
+    history.replaceState(null, '', location.pathname);
+    const card = document.getElementById('authCard');
+    const isCancelled = errorCode === 'access_denied';
+    card.innerHTML = isCancelled
+      ? `<h2>Sign-in was cancelled</h2>
+         <div class="section-sub">No changes were made — try again whenever you're ready.</div>
+         <button class="primary-btn" id="authLinkErrorBackBtn">Back to sign in</button>`
+      : `<h2>Something went wrong</h2>
+         <div class="section-sub">${description.replace(/\+/g, ' ')}</div>
+         <button class="primary-btn" id="authLinkErrorRetryBtn">Request a new link</button>
+         <div class="auth-switch-row"><button class="auth-link-btn" id="authLinkErrorBackBtn">Back to sign in</button></div>`;
+    card.querySelector('#authLinkErrorRetryBtn')?.addEventListener('click', ()=>{ authMode = 'forgot'; renderAuthCard(); });
+    card.querySelector('#authLinkErrorBackBtn').addEventListener('click', ()=>{ authMode = 'signin'; renderAuthCard(); });
+    return true;
   }
 
-  function renderAuthCard(){
+  function showAuthGate(message){
+    appStarted = false;
+    document.body.classList.add('auth-pending');
+    // A stale onboarding overlay (z-index 60) is currently only ever masked by #authGate's
+    // higher z-index (100), not actually removed -- endOnboardingSkipped() cleans up after
+    // itself, but a sign-out or session expiry mid-onboarding previously didn't. Left alone, it
+    // would render on top of #hub (no explicit z-index, so effectively 0) the next time this
+    // tab reaches the ready app-shell state without an intervening full page reload.
+    onboardingOverlayEl()?.remove();
+    authMode = 'signin';
+    if(checkAuthLinkError()) return;
+    renderAuthCard(message);
+  }
+
+  function renderAuthCard(message){
     const card = document.getElementById('authCard');
 
     if(authMode === 'forgot'){
@@ -1845,39 +1969,50 @@ body.auth-pending #hub{display:none;}
       ${isSignup ? '' : '<div class="auth-forgot-row"><button class="auth-link-btn" id="authForgotLink">Forgot password?</button></div>'}
       <div class="auth-status-note" id="authStatusNote"></div>
       <button class="primary-btn" id="authSubmitBtn">${isSignup ? 'Create account' : 'Sign in'}</button>
-      <div class="auth-divider">or</div>
-      <button class="auth-oauth-btn" id="authGoogleBtn"><i class="ti ti-brand-google"></i>Continue with Google</button>
       <div class="auth-switch-row">
         ${isSignup ? 'Already have an account? ' : 'New household? '}
         <button class="auth-link-btn" id="authSwitchBtn">${isSignup ? 'Sign in' : 'Create one'}</button>
       </div>`;
+    if(message) card.querySelector('#authStatusNote').textContent = message;
+    // Google sign-in button removed: no OAuth client configured in Supabase (provider disabled,
+    // Client ID/Secret empty) as of 2026-08-15. Re-add once a real Google Cloud OAuth client
+    // exists and the provider is enabled -- checkAuthLinkError() below still handles the
+    // post-redirect OAuth-cancellation/error case for whenever it comes back.
 
     if(!isSignup){
       card.querySelector('#authForgotLink').addEventListener('click', ()=>{ authMode = 'forgot'; renderAuthCard(); });
     }
     card.querySelector('#authSwitchBtn').addEventListener('click', ()=>{ authMode = isSignup ? 'signin' : 'signup'; renderAuthCard(); });
-    card.querySelector('#authGoogleBtn').addEventListener('click', ()=>{
-      supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
-    });
     card.querySelector('#authSubmitBtn').addEventListener('click', async ()=>{
       const email = card.querySelector('#authEmail').value.trim();
       const password = card.querySelector('#authPassword').value;
       const note = card.querySelector('#authStatusNote');
       const btn = card.querySelector('#authSubmitBtn');
       if(!email || !password){ note.textContent = 'Enter an email and password'; note.classList.remove('ok'); return; }
+      if(isSignup){
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ note.textContent = 'Enter a valid email address'; note.classList.remove('ok'); return; }
+        if(password.length < 6){ note.textContent = 'Password must be at least 6 characters'; note.classList.remove('ok'); return; }
+      }
       btn.disabled = true; note.textContent = isSignup ? 'Creating account…' : 'Signing in…'; note.classList.remove('ok');
       try{
+        // Email confirmation is off for this project (see Task #17's Section A decision) --
+        // signUp() returns an immediately-authenticated session, same as signIn. There is no
+        // separate "check your email" state to show; onAuthStateChange's SIGNED_IN handler
+        // takes over from here either way, routing a brand-new account into onboarding.
         const { error } = isSignup
           ? await supabaseClient.auth.signUp({ email, password })
           : await supabaseClient.auth.signInWithPassword({ email, password });
         if(error) throw error;
-        if(isSignup){
-          note.textContent = 'Check your email to confirm your account, then sign in.'; note.classList.add('ok');
-          btn.disabled = false;
-        }
-        // On a successful sign-in, onAuthStateChange's SIGNED_IN event takes it from here.
       }catch(e){
-        note.textContent = e.message || 'Something went wrong.'; note.classList.remove('ok');
+        // Supabase's duplicate-signup error text varies by version ("User already registered",
+        // "already been registered", etc.) -- match loosely rather than a single exact string.
+        if(isSignup && /already|registered|exists/i.test(e.message || '')){
+          note.innerHTML = `An account with this email already exists. <button class="auth-link-btn" id="authGoToSigninBtn">Sign in</button> instead, or use Forgot password if needed.`;
+          note.classList.remove('ok');
+          card.querySelector('#authGoToSigninBtn')?.addEventListener('click', ()=>{ authMode = 'signin'; renderAuthCard(); });
+        } else {
+          note.textContent = e.message || 'Something went wrong.'; note.classList.remove('ok');
+        }
         btn.disabled = false;
       }
     });
@@ -1909,6 +2044,440 @@ body.auth-pending #hub{display:none;}
     });
   }
 
+  // ---------------- Onboarding ----------------
+  // Guided first-run flow for a signed-in user with no households row, or with a row that
+  // exists but hasn't finished onboarding (households.onboarding_completed_at still null —
+  // see loadHouseholdData()/init() above). Rendered as a full-viewport overlay appended
+  // directly to <body> (not #hub, which stays behind body.auth-pending's display:none while
+  // this runs) — same .overlay-page pattern Settings/meal-history already use, just anchored
+  // one level higher since #hub itself has nothing loaded into it yet at this point.
+  //
+  // Exact standard board-of-advisors set, read directly from the real household's existing
+  // rows (not reinvented) — 3 fixed personas, 2 is_customizable (matches Settings' own copy,
+  // which never surfaces customization in onboarding per the PRD's deliberate P0 scope cut).
+  const ADVISOR_SEED = [
+    { persona_key: 'weeknight_realist', name: 'The Weeknight Realist', philosophy: 'Fast, low-fuss, high repeat-rate family recipes; minimal cleanup and pantry staples.', is_customizable: false },
+    { persona_key: 'flavor_explorer', name: 'The Flavor Explorer', philosophy: 'Bold, unfussy, global flavors; uses whole ingredients; gentle, low-stakes variety.', is_customizable: true },
+    { persona_key: 'veg_forward_stylist', name: 'The Veg-Forward Stylist', philosophy: 'Vegetable-forward, herb- and spice-driven; makes vegetables genuinely kid-appealing.', is_customizable: true },
+    { persona_key: 'child_nutritionist', name: 'The Child Nutritionist', philosophy: 'Realistic picky-eating strategy: repeated low-pressure exposure, pairing new with familiar, no bribery or battles.', is_customizable: false },
+    { persona_key: 'family_gp', name: 'The Family GP / Dietician', philosophy: 'Whole-week balance check: protein variety, iron/fibre, flags anything relevant to health notes.', is_customizable: false },
+  ];
+
+  let onboardingUserId = null;       // set when starting fresh (no households row yet)
+  let onboardingHousehold = null;    // in-memory working copy being built across screens 1-3
+  let onboardingMealsAdded = 0;      // session count for screen 3's running list
+  let onboardingPreviewDismissed = false;
+
+  function onboardingOverlayEl(){ return document.getElementById('onboardingOverlay'); }
+
+  async function startOnboarding(household){
+    if(household && household.adults >= 1){
+      // Resuming with the required fields already satisfied — per the PRD's resumability rule,
+      // the only remaining incomplete screen is meal history. Checking adults specifically
+      // (not just "does a households row exist") matters because a household row can now also
+      // exist from a Screen-1 skip, which upserts a bare row without ever validating adults —
+      // that case must still resume at Screen 2, not skip straight past its required fields.
+      currentHouseholdId = household.id;
+      onboardingHousehold = household;
+      renderOnboardingScreen('mealhistory');
+    } else {
+      if(household){
+        currentHouseholdId = household.id;
+        onboardingUserId = household.id;
+        onboardingHousehold = household;
+      } else {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        onboardingUserId = user.id;
+        onboardingHousehold = {
+          adults: 0, kids: 0, allergies_or_restrictions: '', likes: '', dislikes: '',
+          pantry_staples: '', use_up_this_week: '', key_principles: []
+        };
+      }
+      renderOnboardingScreen('welcome');
+    }
+  }
+
+  function renderOnboardingScreen(screen){
+    document.body.classList.remove('auth-pending');
+    let overlay = onboardingOverlayEl();
+    if(!overlay){
+      overlay = document.createElement('div');
+      overlay.className = 'overlay-page';
+      overlay.id = 'onboardingOverlay';
+      document.body.appendChild(overlay);
+    }
+    if(screen === 'welcome') renderOnboardingWelcome(overlay);
+    else if(screen === 'household') renderOnboardingHousehold(overlay);
+    else if(screen === 'mealhistory') renderOnboardingMealHistory(overlay);
+    else if(screen === 'completion') renderOnboardingCompletion(overlay);
+  }
+
+  // Screens 1-2's "Skip for now": ends onboarding immediately, no automatic Completion work,
+  // onboarding_completed_at stays null. Deliberately does NOT just re-run init() — that would
+  // hit the exact same onboarding_completed_at gate that just sent them here and bounce them
+  // straight back into onboarding, defeating the point of skipping. Instead this enters the app
+  // shell directly for *this* visit (loadHouseholdData's ignoreOnboardingGate), while leaving
+  // onboarding_completed_at null so a genuinely fresh future load still resumes onboarding
+  // (Screens 1-2 are only ever reachable pre-household-row, so there's no risk of this upsert
+  // clobbering real saved data — see startOnboarding()).
+  async function endOnboardingSkipped(){
+    onboardingOverlayEl()?.remove();
+    const uid = onboardingUserId || currentHouseholdId;
+    const h = onboardingHousehold;
+    try{
+      await supabaseClient.from('households').upsert({
+        id: uid, adults: h.adults, kids: h.kids,
+        allergies_or_restrictions: h.allergies_or_restrictions, likes: h.likes, dislikes: h.dislikes,
+        pantry_staples: h.pantry_staples, use_up_this_week: h.use_up_this_week, key_principles: h.key_principles
+      });
+    }catch(e){ /* fall through — loadHouseholdData below will surface the real error if this household row still can't be read */ }
+    currentHouseholdId = uid;
+
+    document.body.classList.remove('auth-pending');
+    const stopLoading = showLoadingIndicator(document.getElementById('authCard'), 'Loading your household…');
+    let result;
+    try{
+      result = await loadHouseholdData({ ignoreOnboardingGate: true });
+    }catch(e){
+      stopLoading();
+      document.body.classList.add('auth-pending');
+      document.getElementById("authCard").innerHTML = `<div class="no-recipe">Couldn't load your household data — try reloading the page.</div>`;
+      return;
+    }
+    await renderAppShellReady(stopLoading);
+  }
+
+  function renderOnboardingWelcome(overlay){
+    overlay.innerHTML = `
+      <div class="overlay-inner">
+        <div class="onboarding-center">
+          <div class="onboarding-icon">🍽️</div>
+          <h2 class="overlay-title">Let's build your family's meal plan</h2>
+          <p class="overlay-sub">Tell us a bit about your household and we'll get smarter with every detail you add — the more we know, the better tonight's suggestion gets.</p>
+        </div>
+        <div class="onboarding-pitch-row">
+          <div class="onboarding-pitch-item"><span class="icon">🥗</span>Household prefs shape every plan</div>
+          <div class="onboarding-pitch-item"><span class="icon">📝</span>Past meals teach us what works</div>
+          <div class="onboarding-pitch-item"><span class="icon">✨</span>Watch your plan improve live</div>
+        </div>
+        <button class="primary-btn" id="obGetStartedBtn">Get started</button>
+        <button class="cancel-link" id="obSkipBtn">Skip for now</button>
+      </div>`;
+    overlay.querySelector('#obGetStartedBtn').addEventListener('click', ()=> renderOnboardingScreen('household'));
+    overlay.querySelector('#obSkipBtn').addEventListener('click', endOnboardingSkipped);
+  }
+
+  // Shared live-preview panel for screens 2 & 3. Deliberately NOT a fabricated sample dish —
+  // an actual generated dinner isn't available until Completion's real AI call, so making one
+  // up here would show something that might not match what's actually generated. Instead this
+  // echoes back, honestly, what was just entered — still the "tangible, not just stated" proof
+  // of value the PRD asks for, without a per-keystroke AI call (slow, costs real API spend).
+  function onboardingPreviewLines(){
+    const h = onboardingHousehold;
+    const lines = [];
+    const people = [];
+    if(h.adults) people.push(`${h.adults} adult${h.adults === 1 ? '' : 's'}`);
+    if(h.kids) people.push(`${h.kids} kid${h.kids === 1 ? '' : 's'}`);
+    lines.push(`Feeds <b>${people.length ? people.join(' + ') : 'your household'}</b>`);
+    if(h.allergies_or_restrictions) lines.push(`Works around: <b>${h.allergies_or_restrictions}</b>`);
+    if(h.dislikes) lines.push(`Skips: <b>${h.dislikes}</b>`);
+    if(h.likes) lines.push(`Leans into: <b>${h.likes}</b>`);
+    if(h.pantry_staples) lines.push(`Uses what's on hand: <b>${h.pantry_staples}</b>`);
+    if((h.key_principles || []).length) lines.push(`Following <b>${h.key_principles.length} principle${h.key_principles.length === 1 ? '' : 's'}</b> you've set`);
+    if(onboardingMealsAdded > 0) lines.push(`Learning from <b>${onboardingMealsAdded} meal${onboardingMealsAdded === 1 ? '' : 's'}</b> you've told us about`);
+    if(lines.length <= 1 && !h.allergies_or_restrictions && !h.dislikes && !h.likes && !h.pantry_staples && !(h.key_principles||[]).length && !onboardingMealsAdded){
+      return `<div class="onboarding-preview-line">Add a few details below and we'll start tailoring your plan.</div>`;
+    }
+    return lines.map(l => `<div class="onboarding-preview-line">${l}</div>`).join('');
+  }
+
+  function renderOnboardingPreviewCard(){
+    if(onboardingPreviewDismissed) return '';
+    return `
+      <div class="onboarding-preview-card" id="obPreviewCard">
+        <button class="onboarding-preview-close" id="obPreviewClose" aria-label="Dismiss preview" type="button">✕</button>
+        <div class="onboarding-preview-eyebrow">✨ What we'll use for your plan</div>
+        <div id="obPreviewBody">${onboardingPreviewLines()}</div>
+      </div>`;
+  }
+
+  function pulseOnboardingPreview(){
+    const card = document.getElementById('obPreviewCard');
+    if(!card) return;
+    const body = document.getElementById('obPreviewBody');
+    card.classList.add('pulse');
+    body.innerHTML = onboardingPreviewLines();
+    setTimeout(()=> card.classList.remove('pulse'), 900);
+  }
+
+  function bindOnboardingPreviewClose(overlay){
+    const closeBtn = overlay.querySelector('#obPreviewClose');
+    if(!closeBtn) return;
+    closeBtn.addEventListener('click', ()=>{
+      onboardingPreviewDismissed = true;
+      document.getElementById('obPreviewCard')?.remove();
+    });
+  }
+
+  function renderOnboardingHousehold(overlay){
+    const h = onboardingHousehold;
+    const checksHtml = DEFAULT_PRINCIPLES.map(p => `
+      <label class="item">
+        <input type="checkbox" data-ob-principle-id="${p.id}" ${p.checked ? 'checked' : ''}>
+        <span>${p.label}</span>
+      </label>`).join('');
+
+    overlay.innerHTML = `
+      <div class="overlay-inner">
+        <button class="overlay-close" id="obBackBtn"><i class="ti ti-arrow-left"></i>Back</button>
+        <div class="overlay-title">Your household</div>
+        <div class="overlay-sub">Just the headcount is required — everything below is optional, but the more you add, the better your plan gets.</div>
+
+        ${renderOnboardingPreviewCard()}
+
+        <div class="principles-card" style="margin-bottom:14px;">
+          <div class="onboarding-section-label">Who's in your household? <span class="onboarding-tag required">Required</span></div>
+          <div style="margin-top:10px;">
+            <div class="stepper-row">
+              <span class="stepper-label">Adults</span>
+              <div class="stepper-control">
+                <button class="stepper-btn" type="button" data-ob-stepper="adults" data-delta="-1" ${h.adults <= 0 ? 'disabled' : ''}>&minus;</button>
+                <span class="stepper-value" id="obAdultsValue">${h.adults}</span>
+                <button class="stepper-btn" type="button" data-ob-stepper="adults" data-delta="1">+</button>
+              </div>
+            </div>
+            <div class="stepper-row">
+              <span class="stepper-label">Kids</span>
+              <div class="stepper-control">
+                <button class="stepper-btn" type="button" data-ob-stepper="kids" data-delta="-1" ${h.kids <= 0 ? 'disabled' : ''}>&minus;</button>
+                <span class="stepper-value" id="obKidsValue">${h.kids}</span>
+                <button class="stepper-btn" type="button" data-ob-stepper="kids" data-delta="1">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="onboarding-error-note" id="obHouseholdError"></div>
+        </div>
+
+        <div class="principles-card" style="margin-bottom:14px;">
+          <div class="onboarding-section-label">A few more details <span class="onboarding-tag optional">Optional</span></div>
+          <div class="onboarding-hint">Open by default — nothing here blocks you from continuing.</div>
+          <div class="onboarding-field-grid">
+            <div>
+              <label class="modal-label">Allergies / restrictions</label>
+              <input class="text-input" id="obAllergies" placeholder="e.g. dairy-light" value="${h.allergies_or_restrictions}">
+            </div>
+            <div>
+              <label class="modal-label">Dislikes</label>
+              <input class="text-input" id="obDislikes" placeholder="e.g. tomatoes" value="${h.dislikes}">
+            </div>
+            <div>
+              <label class="modal-label">Likes</label>
+              <input class="text-input" id="obLikes" placeholder="e.g. tacos, stir-fry" value="${h.likes}">
+            </div>
+            <div>
+              <label class="modal-label">Pantry staples</label>
+              <input class="text-input" id="obPantry" placeholder="e.g. rice, canned beans" value="${h.pantry_staples}">
+            </div>
+            <div class="full">
+              <label class="modal-label">Use up this week</label>
+              <input class="text-input" id="obUseUp" placeholder="e.g. half a bag of spinach" value="${h.use_up_this_week}">
+            </div>
+          </div>
+        </div>
+
+        <div class="principles-card" style="margin-bottom:14px;">
+          <div class="onboarding-section-label">Meal-planning principles <span class="onboarding-tag optional">Optional</span></div>
+          <div class="onboarding-hint">Same component as Settings → Meal Planning Principles — reused here as-is.</div>
+          <div class="principles-defaults-list">${checksHtml}</div>
+          <div class="modal-label" style="margin-top:10px;">Anything else?</div>
+          <textarea id="obPrinciplesFreeText" rows="3" placeholder="e.g. one kid is picky about texture, favor mild spice"></textarea>
+        </div>
+
+        <button class="primary-btn" id="obSaveContinueBtn">Save &amp; continue</button>
+        <button class="cancel-link" id="obSkipBtn">Skip for now</button>
+      </div>`;
+
+    overlay.querySelector('#obBackBtn').addEventListener('click', ()=> renderOnboardingScreen('welcome'));
+    overlay.querySelector('#obSkipBtn').addEventListener('click', endOnboardingSkipped);
+    bindOnboardingPreviewClose(overlay);
+
+    overlay.querySelectorAll('[data-ob-stepper]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const field = btn.dataset.obStepper;
+        const delta = parseInt(btn.dataset.delta, 10);
+        h[field] = Math.max(0, h[field] + delta);
+        renderOnboardingHousehold(overlay);
+      });
+    });
+
+    overlay.querySelector('#obSaveContinueBtn').addEventListener('click', async ()=>{
+      const err = overlay.querySelector('#obHouseholdError');
+      if(h.adults < 1){
+        err.textContent = "Let us know how many adults are in your household.";
+        return;
+      }
+      err.textContent = '';
+
+      h.allergies_or_restrictions = overlay.querySelector('#obAllergies').value.trim();
+      h.dislikes = overlay.querySelector('#obDislikes').value.trim();
+      h.likes = overlay.querySelector('#obLikes').value.trim();
+      h.pantry_staples = overlay.querySelector('#obPantry').value.trim();
+      h.use_up_this_week = overlay.querySelector('#obUseUp').value.trim();
+
+      const principleLines = [];
+      overlay.querySelectorAll('[data-ob-principle-id]').forEach(cb=>{
+        if(cb.checked){
+          const preset = DEFAULT_PRINCIPLES.find(p => p.id === cb.dataset.obPrincipleId);
+          if(preset) principleLines.push(preset.text);
+        }
+      });
+      overlay.querySelector('#obPrinciplesFreeText').value.trim().split('\n').map(l=>l.trim()).filter(Boolean).forEach(l=>{
+        principleLines.push(l.replace(/^-\s*/, ''));
+      });
+      h.key_principles = principleLines;
+
+      const btn = overlay.querySelector('#obSaveContinueBtn');
+      btn.disabled = true; btn.textContent = 'Saving…';
+      try{
+        // Household row may not exist yet (brand-new signup) or may already exist (resuming
+        // after a skip) -- upsert covers both without a separate insert-vs-update branch.
+        // Deliberately does NOT insert a principles_update feedback row the way Settings'
+        // save handler does: that row exists to tell regenerate-now "something changed since
+        // the last plan," but there is no plan yet at this point in onboarding -- Completion's
+        // fresh generation reads household.key_principles directly.
+        const { error } = await supabaseClient.from('households').upsert({
+          id: onboardingUserId || currentHouseholdId,
+          adults: h.adults, kids: h.kids,
+          allergies_or_restrictions: h.allergies_or_restrictions,
+          likes: h.likes, dislikes: h.dislikes,
+          pantry_staples: h.pantry_staples, use_up_this_week: h.use_up_this_week,
+          key_principles: h.key_principles
+        });
+        if(error) throw error;
+        currentHouseholdId = onboardingUserId || currentHouseholdId;
+        pulseOnboardingPreview();
+        setTimeout(()=> renderOnboardingScreen('mealhistory'), 500);
+      }catch(e){
+        err.textContent = "Couldn't save: " + (e.message || 'unknown error');
+        btn.disabled = false; btn.textContent = 'Save & continue';
+      }
+    });
+  }
+
+  let onboardingMealChips = [];
+
+  // Screen 3 has no required fields left to gather (adults/kids/etc. were already saved on
+  // Screen 2), so "Skip for now" and "Finish" are the same action here -- both proceed to
+  // Completion with whatever meals (zero or more) were added. This differs from Screens 1-2,
+  // where skip truly abandons onboarding, because there's nothing left to abandon by this point.
+  function renderOnboardingMealHistory(overlay){
+    overlay.innerHTML = `
+      <div class="overlay-inner">
+        <button class="overlay-close" id="obBackBtn"><i class="ti ti-arrow-left"></i>Back</button>
+        <div class="overlay-title">Add a few recent meals</div>
+        <div class="overlay-sub">Add a couple of recent meals to get started — including ones from before this app. You can always add more later.</div>
+        ${renderOnboardingPreviewCard()}
+        <div id="obMealChips">${onboardingMealChips.map(d => `<div class="onboarding-meal-chip"><span class="dot"></span>${d}</div>`).join('')}</div>
+        <div id="obMealFormContainer"></div>
+        <button class="primary-btn" id="obFinishBtn">Finish</button>
+        <button class="cancel-link" id="obSkipBtn">Skip for now</button>
+      </div>`;
+
+    overlay.querySelector('#obBackBtn').addEventListener('click', ()=> renderOnboardingScreen('household'));
+    bindOnboardingPreviewClose(overlay);
+
+    renderMealHistoryFormInto(overlay.querySelector('#obMealFormContainer'), (desc)=>{
+      onboardingMealsAdded++;
+      onboardingMealChips.push(desc);
+      overlay.querySelector('#obMealChips').insertAdjacentHTML('beforeend', `<div class="onboarding-meal-chip"><span class="dot"></span>${desc}</div>`);
+      pulseOnboardingPreview();
+    });
+
+    overlay.querySelector('#obFinishBtn').addEventListener('click', ()=> renderOnboardingScreen('completion'));
+    overlay.querySelector('#obSkipBtn').addEventListener('click', ()=> renderOnboardingScreen('completion'));
+  }
+
+  // Fully automatic: no user input happens on this screen. Order matters -- advisors are
+  // seeded before generation runs, since the generation prompt reads board_of_advisors to
+  // credit dinners to a persona; an empty advisors table at generation time would produce
+  // dinners with no attribution. onboarding_completed_at is only set once both steps have
+  // actually succeeded, never optimistically.
+  async function renderOnboardingCompletion(overlay){
+    overlay.innerHTML = `
+      <div class="overlay-inner">
+        <div class="onboarding-center" id="obCompletionLoading"></div>
+      </div>`;
+    const stopLoading = showLoadingIndicator(overlay.querySelector('#obCompletionLoading'), 'Setting up your board and your first plan…');
+
+    try{
+      // Idempotent: a retry after a failed generation shouldn't re-seed or duplicate advisors.
+      const { data: existingAdvisors, error: advCheckErr } = await supabaseClient
+        .from('board_of_advisors').select('persona_key').eq('household_id', currentHouseholdId);
+      if(advCheckErr) throw advCheckErr;
+      if(!existingAdvisors || existingAdvisors.length === 0){
+        const { error: advErr } = await supabaseClient.from('board_of_advisors')
+          .insert(ADVISOR_SEED.map(a => ({ ...a, household_id: currentHouseholdId })));
+        if(advErr) throw advErr;
+      }
+
+      // The user-JWT branch of propose-week (see supabase/functions/propose-week) -- same
+      // generation logic and force-override bypass pg_cron uses, scoped to this caller's own
+      // household only, never gated on Saturday since onboarding always wants it immediately.
+      const genResult = await callEdgeFunction('propose-week', {});
+      const householdResult = genResult && genResult.results && genResult.results[0];
+      if(!householdResult || householdResult.status !== 'ok'){
+        throw new Error((householdResult && householdResult.message) || genResult.message || "Couldn't generate your first plan — try again.");
+      }
+
+      const { error: completeErr } = await supabaseClient.from('households')
+        .update({ onboarding_completed_at: new Date().toISOString() }).eq('id', currentHouseholdId);
+      if(completeErr) throw completeErr;
+
+      stopLoading();
+      renderOnboardingCompletionSuccess(overlay);
+    }catch(e){
+      stopLoading();
+      renderOnboardingCompletionError(overlay, e.message || 'Something went wrong finishing setup.');
+    }
+  }
+
+  function renderOnboardingCompletionSuccess(overlay){
+    const h = onboardingHousehold;
+    overlay.innerHTML = `
+      <div class="overlay-inner">
+        <div class="onboarding-center">
+          <div class="onboarding-done-icon"><i class="ti ti-check"></i></div>
+          <h2 class="overlay-title">You're all set!</h2>
+          <p class="overlay-sub">We've seeded your board of advisors and generated This Week's plan using what you told us.</p>
+        </div>
+        <div class="principles-card">
+          <div class="onboarding-summary-line"><span class="dot"></span>Household saved (${h.adults} adult${h.adults === 1 ? '' : 's'}, ${h.kids} kid${h.kids === 1 ? '' : 's'})</div>
+          <div class="onboarding-summary-line"><span class="dot"></span>${onboardingMealsAdded} recent meal${onboardingMealsAdded === 1 ? '' : 's'} added</div>
+          <div class="onboarding-summary-line"><span class="dot"></span>5 board-of-advisors personas seeded</div>
+          <div class="onboarding-summary-line"><span class="dot"></span>This week's plan personalized</div>
+        </div>
+        <button class="primary-btn" id="obSeePlanBtn">See my plan</button>
+      </div>`;
+    // A full reload, not a call back into the existing in-memory app state -- this is the same
+    // class of transition as the account-switch staleness bug found during regression testing
+    // (stale PRINCIPLES_TEXT surviving an auth switch until a real reload). Cheapest guarantee
+    // that nothing pre-onboarding survives: reinitialize the whole page from scratch.
+    overlay.querySelector('#obSeePlanBtn').addEventListener('click', ()=> location.reload());
+  }
+
+  function renderOnboardingCompletionError(overlay, message){
+    overlay.innerHTML = `
+      <div class="overlay-inner">
+        <div class="onboarding-center">
+          <div class="onboarding-icon">⚠️</div>
+          <h2 class="overlay-title">Couldn't finish setup</h2>
+          <p class="overlay-sub">${message}</p>
+        </div>
+        <button class="primary-btn" id="obRetryBtn">Try again</button>
+      </div>`;
+    overlay.querySelector('#obRetryBtn').addEventListener('click', ()=> renderOnboardingScreen('completion'));
+  }
+
   // null = not yet determined (only true on the very first callback). Guards against
   // a redundant "still signed out" event re-rendering the auth card out from under a
   // signup/forgot-password interaction the user is already mid-way through.
@@ -1924,8 +2493,14 @@ body.auth-pending #hub{display:none;}
       knownSignedIn = true;
       showApp();
     } else if(knownSignedIn !== false){
+      // A prior true (not the initial null) means the app was actually up and running under a
+      // session that just vanished -- an involuntary expiry, unless the user just clicked
+      // "Sign out" themselves (explicitSignOut). A null->false transition is just "never signed
+      // in on this load," which needs no explanation.
+      const sessionExpired = knownSignedIn === true && !explicitSignOut;
       knownSignedIn = false;
-      showAuthGate();
+      explicitSignOut = false;
+      showAuthGate(sessionExpired ? 'Your session expired, please sign in again' : undefined);
     }
   });
 })();

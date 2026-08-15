@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Family Menu Hub — Onboarding UX Flow Proposal</title>
+<style>
+  :root{
+    --bg-app: #cfe9df;
+    --bg-app-2: #eaf3e9;
+    --glass-bg: rgba(255,255,255,0.52);
+    --glass-bg-strong: rgba(255,255,255,0.68);
+    --glass-border: rgba(255,255,255,0.65);
+    --card-white: #ffffff;
+    --teal-dark: #2c6b62;
+    --teal-darker: #234f49;
+    --teal-mid: #3f8579;
+    --ink: #1f2d33;
+    --ink-soft: #55666a;
+    --ink-faint: #7c8b8f;
+    --border: #e1ece8;
+    --amber: #d98a3d;
+    --green: #2c6b62;
+    --shadow: 0 18px 40px -20px rgba(31,45,51,0.35);
+    --blur: blur(16px);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #eef4f2;
+    color: var(--ink);
+  }
+  .page{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 40px 28px 80px;
+  }
+  header.doc{
+    margin-bottom: 34px;
+  }
+  header.doc h1{
+    font-size: 26px;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  header.doc p{
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 15px;
+    max-width: 760px;
+    line-height: 1.5;
+  }
+  .badge-row{
+    display:flex;
+    gap:8px;
+    margin-top:14px;
+    flex-wrap: wrap;
+  }
+  .badge{
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid var(--border);
+    color: var(--teal-darker);
+  }
+  .badge.warn{
+    background: #fff3e6;
+    color: #a05a13;
+    border-color: #f3d9b8;
+  }
+
+  .layout{
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+  @media (max-width: 900px){
+    .layout{ grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Phone frame ---------- */
+  .phone-wrap{
+    position: sticky;
+    top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+  .phone{
+    width: 340px;
+    height: 700px;
+    background: #000;
+    border-radius: 46px;
+    padding: 12px;
+    box-shadow: var(--shadow);
+  }
+  .screen{
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(120% 70% at 15% 0%, #e3f4ec 0%, transparent 55%),
+      radial-gradient(110% 70% at 100% 20%, #cdeadd 0%, transparent 55%),
+      linear-gradient(165deg, var(--bg-app) 0%, var(--bg-app-2) 100%);
+    border-radius: 34px;
+    overflow: hidden;
+    position: relative;
+    display:flex;
+    flex-direction: column;
+  }
+  .statusbar{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    padding: 14px 22px 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .screen-body{
+    flex:1;
+    overflow-y: auto;
+    padding: 8px 20px 22px;
+  }
+  .screen-body::-webkit-scrollbar{ display:none; }
+
+  .step-track{
+    display:flex;
+    gap:6px;
+    padding: 4px 20px 10px;
+  }
+  .step-dot{
+    height:4px;
+    flex:1;
+    border-radius: 3px;
+    background: rgba(44,107,98,0.18);
+  }
+  .step-dot.done, .step-dot.active{ background: var(--teal-dark); }
+
+  .nav-row{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 2px 2px 10px;
+  }
+  .back-link{
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--teal-dark);
+    cursor:pointer;
+  }
+  .skip-link{
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-faint);
+    cursor:pointer;
+  }
+
+  h2.screen-title{
+    font-size: 22px;
+    margin: 6px 0 6px;
+    letter-spacing: -0.01em;
+  }
+  p.screen-sub{
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin: 0 0 14px;
+  }
+
+  .card{
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 8px 26px rgba(31,45,51,0.10);
+    margin-bottom: 14px;
+  }
+  .section-label{
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--teal-darker);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom: 4px;
+  }
+  .section-hint{
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin: 0 0 12px;
+    line-height: 1.45;
+  }
+  .required-tag{
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #a05a13;
+    background: #fff3e6;
+    border: 1px solid #f3d9b8;
+    padding: 2px 7px;
+    border-radius: 999px;
+  }
+  .optional-tag{
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--teal-darker);
+    background: rgba(255,255,255,0.6);
+    border: 1px solid var(--glass-border);
+    padding: 2px 7px;
+    border-radius: 999px;
+  }
+
+  textarea.principles-box{
+    width:100%;
+    min-height: 84px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--ink);
+    font-family: inherit;
+    resize: none;
+    background: rgba(251,254,253,0.85);
+  }
+  textarea.principles-box::placeholder{ color: #9fb0ac; }
+
+  .field-label{
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 700;
+    margin-bottom: 6px;
+    display:block;
+  }
+  input.text-input{
+    width:100%;
+    border:1px solid var(--border);
+    border-radius: 12px;
+    padding: 11px 12px;
+    font-size: 12.5px;
+    font-family: inherit;
+    background: rgba(251,254,253,0.85);
+  }
+
+  .quick-field-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .quick-field-grid .full{ grid-column: 1 / -1; }
+
+  .btn{
+    display:block;
+    width:100%;
+    text-align:center;
+    padding: 14px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 14.5px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-primary{
+    background: var(--teal-dark);
+    color: #fff;
+  }
+  .btn-primary:active{ background: var(--teal-darker); }
+  .btn-ghost{
+    background: transparent;
+    color: var(--ink-faint);
+    font-weight: 600;
+    padding: 10px;
+  }
+
+  /* ---------- Stepper (adults / kids) ---------- */
+  .stepper-row{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .stepper-row:last-child{ margin-bottom: 0; }
+  .stepper-label{
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .stepper-control{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 5px 6px;
+  }
+  .stepper-btn{
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: none;
+    background: var(--teal-dark);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    line-height:1;
+  }
+  .stepper-btn:disabled{ opacity: 0.35; cursor:not-allowed; }
+  .stepper-value{
+    min-width: 20px;
+    text-align:center;
+    font-size: 14.5px;
+    font-weight: 800;
+    color: var(--ink);
+  }
+  .inline-error{
+    font-size: 11.5px;
+    color: #b3401a;
+    font-weight: 700;
+    margin: -6px 0 12px;
+    display:none;
+  }
+  .inline-error.show{ display:block; }
+
+  /* ---------- Principles checkboxes (reused component) ---------- */
+  .principle-check{
+    display:flex;
+    align-items:flex-start;
+    gap: 9px;
+    padding: 7px 0;
+    font-size: 12.5px;
+    color: var(--ink);
+    cursor:pointer;
+  }
+  .principle-check input{
+    margin-top: 2px;
+    width: 15px;
+    height: 15px;
+    accent-color: var(--teal-dark);
+    flex-shrink:0;
+  }
+  .principle-check span{ line-height: 1.4; }
+
+  .collapse-toggle{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    cursor:pointer;
+    user-select:none;
+  }
+  .collapse-chevron{
+    font-size: 12px;
+    color: var(--ink-faint);
+    transition: transform .2s ease;
+  }
+  .collapse-chevron.open{ transform: rotate(180deg); }
+
+  .feedback-row{ display:flex; gap:8px; margin-bottom: 10px; }
+  .feedback-pill{
+    flex:1;
+    text-align:center;
+    padding: 9px 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--ink-soft);
+    background: #fff;
+    cursor:pointer;
+  }
+  .feedback-pill.selected{
+    background: var(--teal-dark);
+    border-color: var(--teal-dark);
+    color: #fff;
+  }
+
+  .meal-chip{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 9px 12px;
+    font-size: 12.5px;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+  .meal-chip .dot{
+    width:7px;height:7px;border-radius:50%;
+    background: var(--green);
+    flex-shrink:0;
+  }
+
+  .preview-card{
+    background: linear-gradient(180deg, rgba(255,255,255,0.75) 0%, rgba(230,246,239,0.65) 100%);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 18px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    transition: box-shadow .4s ease;
+  }
+  .preview-card.pulse{
+    box-shadow: 0 0 0 3px rgba(44,107,98,0.35);
+  }
+  .preview-eyebrow{
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 800;
+    color: var(--teal-dark);
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom: 8px;
+  }
+  .preview-eyebrow .sparkle{ font-size: 12px; }
+  .preview-meal-name{
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 3px;
+    transition: opacity .25s ease;
+  }
+  .preview-meal-tag{
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    transition: opacity .25s ease;
+  }
+  .preview-updated-flag{
+    display:inline-block;
+    margin-top:8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--teal-dark);
+    background: rgba(227,243,238,0.9);
+    padding: 3px 9px;
+    border-radius: 999px;
+    opacity: 0;
+    transform: translateY(3px);
+    transition: all .3s ease;
+  }
+  .preview-updated-flag.show{ opacity:1; transform: translateY(0); }
+
+  .welcome-icon{
+    width: 84px;
+    height: 84px;
+    border-radius: 22px;
+    background: var(--glass-bg-strong);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--glass-border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 38px;
+    margin: 26px auto 22px;
+    box-shadow: 0 8px 20px rgba(31,45,51,0.1);
+  }
+  .center-text{ text-align:center; }
+
+  .pitch-row{
+    display:flex;
+    gap:10px;
+    margin: 18px 0 26px;
+  }
+  .pitch-item{
+    flex:1;
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 12px 10px;
+    text-align:center;
+    font-size: 11px;
+    color: var(--ink-soft);
+    font-weight: 600;
+    line-height:1.35;
+  }
+  .pitch-item .n{
+    display:block;
+    font-size: 17px;
+    margin-bottom: 4px;
+  }
+
+  .done-check{
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    background: var(--teal-dark);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 34px;
+    margin: 30px auto 20px;
+  }
+
+  .summary-line{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(225,236,232,0.8);
+  }
+  .summary-line:last-child{ border-bottom:none; }
+  .summary-line .dot{ width:6px;height:6px;border-radius:50%;background:var(--teal-dark); flex-shrink:0; }
+
+  .bottom-nav{
+    padding: 12px 20px 18px;
+  }
+
+  /* ---------- Controls under phone ---------- */
+  .controls{
+    display:flex;
+    gap:10px;
+  }
+  .ctrl-btn{
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .ctrl-btn:disabled{ opacity: 0.35; cursor:not-allowed; }
+  .ctrl-btn.primary{
+    background: var(--teal-dark);
+    color:#fff;
+    border-color: var(--teal-dark);
+  }
+  .screen-label{
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--ink-faint);
+  }
+
+  /* ---------- Annotations panel ---------- */
+  .annotations{
+    padding-top: 6px;
+  }
+  .anno-block{
+    display:none;
+    animation: fadein .3s ease;
+  }
+  .anno-block.active{ display:block; }
+  @keyframes fadein{ from{opacity:0; transform: translateY(6px);} to{opacity:1; transform:none;} }
+
+  .anno-title{
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+  .anno-sub{
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 0 0 22px;
+    line-height:1.5;
+  }
+  .anno-point{
+    display:flex;
+    gap: 12px;
+    padding: 16px 0;
+    border-top: 1px solid var(--border);
+  }
+  .anno-point:first-of-type{ border-top:none; }
+  .anno-point .num{
+    flex-shrink:0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--teal-dark);
+    color:#fff;
+    font-size: 12px;
+    font-weight: 800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .anno-point .txt h4{
+    margin:0 0 4px;
+    font-size: 14.5px;
+    color: var(--ink);
+  }
+  .anno-point .txt p{
+    margin:0;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .anno-point .txt code{
+    background: #eef4f2;
+    padding: 1px 6px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    color: var(--teal-darker);
+  }
+
+  .prd-tag{
+    display:inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    background: #fff3e6;
+    color: #a05a13;
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+<noscript>
+  <div style="max-width:640px;margin:60px auto;padding:24px 28px;border:1px solid #f3d9b8;background:#fff3e6;border-radius:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#a05a13;line-height:1.5;">
+    <strong>This mockup needs JavaScript to run</strong> and your browser/viewer has it disabled or blocked. If you're seeing this in an inline chat preview, try downloading the HTML file and opening it directly in a browser tab (double-click the downloaded file, or drag it into Chrome/Safari/Edge) instead of viewing it inline.
+  </div>
+</noscript>
+<div class="page">
+
+  <header class="doc">
+    <h1>Onboarding UX Flow — Proposal (v2, compressed)</h1>
+    <p>A walkable mockup of the four-screen onboarding sequence from PRD Section D — Welcome, a merged "Your household" screen (required counts up top, optional detail + the reused Principles component open by default below), "Add a few recent meals," and a fully automatic Completion. Use the controls under the phone to step through; "Your household" and "Add a few recent meals" demonstrate the live preview panel updating as data is entered.</p>
+    <div class="badge-row">
+      <span class="badge">2 data-entry screens, not 4-5</span>
+      <span class="badge">Reuses existing Principles + Meal History components</span>
+      <span class="badge">Board of advisors seeded silently — no screen</span>
+      <span class="badge warn">Glass style is an approximation — real weekly-board-design-system.md not yet reviewed</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="screen">
+          <div class="statusbar">
+            <span>9:41</span>
+            <span>●●●●</span>
+          </div>
+
+          <!-- STEP TRACK (only on the two data-entry screens) -->
+          <div class="step-track" id="stepTrack" style="display:none;">
+            <div class="step-dot" data-step="1"></div>
+            <div class="step-dot" data-step="2"></div>
+          </div>
+
+          <div class="screen-body" id="screenBody">
+            <!-- JS renders screens here -->
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="ctrl-btn" id="btnBack">&larr; Back</button>
+        <span class="screen-label" id="screenLabel" style="align-self:center;">Screen 1 of 4</span>
+        <button class="ctrl-btn primary" id="btnNext">Next &rarr;</button>
+      </div>
+    </div>
+
+    <div class="annotations">
+      <!-- 1: Welcome -->
+      <div class="anno-block" data-anno="1">
+        <h2 class="anno-title">Screen 1 — Welcome</h2>
+        <p class="anno-sub">First thing a new user sees after verifying their email or completing Google sign-in. Purely orienting — no data entry yet.</p>
+        <div class="anno-point">
+          <div class="num">1</div>
+          <div class="txt"><h4>Value pitch is concrete, not generic</h4><p>Leads with what the product does and previews that answers directly improve tonight's dinner suggestion, rather than a vague "welcome!" screen.</p></div>
+        </div>
+        <div class="anno-point">
+          <div class="num">2</div>
+          <div class="txt"><h4>Three-stat pitch row</h4><p>Quick visual reinforcement of the "more data = better plan" idea before asking for any effort. Purely illustrative copy here, tune wording later.</p></div>
+        </div>
+        <div class="anno-point">
+          <div class="num">3</div>
+          <div class="txt"><h4><code>Skip for now</code> is visible but de-emphasized</h4><p>Present from the very first screen, per the PRD's "skippable but nudged" decision — never hidden, never the primary action.<span class="prd-tag">PRD: Section D, P0</span></p></div>
+        </div>
+      </div>
+
+      <!-- 2: Your household -->
+      <div class="anno-block" data-anno="2">
+        <h2 class="anno-title">Screen 2 — Your household</h2>
+        <p class="anno-sub">This is the screen that changed most from the earlier draft: what used to be two separate steps (Household basics, then Principles) is now one screen with a required tier and an open-by-default optional tier — not a hard step split, and not a hidden "Advanced" toggle either.</p>
+        <div class="anno-point">
+          <div class="num">1</div>
+          <div class="txt"><h4>Required tier: adults &amp; kids, top of screen</h4><p>Steppers, not a text field — every generation prompt reads <code>adults</code>/<code>kids</code> directly, so this is the one thing onboarding actually blocks on. Try tapping "Save &amp; continue" with adults at 0 — it's blocked inline, matching the PRD's acceptance criterion.<span class="prd-tag">PRD: Section D, P0</span></p></div>
+        </div>
+        <div class="anno-point">
+          <div class="num">2</div>
+          <div class="txt"><h4>Optional tier: open by default, not collapsed</h4><p>Quick fields for allergies, likes, dislikes, pantry staples, and this week's use-up items — plus the existing 5-checkbox-plus-free-text Principles component from Settings, embedded here as-is (same underlying storage, no redesign). All of it is visible immediately; none of it blocks continuing.</p></div>
+        </div>
+        <div class="anno-point">
+          <div class="num">3</div>
+          <div class="txt"><h4>Live preview panel reacts on save</h4><p>Try it: set adults/kids, fill in anything below (or don't), and tap <code>Save &amp; continue</code>. The preview card swaps to a dinner that reflects what was entered, with a brief highlight pulse and an "Updated ✨" tag — the concrete proof-of-value moment from the PRD, not just a completeness meter.</p></div>
+        </div>
+      </div>
+
+      <!-- 3: Meal History -->
+      <div class="anno-block" data-anno="3">
+        <h2 class="anno-title">Screen 3 — Add a few recent meals</h2>
+        <p class="anno-sub">Directly reuses the existing "Add meal history" form (description, optional recipe link + Fetch recipe, Yes/Mostly/Not really feedback, optional note) — no new fields introduced.</p>
+        <div class="anno-point">
+          <div class="num">1</div>
+          <div class="txt"><h4>Soft target, lowered to "a couple"</h4><p>The earlier draft asked for 3–5; this version asks for "a couple" — proportionate to this being the last screen standing between the user and their generated plan. Still a suggestion, not a minimum enforced before continuing.</p></div>
+        </div>
+        <div class="anno-point">
+          <div class="num">2</div>
+          <div class="txt"><h4>Added meals show as a running list</h4><p>Each saved meal appears as a small chip above the form, so the user sees visible progress without needing a separate summary screen. Zero meals is a valid way to reach Finish.</p></div>
+        </div>
+        <div class="anno-point">
+          <div class="num">3</div>
+          <div class="txt"><h4>Preview keeps reacting</h4><p>The same live preview panel from Screen 2 persists here and updates again as meals are added — reinforcing the same feedback loop with a second, different kind of input.</p></div>
+        </div>
+      </div>
+
+      <!-- 4: Completion -->
+      <div class="anno-block" data-anno="4">
+        <h2 class="anno-title">Screen 4 — Completion</h2>
+        <p class="anno-sub">No user input happens on this screen — everything here runs automatically the moment the user arrives, confirming onboarding is done and handing off into an app that's already tailored, not generic.</p>
+        <div class="anno-point">
+          <div class="num">1</div>
+          <div class="txt"><h4>Board of advisors seeded silently</h4><p>The 5 standard personas are inserted here with no screen of their own. The 2 <code>is_customizable</code> personas seed with their defaults — customizing them is deferred entirely to Settings, not surfaced anywhere in onboarding, to keep this to two data-entry screens.<span class="prd-tag">PRD: Section D, P0</span></p></div>
+        </div>
+        <div class="anno-point">
+          <div class="num">2</div>
+          <div class="txt"><h4>First week generated synchronously, then marked complete</h4><p>Reuses propose-week's core logic with the same force-override bypass the app already has, so a brand-new household doesn't wait for Saturday's cron. Only once seeding and generation both succeed does this screen show its confirmation and set <code>onboarding_completed_at</code>.</p></div>
+        </div>
+        <div class="anno-point">
+          <div class="num">3</div>
+          <div class="txt"><h4>Single CTA into "This week"</h4><p>Tapping through triggers the full <code>loadHouseholdData()</code> reload per the PRD's state-reload requirement, so the first real screen they see reflects a clean fresh load — not leftover pre-onboarding state.</p></div>
+        </div>
+        <div class="anno-point">
+          <div class="num">4</div>
+          <div class="txt"><h4>If they skipped earlier, this screen is simply never shown</h4><p>A user who tapped "Skip for now" at any point lands directly in the app with a generic plan and no advisors seeded; the existing in-app nudge banner becomes their path back in, and re-entering onboarding resumes at Screen 3 since the required fields on Screen 2 are the only thing that gates resumption.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const totalScreens = 4;
+  let current = 1;
+  let householdSaved = false;
+  let mealsAdded = [];
+
+  const household = { adults: 0, kids: 0, allergies: '', likes: '', dislikes: '', pantry: '', useUp: '' };
+  const principleChecks = [false, false, false, false, false];
+  let principlesText = '';
+
+  const PRINCIPLE_LABELS = [
+    'Favor one-pan / low-cleanup dinners on weeknights',
+    'Include at least one vegetarian night',
+    'Keep weekly grocery spend moderate',
+    'Prioritize quick meals (30 min or less) Mon–Thu',
+    'OK to repeat a favorite meal more than once a week'
+  ];
+
+  const screenBody = document.getElementById('screenBody');
+  const stepTrack = document.getElementById('stepTrack');
+  const screenLabel = document.getElementById('screenLabel');
+  const btnBack = document.getElementById('btnBack');
+  const btnNext = document.getElementById('btnNext');
+
+  const genericPreview = { name: "One-pan sausage &amp; rice bake", tag: "Generic starter suggestion" };
+  const tailoredPreviewAfterHousehold = { name: "Tomato-free chicken tacos, build-your-own", tag: "Reflects: dairy-light, tomato-free option" };
+  const tailoredPreviewAfterMeals = { name: "Egg &amp; soy fried rice with bacon", tag: "Reflects: a repeat of a meal you told us was a hit" };
+
+  function annoFor(step){
+    document.querySelectorAll('.anno-block').forEach(el=>{
+      el.classList.toggle('active', el.dataset.anno == step);
+    });
+  }
+
+  function render(){
+    screenLabel.textContent = `Screen ${current} of ${totalScreens}`;
+    btnBack.disabled = current === 1;
+    btnNext.textContent = current === totalScreens ? 'Restart ↺' : 'Next →';
+    stepTrack.style.display = (current === 2 || current === 3) ? 'flex' : 'none';
+    if(stepTrack.style.display === 'flex'){
+      document.querySelectorAll('.step-dot').forEach(d=>{
+        const s = parseInt(d.dataset.step);
+        d.classList.toggle('done', s < (current-1));
+        d.classList.toggle('active', s === (current-1));
+      });
+    }
+    annoFor(current);
+
+    if(current === 1) renderWelcome();
+    else if(current === 2) renderHousehold();
+    else if(current === 3) renderMealHistory();
+    else renderCompletion();
+  }
+
+  function renderWelcome(){
+    screenBody.innerHTML = `
+      <div class="center-text">
+        <div class="welcome-icon">🍽️</div>
+        <h2 class="screen-title">Let's build your family's meal plan</h2>
+        <p class="screen-sub">Tell us a bit about your household and we'll get smarter with every detail you add — the more we know, the better tonight's suggestion gets.</p>
+      </div>
+      <div class="pitch-row">
+        <div class="pitch-item"><span class="n">🥗</span>Household prefs shape every plan</div>
+        <div class="pitch-item"><span class="n">📝</span>Past meals teach us what works</div>
+        <div class="pitch-item"><span class="n">✨</span>Watch your plan improve live</div>
+      </div>
+      <button class="btn btn-primary" data-action="next">Get started</button>
+      <button class="btn btn-ghost" data-action="skip">Skip for now</button>
+    `;
+  }
+
+  function renderPreviewCard(state){
+    const data = state === 'tailored2' ? tailoredPreviewAfterMeals
+      : state === 'tailored' ? tailoredPreviewAfterHousehold
+      : genericPreview;
+    return `
+      <div class="preview-card" id="previewCard">
+        <div class="preview-eyebrow"><span class="sparkle">✨</span> Tonight's dinner preview</div>
+        <div class="preview-meal-name" id="previewName">${data.name}</div>
+        <div class="preview-meal-tag" id="previewTag">${data.tag}</div>
+        <span class="preview-updated-flag" id="previewFlag">Updated based on what you just told us</span>
+      </div>
+    `;
+  }
+
+  function stepper(id, label, value, min){
+    const canDec = value > min;
+    return `
+      <div class="stepper-row">
+        <span class="stepper-label">${label}</span>
+        <div class="stepper-control">
+          <button class="stepper-btn" type="button" ${canDec ? '' : 'disabled'} data-action="stepper" data-id="${id}" data-delta="-1">&minus;</button>
+          <span class="stepper-value">${value}</span>
+          <button class="stepper-btn" type="button" data-action="stepper" data-id="${id}" data-delta="1">+</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderHousehold(){
+    const checksHtml = PRINCIPLE_LABELS.map((label, i) => `
+      <label class="principle-check">
+        <input type="checkbox" ${principleChecks[i] ? 'checked' : ''} data-principle-index="${i}">
+        <span>${label}</span>
+      </label>
+    `).join('');
+
+    screenBody.innerHTML = `
+      <div class="nav-row">
+        <span class="back-link" data-action="back">&larr; Back</span>
+        <span class="skip-link" data-action="skip">Skip for now</span>
+      </div>
+      <h2 class="screen-title">Your household</h2>
+      <p class="screen-sub">Just the headcount is required — everything below is optional, but the more you add, the better your plan gets.</p>
+      ${renderPreviewCard(householdSaved ? 'tailored' : 'generic')}
+
+      <div class="card">
+        <div class="section-label">Who's in your household? <span class="required-tag">Required</span></div>
+        ${stepper('adults', 'Adults', household.adults, 0)}
+        ${stepper('kids', 'Kids', household.kids, 0)}
+        <div class="inline-error" id="householdError">Let us know how many adults are in your household.</div>
+      </div>
+
+      <div class="card">
+        <div class="section-label">A few more details <span class="optional-tag">Optional</span></div>
+        <p class="section-hint">Open by default — nothing here blocks you from continuing.</p>
+        <div class="quick-field-grid">
+          <div>
+            <span class="field-label">Allergies / restrictions</span>
+            <input class="text-input" placeholder="e.g. dairy-light" value="${household.allergies}" data-field="allergies">
+          </div>
+          <div>
+            <span class="field-label">Dislikes</span>
+            <input class="text-input" placeholder="e.g. tomatoes" value="${household.dislikes}" data-field="dislikes">
+          </div>
+          <div>
+            <span class="field-label">Likes</span>
+            <input class="text-input" placeholder="e.g. tacos, stir-fry" value="${household.likes}" data-field="likes">
+          </div>
+          <div>
+            <span class="field-label">Pantry staples</span>
+            <input class="text-input" placeholder="e.g. rice, canned beans" value="${household.pantry}" data-field="pantry">
+          </div>
+          <div class="full">
+            <span class="field-label">Use up this week</span>
+            <input class="text-input" placeholder="e.g. half a bag of spinach" value="${household.useUp}" data-field="useUp">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-label">Meal-planning principles <span class="optional-tag">Optional</span></div>
+        <p class="section-hint">Same component as Settings → Meal Planning Principles — reused here as-is.</p>
+        ${checksHtml}
+        <div style="margin-top:8px;">
+          <span class="field-label">Anything else?</span>
+          <textarea class="principles-box" placeholder="e.g. one kid is picky about texture, favor mild spice" data-field="principlesText">${principlesText}</textarea>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" data-action="save-household">Save &amp; continue</button>
+      <button class="btn btn-ghost" data-action="skip">Skip for now</button>
+    `;
+  }
+
+  function adjustStepper(id, delta){
+    household[id] = Math.max(0, household[id] + delta);
+    renderHousehold();
+  }
+
+  function saveHousehold(){
+    const err = document.getElementById('householdError');
+    if(household.adults < 1){
+      err.classList.add('show');
+      return;
+    }
+    err.classList.remove('show');
+    householdSaved = true;
+    const card = document.getElementById('previewCard');
+    const name = document.getElementById('previewName');
+    const tag = document.getElementById('previewTag');
+    const flag = document.getElementById('previewFlag');
+    card.classList.add('pulse');
+    name.style.opacity = 0;
+    tag.style.opacity = 0;
+    setTimeout(()=>{
+      name.textContent = tailoredPreviewAfterHousehold.name;
+      tag.textContent = tailoredPreviewAfterHousehold.tag;
+      name.style.opacity = 1;
+      tag.style.opacity = 1;
+      flag.classList.add('show');
+    }, 260);
+    setTimeout(()=>{ card.classList.remove('pulse'); }, 1200);
+    setTimeout(()=>{ goNext(); }, 950);
+  }
+
+  function renderMealHistory(){
+    const chips = mealsAdded.map(m => `<div class="meal-chip"><span class="dot"></span>${m}</div>`).join('');
+    screenBody.innerHTML = `
+      <div class="nav-row">
+        <span class="back-link" data-action="back">&larr; Back</span>
+        <span class="skip-link" data-action="skip">Skip for now</span>
+      </div>
+      <h2 class="screen-title">Add a few recent meals</h2>
+      <p class="screen-sub">Add a couple of recent meals to get started — including ones from before this app. You can always add more later.</p>
+      ${renderPreviewCard(mealsAdded.length > 0 ? 'tailored2' : (householdSaved ? 'tailored' : 'generic'))}
+      ${chips}
+      <div class="card">
+        <span class="field-label">Description</span>
+        <input class="text-input" id="mealInput" placeholder="What was the meal?" style="margin-bottom:12px;">
+        <span class="field-label">Feedback (optional — assumed a yes if skipped)</span>
+        <div class="feedback-row">
+          <div class="feedback-pill">YES</div>
+          <div class="feedback-pill">MOSTLY</div>
+          <div class="feedback-pill">NOT REALLY</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" data-action="add-meal">Save &amp; add another</button>
+      <button class="btn btn-ghost" data-action="next">Finish</button>
+    `;
+  }
+
+  function addMeal(){
+    const input = document.getElementById('mealInput');
+    const val = input.value.trim() || 'Egg & soy fried rice with bacon';
+    mealsAdded.push(val);
+    const card = document.getElementById('previewCard');
+    const name = document.getElementById('previewName');
+    const tag = document.getElementById('previewTag');
+    const flag = document.getElementById('previewFlag');
+    card.classList.add('pulse');
+    name.style.opacity = 0; tag.style.opacity = 0;
+    setTimeout(()=>{
+      name.textContent = tailoredPreviewAfterMeals.name;
+      tag.textContent = tailoredPreviewAfterMeals.tag;
+      name.style.opacity = 1; tag.style.opacity = 1;
+      flag.classList.add('show');
+    }, 260);
+    setTimeout(()=>{ card.classList.remove('pulse'); }, 1200);
+    renderMealHistory();
+  }
+
+  function renderCompletion(){
+    screenBody.innerHTML = `
+      <div class="center-text">
+        <div class="done-check">✓</div>
+        <h2 class="screen-title">You're all set!</h2>
+        <p class="screen-sub">We've seeded your board of advisors and generated This Week's plan using what you told us.</p>
+      </div>
+      <div class="card">
+        <div class="summary-line"><span class="dot"></span>Household saved (${household.adults} adult${household.adults===1?'':'s'}, ${household.kids} kid${household.kids===1?'':'s'})</div>
+        <div class="summary-line"><span class="dot"></span>${mealsAdded.length} recent meal${mealsAdded.length===1?'':'s'} added</div>
+        <div class="summary-line"><span class="dot"></span>5 board-of-advisors personas seeded</div>
+        <div class="summary-line"><span class="dot"></span>This week's plan personalized</div>
+      </div>
+      <button class="btn btn-primary" data-action="restart">See my plan</button>
+    `;
+  }
+
+  function goNext(){ if(current < totalScreens){ current++; render(); } else { goRestart(); } }
+  function goBack(){ if(current > 1){ current--; render(); } }
+  function skip(){ current = totalScreens; render(); }
+  function goRestart(){
+    current = 1;
+    householdSaved = false;
+    mealsAdded = [];
+    household.adults = 0; household.kids = 0;
+    household.allergies = ''; household.likes = ''; household.dislikes = ''; household.pantry = ''; household.useUp = '';
+    for(let i=0;i<principleChecks.length;i++){ principleChecks[i] = false; }
+    principlesText = '';
+    render();
+  }
+
+  // Event delegation for everything rendered inside screenBody, so nothing
+  // relies on inline onclick/oninput/onchange attributes (some HTML preview
+  // sandboxes strip those for security while still allowing external <script>
+  // logic — delegated listeners on real DOM nodes work everywhere).
+  function handleScreenClick(e){
+    const el = e.target.closest('[data-action]');
+    if(!el) return;
+    const action = el.dataset.action;
+    if(action === 'next') goNext();
+    else if(action === 'back') goBack();
+    else if(action === 'skip') skip();
+    else if(action === 'save-household') saveHousehold();
+    else if(action === 'add-meal') addMeal();
+    else if(action === 'restart') goRestart();
+    else if(action === 'stepper') adjustStepper(el.dataset.id, parseInt(el.dataset.delta, 10));
+  }
+
+  function handleScreenInput(e){
+    const field = e.target.dataset.field;
+    if(!field) return;
+    if(field === 'principlesText') principlesText = e.target.value;
+    else household[field] = e.target.value;
+  }
+
+  function handleScreenChange(e){
+    const idx = e.target.dataset.principleIndex;
+    if(idx === undefined) return;
+    principleChecks[parseInt(idx, 10)] = e.target.checked;
+  }
+
+  screenBody.addEventListener('click', handleScreenClick);
+  screenBody.addEventListener('input', handleScreenInput);
+  screenBody.addEventListener('change', handleScreenChange);
+
+  btnNext.addEventListener('click', goNext);
+  btnBack.addEventListener('click', goBack);
+
+  render();
+</script>
+
+</body>
+</html>
