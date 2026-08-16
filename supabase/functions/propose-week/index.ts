@@ -93,6 +93,13 @@ async function callClaude(systemPrompt: string, userPrompt: string, maxTokens = 
   try {
     return JSON.parse(text);
   } catch (e) {
+    // A handful of real failures on regenerate-meal (2026-08-16, same callClaude pattern)
+    // showed otherwise fully complete, well-formed JSON cut off missing only the final closing
+    // brace, at lengths far short of maxTokens. Retry once with a brace appended before giving
+    // up; only masks exactly this one specific, observed defect shape, not JSON errors in general.
+    if (!text.endsWith("}")) {
+      try { return JSON.parse(text + "}"); } catch { /* fall through to the original error */ }
+    }
     throw new Error("Could not parse Claude response as JSON: " + String(e));
   }
 }
