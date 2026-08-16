@@ -186,10 +186,11 @@ Deno.serve(async (req) => {
 
     const newReviewFeedback = (newFeedback || []).filter((r: any) => r.type === "review_feedback" && r.week_id === week.week_id);
     const newPrinciplesUpdates = (newFeedback || []).filter((r: any) => r.type === "principles_update");
-
-    if (!newReviewFeedback.length && !newPrinciplesUpdates.length) {
-      return jsonResponse({ status: "no_changes", message: "No new feedback or principle edits since the current plan was generated." });
-    }
+    // Refresh plan always regenerates now, whether or not anything new was logged -- clicking it
+    // with no pending feedback means "give me a fresh alternative take on this week," not "do
+    // nothing." Whether there's real feedback to incorporate still matters for which instruction
+    // paragraph goes into the prompt below (revise-around-feedback vs. free-variety-swap).
+    const hasNewFeedback = !!(newReviewFeedback.length || newPrinciplesUpdates.length);
 
     if (newReviewFeedback.length) {
       const latestReview = newReviewFeedback[newReviewFeedback.length - 1];
@@ -234,12 +235,19 @@ Deno.serve(async (req) => {
       (dishReputationLines.length ? '\n\nHistorical dish feedback (from every "Log" submission ever made, any week) — ' +
         'if you touch a dinner below, prefer repeating a "proven" dish over a fresh idea when it fits, and avoid reintroducing ' +
         'a poorly-received ("new" status with mostly "no") dish in the same format:\n' + dishReputationLines.join("\n") : "") +
-      "\n\nRevise ONLY the days/meals that need to change to address the feedback above and/or the " +
-      "(possibly updated) household principles above — leave every other day exactly as it was unless it " +
-      "truly needs to change. Keep the leftover-lunch day-after rule intact (Tuesday lunch = Monday dinner leftovers, etc.). " +
-      "A day's dinner/lunch/snack may be null (an empty slot the family removed on purpose) — leave it null unless the " +
-      'feedback specifically asks you to fill it. Never invent a method for a meal that has a "source" field (an externally-linked ' +
-      "recipe) — leave it as-is or replace it outright with a fresh board-authored meal. " +
+      (hasNewFeedback
+        ? "\n\nRevise ONLY the days/meals that need to change to address the feedback above and/or the " +
+          "(possibly updated) household principles above — leave every other day exactly as it was unless it " +
+          "truly needs to change. A day's dinner/lunch/snack may be null (an empty slot the family removed on purpose) " +
+          "— leave it null unless the feedback specifically asks you to fill it. "
+        : "\n\nThe family has not left any new feedback or principle changes since this plan was generated — they " +
+          "clicked Refresh simply wanting a fresh alternative take on the week, not a fix for anything specific. Feel " +
+          "free to swap out any board-authored meal for variety, even without a complaint driving the change, while " +
+          "still respecting the household principles, historical dish reputation, and pantry/Budget Saver settings " +
+          "above. A day's dinner/lunch/snack may be null (an empty slot the family removed on purpose) — leave it null. ") +
+      "Keep the leftover-lunch day-after rule intact (Tuesday lunch = Monday dinner leftovers, etc.). " +
+      'Never invent a method for a meal that has a "source" field (an externally-linked recipe the family added ' +
+      "themselves) — leave every one of those exactly as it is. " +
       'Give every present meal a structured "ingredients" array: [{"name":"...","quantity":<number>,"unit":"...",' +
       '"category":"produce|meat_deli|dairy|pantry|frozen|other","display":"natural prose form, e.g. \'2 cloves garlic, minced\'"}] ' +
       '— leftover-based lunches/snacks get "ingredients": []. Dinners also get a "method" array of prose steps. ' +

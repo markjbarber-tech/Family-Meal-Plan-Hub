@@ -680,7 +680,7 @@ body.auth-pending #hub{display:none;}
       <div class="review-box">
         <button class="review-box-collapse" id="reviewBoxCollapse"><i class="ti ti-chevron-up"></i>Collapse</button>
         <div class="rb-title">Feedback or ingredients on hand?</div>
-        <div class="rb-sub">Note plan changes or ingredients that need using up — checked regularly and folded into the plan.</div>
+        <div class="rb-sub">Note plan changes or ingredients that need using up — this regenerates the plan right away using what you enter here.</div>
         <label>Plan feedback</label>
         <textarea id="planFeedbackInput" placeholder="e.g. can we swap Wednesday's sausage bake for something else?"></textarea>
         <label>What ingredients do you already have?</label>
@@ -690,7 +690,7 @@ body.auth-pending #hub{display:none;}
           <span>Budget Saver Mode — chain meals together to shrink this week's shopping list</span>
         </label>
         <div class="review-saved-note" id="reviewSavedNote"></div>
-        <button class="review-submit-btn" id="saveReviewBtn">Send feedback</button>
+        <button class="review-submit-btn" id="saveReviewBtn">Update plan with this</button>
       </div>`;
     container.querySelector("#reviewBoxCollapse").addEventListener("click", ()=>{
       reviewBoxExpanded = false;
@@ -701,18 +701,37 @@ body.auth-pending #hub{display:none;}
       const pantry_ingredients = container.querySelector("#pantryInput").value;
       const budget_saver_mode = container.querySelector("#budgetSaverInput").checked;
       const note = container.querySelector("#reviewSavedNote");
+      const btn = container.querySelector("#saveReviewBtn");
       const budgetModeChanged = budget_saver_mode !== !!WEEK_DATA.budget_saver_mode;
       if(!plan_feedback && !pantry_ingredients && !budgetModeChanged){ note.textContent = "Add something in one of the boxes first"; return; }
-      note.textContent = "Sending…";
+      btn.disabled = true;
+      note.textContent = "Saving…";
       try{
         const { error } = await supabaseClient.from('feedback').insert({
           household_id: currentHouseholdId, type: "review_feedback", week_id: WEEK_DATA.week_id,
           plan_feedback, pantry_ingredients, budget_saver_mode
         });
         if(error) throw error;
-        note.textContent = "Sent ✓";
       }catch(e){
-        note.textContent = "Couldn't send — reply to our email instead";
+        note.textContent = "Couldn't save — reply to our email instead";
+        btn.disabled = false;
+        return;
+      }
+      // regenerate-now itself picks up every pending review_feedback/principles_update row
+      // since the last regeneration, not just the one just saved above -- so this naturally
+      // folds in anything else still outstanding, not only this submission.
+      note.textContent = "Saved — generating your plan… (up to a few minutes)";
+      const ok = await runRegenerate(
+        document.getElementById("refreshPlanBtn"),
+        document.getElementById("refreshStatusNote"),
+        '<i class="ti ti-refresh"></i>Refreshing… (up to a few minutes)'
+      );
+      if(ok){
+        reviewBoxExpanded = false;
+        renderReviewBox();
+      } else {
+        btn.disabled = false;
+        note.textContent = "Saved, but the regenerate failed — see the note by Refresh plan above.";
       }
     });
   }
@@ -1585,13 +1604,15 @@ body.auth-pending #hub{display:none;}
     });
   }
 
-  async function requestRegenerate(){
-    const btn = document.getElementById("refreshPlanBtn");
-    const note = document.getElementById("refreshStatusNote");
-    if(btn.disabled) return;
+  // Shared by the top-level Refresh plan button and the review box's "Update plan with this"
+  // button -- both trigger the exact same regenerate-now call and data refresh, just with
+  // different button/note elements to update while it runs. Returns true on success so callers
+  // (like the review box) know whether it's safe to collapse/reset their own UI afterward.
+  async function runRegenerate(btn, note, workingLabel){
+    if(btn.disabled) return false;
     btn.disabled = true;
     const originalLabel = btn.innerHTML;
-    btn.innerHTML = '<i class="ti ti-refresh"></i>Refreshing… (up to a few minutes)';
+    btn.innerHTML = workingLabel;
     const stopLoading = showLoadingIndicator(note, "Generating your plan…");
     try{
       const result = await callEdgeFunction('regenerate-now', {});
@@ -1600,18 +1621,27 @@ body.auth-pending #hub{display:none;}
         note.textContent = "Updated ✓" + (result.summary ? " — " + result.summary : "");
         await fetchShoppingState();
         applyWeekPatch(await fetchCurrentWeekData());
-      } else if(result.status === "no_changes"){
-        note.textContent = "Nothing new to incorporate — plan is already up to date.";
+        return true;
       } else {
         note.textContent = "Refresh failed: " + (result.message || "unknown error");
+        return false;
       }
     }catch(e){
       stopLoading();
       note.textContent = "Lost the connection while waiting — it may have still gone through. Reload in a moment to check before trying again.";
+      return false;
     }finally{
       btn.disabled = false;
       btn.innerHTML = originalLabel;
     }
+  }
+
+  async function requestRegenerate(){
+    await runRegenerate(
+      document.getElementById("refreshPlanBtn"),
+      document.getElementById("refreshStatusNote"),
+      '<i class="ti ti-refresh"></i>Refreshing… (up to a few minutes)'
+    );
   }
 
   document.getElementById("settingsBtn").addEventListener("click", openSettingsPage);
