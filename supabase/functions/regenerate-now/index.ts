@@ -252,7 +252,12 @@ Deno.serve(async (req) => {
       '  "commit_summary": "a short one-line summary suitable as a git commit message"\n' +
       "}";
 
-    const plan = await callClaude(systemPrompt, userPrompt);
+    // This asks for the same shape as propose-week's full-week generation (all 7 days, every
+    // slot, even unchanged ones) -- propose-week needed 24000 tokens for that shape after a real
+    // truncation failure, yet this call was still on callClaude's untouched 8000 default. Found
+    // while investigating a similar truncation bug in regenerate-meal (2026-08-16) -- same
+    // pattern, fixed here before it caused an identical live failure on Refresh plan.
+    const plan = await callClaude(systemPrompt, userPrompt, 24000);
     if (!plan || !plan.days || !Array.isArray(plan.days)) {
       return jsonResponse({ status: "error", message: "The board did not return a usable plan — try again." }, 502);
     }
