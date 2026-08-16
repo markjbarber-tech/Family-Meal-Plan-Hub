@@ -183,10 +183,12 @@ Deno.serve(async (req) => {
         ? ':\n{"name": "...", "new": true, "authored_by": "...", "ingredients": [{"name":"...","quantity":<number>,"unit":"...","category":"produce|meat_deli|dairy|pantry|frozen|other","display":"..."}], "method": ["...", "..."], "prep_time": "...", "cook_time": "...", "hands_off_time": "... (omit if none)", "prep_ahead_note": "... (omit if none)","board_note": "one sentence on what this is and why"}'
         : ' (no method or authored_by needed for lunch/snack):\n{"name": "...", "ingredients": [{"name":"...","quantity":<number>,"unit":"...","category":"produce|meat_deli|dairy|pantry|frozen|other","display":"..."}], "board_note": "one sentence on what this is and why"}');
 
-    // 2000 matched the original Code.gs budget, but that predates prep_time/cook_time/
-    // hands_off_time/prep_ahead_note being added to the schema -- those extra fields make
-    // responses longer, so bump the ceiling to avoid truncating mid-response.
-    const result = await callClaude(systemPrompt, userPrompt, 3000);
+    // 2000 (original Code.gs budget) then 3000 both proved too tight -- a live failure on
+    // 2026-08-16 captured the raw response mid-truncation: every field was fully written
+    // (17 ingredients, 7 method steps, board_note) and the response was cut off missing only
+    // the final closing brace, meaning 3000 just barely wasn't enough for a verbose-but-normal
+    // dinner. Real headroom this time rather than another value tuned to just barely fit.
+    const result = await callClaude(systemPrompt, userPrompt, 6000);
     if (!result || !result.name || !result.ingredients) {
       return jsonResponse({ status: "error", message: "The board did not return a usable meal — try again." }, 502);
     }
