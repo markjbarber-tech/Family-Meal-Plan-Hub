@@ -325,6 +325,31 @@ body.auth-pending #hub{display:none;}
 .settings-section h3{font-family:var(--font-head);letter-spacing:-0.01em;font-weight:600;font-size:1rem;margin:0 0 4px;}
 .settings-section .section-sub{font-size:0.8rem;color:var(--ink-soft);margin-bottom:12px;}
 
+/* Board of advisors (Settings) */
+.advisors-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;padding:0;cursor:pointer;text-align:left;}
+.advisors-toggle h3{margin:0;}
+.advisors-toggle i{font-size:18px;color:var(--ink-soft);transition:transform 0.15s;flex-shrink:0;}
+.advisors-toggle[aria-expanded="true"] i{transform:rotate(180deg);}
+.advisors-toggle:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+.advisors-body{margin-top:12px;}
+.advisors-loading{font-size:0.82rem;color:var(--ink-faint);padding:8px 0;}
+.advisor-row{background:rgba(255,255,255,0.6);border:1px solid var(--glass-border);border-radius:12px;padding:12px 14px;margin-bottom:8px;}
+.advisor-row-main{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.advisor-name{font-family:var(--font-head);font-weight:600;font-size:0.88rem;color:var(--ink);}
+.advisor-philosophy{font-size:0.8rem;color:var(--ink-soft);margin-top:3px;line-height:1.45;}
+.advisor-row-actions{display:flex;gap:6px;flex-shrink:0;}
+.advisor-action-btn{font-family:var(--font-mono);font-size:0.64rem;text-transform:uppercase;letter-spacing:0.03em;background:none;border:1px solid var(--glass-border);border-radius:8px;padding:4px 9px;color:var(--ink-soft);cursor:pointer;white-space:nowrap;}
+.advisor-action-btn:hover{background:rgba(255,255,255,0.85);color:var(--ink);}
+.advisor-action-btn.danger{color:var(--status-caution);}
+.advisor-action-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.advisor-edit-form label{display:block;font-family:var(--font-mono);font-size:0.62rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-faint);margin-bottom:4px;}
+.advisor-edit-form input,.advisor-edit-form textarea{width:100%;box-sizing:border-box;border:1px solid var(--glass-border);border-radius:10px;padding:9px 10px;font-family:var(--font-body);font-size:0.85rem;margin-bottom:10px;background:rgba(255,255,255,0.6);color:var(--ink);}
+.advisor-edit-form textarea{resize:vertical;min-height:52px;}
+.advisor-edit-actions{display:flex;gap:8px;}
+.advisor-edit-actions button{flex:1;}
+.advisors-count-note{font-family:var(--font-mono);font-size:0.68rem;color:var(--ink-faint);margin:6px 0 12px;}
+.advisors-error-note{font-size:0.78rem;color:var(--status-caution);margin:6px 0;}
+
 /* Meal history banner (Plan tab) */
 .history-banner{display:flex;align-items:flex-start;gap:12px;background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--glass-border);border-radius:14px;padding:13px 16px;margin-bottom:16px;font-size:0.82rem;}
 .history-banner i{font-size:20px;color:var(--teal-dark);flex-shrink:0;margin-top:1px;}
@@ -467,7 +492,16 @@ body.auth-pending #hub{display:none;}
   // hiding this key. Never put the service_role/secret key here.
   const SUPABASE_URL = "https://jpofeslziyjbysotycfl.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_psBedalpZIlxs5DaGQPf1g_yJ49IdI8";
-  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // persistSession/autoRefreshToken are supabase-js's own defaults, made explicit here since
+  // they're exactly the mechanism "stay signed in across sessions" depends on -- meal-plan data
+  // isn't sensitive enough to warrant forcing a household to re-authenticate regularly, so this
+  // is intentional, not an oversight. localStorage persistence is still subject to the browser's
+  // own storage-eviction rules (e.g. Safari's ~7-day cap on unused sites' local storage) -- no
+  // client-side setting can override that; a home-screen "Add to Home Screen" install sidesteps
+  // it, since Safari exempts installed web apps from that eviction policy.
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  });
 
   // Calls one of the 3 AI-generation Edge Functions, forwarding the signed-in user's own access
   // token so the function's RLS-scoped Supabase client only ever sees this household's data.
@@ -499,6 +533,10 @@ body.auth-pending #hub{display:none;}
   let currentWeekRowId = null; // weeks.id (uuid) for the current week, needed to scope meals queries
 
   function slugify(name){ return String(name).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+  // board_of_advisors.persona_key uses underscore_case (weeknight_realist, flavor_explorer, ...)
+  // -- reuses slugify()'s logic rather than duplicating it, just swaps the separator to match.
+  function personaKeySlug(name){ return slugify(name).replace(/-/g, '_'); }
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   function shopItemKey(cat, name){ return cat + '::' + String(name).toLowerCase(); }
   function key(day, meal){ return day + "-" + meal; }
 
@@ -1268,6 +1306,15 @@ body.auth-pending #hub{display:none;}
         </div>
 
         <div class="settings-section">
+          <button class="advisors-toggle" id="advisorsToggle" aria-expanded="false">
+            <h3>Board of advisors</h3>
+            <i class="ti ti-chevron-down"></i>
+          </button>
+          <div class="section-sub">The personas who draft and revise your meals — edit what each one cares about, add a new one, or remove one you don't want weighing in.</div>
+          <div class="advisors-body" id="advisorsBody" style="display:none;"></div>
+        </div>
+
+        <div class="settings-section">
           <h3>Meal history</h3>
           <div class="section-sub">Add your family's past meals — including ones from before this app — so the board has a richer picture of what's worked.</div>
           <button class="primary-btn" id="addHistoryBtn"><i class="ti ti-history"></i> Add meal history</button>
@@ -1339,6 +1386,191 @@ body.auth-pending #hub{display:none;}
     });
 
     page.querySelector("#addHistoryBtn").addEventListener("click", ()=> openMealHistoryUpload());
+
+    let advisorsLoaded = false;
+    page.querySelector("#advisorsToggle").addEventListener("click", (e)=>{
+      const btn = e.currentTarget;
+      const body = page.querySelector("#advisorsBody");
+      const expanded = btn.getAttribute("aria-expanded") === "true";
+      btn.setAttribute("aria-expanded", String(!expanded));
+      body.style.display = expanded ? "none" : "block";
+      if(!expanded && !advisorsLoaded){
+        advisorsLoaded = true;
+        loadAndRenderAdvisors(body);
+      }
+    });
+  }
+
+  // ---------------- Board of advisors (Settings) ----------------
+  // All 5 seeded personas are editable and removable now (the is_customizable column is a
+  // leftover from onboarding, where only 2 of the 5 were surfaced -- it's still written on
+  // insert for new rows but no longer gates anything in this UI). Capped at 8 since every
+  // advisor's name+philosophy gets embedded in the prompt for every meal-generation call.
+  const ADVISORS_MAX = 8;
+
+  async function loadAndRenderAdvisors(container){
+    container.innerHTML = '<div class="advisors-loading">Loading…</div>';
+    try{
+      const { data, error } = await supabaseClient.from('board_of_advisors')
+        .select('*').eq('household_id', currentHouseholdId).order('persona_key');
+      if(error) throw error;
+      renderAdvisorsList(container, data || []);
+    }catch(e){
+      container.innerHTML = '<div class="advisors-error-note">Couldn\'t load the board — try reopening Settings.</div>';
+    }
+  }
+
+  function advisorRowHtml(a, totalCount){
+    return `
+      <div class="advisor-row" data-persona-key="${escapeHtml(a.persona_key)}">
+        <div class="advisor-row-main">
+          <div>
+            <div class="advisor-name">${escapeHtml(a.name)}</div>
+            <div class="advisor-philosophy">${escapeHtml(a.philosophy || '')}</div>
+          </div>
+          <div class="advisor-row-actions">
+            <button class="advisor-action-btn" data-action="edit">Edit</button>
+            <button class="advisor-action-btn danger" data-action="remove" ${totalCount <= 1 ? 'disabled title="At least one advisor is required"' : ''}>Remove</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderAdvisorsList(container, advisors){
+    const atCap = advisors.length >= ADVISORS_MAX;
+    container.innerHTML = `
+      <div class="advisors-list">${advisors.map(a => advisorRowHtml(a, advisors.length)).join('')}</div>
+      <div class="advisors-count-note">${advisors.length} of ${ADVISORS_MAX} advisors</div>
+      <button class="favourite-btn" id="addAdvisorBtn" ${atCap ? 'disabled title="Remove one to add another"' : ''}><i class="ti ti-plus"></i> Add an advisor</button>`;
+    container.querySelectorAll('[data-action="edit"]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const rowEl = btn.closest('.advisor-row');
+        const advisor = advisors.find(a => a.persona_key === rowEl.dataset.personaKey);
+        renderAdvisorEditForm(rowEl, advisor, container);
+      });
+    });
+    container.querySelectorAll('[data-action="remove"]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const rowEl = btn.closest('.advisor-row');
+        const advisor = advisors.find(a => a.persona_key === rowEl.dataset.personaKey);
+        openRemoveAdvisorConfirm(advisor, container);
+      });
+    });
+    const addBtn = container.querySelector('#addAdvisorBtn');
+    if(addBtn && !atCap) addBtn.addEventListener('click', ()=> renderAddAdvisorForm(container, advisors));
+  }
+
+  function renderAdvisorEditForm(rowEl, advisor, container){
+    rowEl.innerHTML = `
+      <div class="advisor-edit-form">
+        <label>Name</label>
+        <input type="text" class="advisor-edit-name" value="${escapeHtml(advisor.name)}">
+        <label>Philosophy</label>
+        <textarea class="advisor-edit-philosophy" rows="3">${escapeHtml(advisor.philosophy || '')}</textarea>
+        <div class="advisors-error-note" style="display:none;"></div>
+        <div class="advisor-edit-actions">
+          <button class="review-submit-btn" data-action="save">Save</button>
+          <button class="cancel-link" data-action="cancel">Cancel</button>
+        </div>
+      </div>`;
+    rowEl.querySelector('[data-action="cancel"]').addEventListener('click', ()=> loadAndRenderAdvisors(container));
+    rowEl.querySelector('[data-action="save"]').addEventListener('click', async ()=>{
+      const name = rowEl.querySelector('.advisor-edit-name').value.trim();
+      const philosophy = rowEl.querySelector('.advisor-edit-philosophy').value.trim();
+      const note = rowEl.querySelector('.advisors-error-note');
+      if(!name){ note.textContent = 'Give this advisor a name'; note.style.display = 'block'; return; }
+      const btn = rowEl.querySelector('[data-action="save"]');
+      btn.disabled = true; btn.textContent = 'Saving…';
+      try{
+        const { error } = await supabaseClient.from('board_of_advisors')
+          .update({ name, philosophy })
+          .eq('household_id', currentHouseholdId).eq('persona_key', advisor.persona_key);
+        if(error) throw error;
+        await loadAndRenderAdvisors(container);
+      }catch(e){
+        note.textContent = "Couldn't save — try again";
+        note.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Save';
+      }
+    });
+  }
+
+  function renderAddAdvisorForm(container, advisors){
+    const addBtn = container.querySelector('#addAdvisorBtn');
+    if(!addBtn) return;
+    const formEl = document.createElement('div');
+    formEl.className = 'advisor-row advisor-edit-form';
+    formEl.innerHTML = `
+      <label>Name</label>
+      <input type="text" class="advisor-add-name" placeholder="e.g. The Budget Hawk">
+      <label>Philosophy</label>
+      <textarea class="advisor-add-philosophy" rows="3" placeholder="What does this advisor care about when suggesting meals?"></textarea>
+      <div class="advisors-error-note" style="display:none;"></div>
+      <div class="advisor-edit-actions">
+        <button class="review-submit-btn" data-action="save">Add</button>
+        <button class="cancel-link" data-action="cancel">Cancel</button>
+      </div>`;
+    addBtn.replaceWith(formEl);
+    formEl.querySelector('[data-action="cancel"]').addEventListener('click', ()=> loadAndRenderAdvisors(container));
+    formEl.querySelector('[data-action="save"]').addEventListener('click', async ()=>{
+      const name = formEl.querySelector('.advisor-add-name').value.trim();
+      const philosophy = formEl.querySelector('.advisor-add-philosophy').value.trim();
+      const note = formEl.querySelector('.advisors-error-note');
+      if(!name){ note.textContent = 'Give this advisor a name'; note.style.display = 'block'; return; }
+      // Guaranteed-unique persona_key within this household -- append a numeric suffix on
+      // collision (e.g. two advisors both named "The Budget Hawk") rather than erroring.
+      let key = personaKeySlug(name) || 'advisor';
+      const existingKeys = new Set(advisors.map(a => a.persona_key));
+      if(existingKeys.has(key)){
+        let n = 2;
+        while(existingKeys.has(`${key}_${n}`)) n++;
+        key = `${key}_${n}`;
+      }
+      const btn = formEl.querySelector('[data-action="save"]');
+      btn.disabled = true; btn.textContent = 'Adding…';
+      try{
+        const { error } = await supabaseClient.from('board_of_advisors').insert({
+          household_id: currentHouseholdId, persona_key: key, name, philosophy, is_customizable: true
+        });
+        if(error) throw error;
+        await loadAndRenderAdvisors(container);
+      }catch(e){
+        note.textContent = "Couldn't add — try again";
+        note.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Add';
+      }
+    });
+  }
+
+  function openRemoveAdvisorConfirm(advisor, container){
+    const backdrop = document.createElement("div");
+    backdrop.className = "modal-backdrop";
+    backdrop.innerHTML = `
+      <div class="modal">
+        <h3>Remove this advisor?</h3>
+        <div class="meal-sub">${escapeHtml(advisor.name)}</div>
+        <p class="confirm-text">"${escapeHtml(advisor.name)}" will stop weighing in on future meal plans. You can always add a new advisor with the same idea later.</p>
+        <div class="modal-status-note" id="removeAdvisorStatusNote"></div>
+        <button class="review-submit-btn danger" id="confirmRemoveAdvisorBtn">Remove</button>
+        <button class="cancel-link" id="cancelRemoveAdvisorBtn">Cancel</button>
+      </div>`;
+    document.getElementById("hub").appendChild(backdrop);
+    backdrop.querySelector("#cancelRemoveAdvisorBtn").addEventListener("click", ()=> backdrop.remove());
+    backdrop.querySelector("#confirmRemoveAdvisorBtn").addEventListener("click", async ()=>{
+      const btn = backdrop.querySelector("#confirmRemoveAdvisorBtn");
+      const note = backdrop.querySelector("#removeAdvisorStatusNote");
+      btn.disabled = true; btn.textContent = "Removing…";
+      try{
+        const { error } = await supabaseClient.from('board_of_advisors')
+          .delete().eq('household_id', currentHouseholdId).eq('persona_key', advisor.persona_key);
+        if(error) throw error;
+        backdrop.remove();
+        await loadAndRenderAdvisors(container);
+      }catch(e){
+        note.innerHTML = `<i class="ti ti-alert-triangle"></i> Couldn't remove: ${e.message || 'unknown error'}`;
+        btn.disabled = false; btn.textContent = "Remove";
+      }
+    });
   }
 
   // ---------------- Meal history upload journey ----------------
@@ -2066,6 +2298,7 @@ body.auth-pending #hub{display:none;}
         const { error } = await supabaseClient.auth.updateUser({ password });
         if(error) throw error;
         note.textContent = 'Password updated — signing you in…'; note.classList.add('ok');
+        passwordRecoveryInProgress = false;
         setTimeout(showApp, 800);
       }catch(e){
         note.textContent = e.message || 'Could not update password.'; note.classList.remove('ok');
@@ -2513,13 +2746,34 @@ body.auth-pending #hub{display:none;}
   // signup/forgot-password interaction the user is already mid-way through.
   let knownSignedIn = null;
 
+  // Set while the reset-password form is up (or about to be). Two distinct races both land in
+  // the generic `if(session)` branch below unless guarded:
+  //   1. On a real recovery-link landing, supabase-js fires INITIAL_SESSION -- with the recovery
+  //      session already attached -- a few ms *before* it fires PASSWORD_RECOVERY. Initialized
+  //      from the URL hash itself (synchronous, available before Supabase does any async
+  //      processing) so even that first INITIAL_SESSION event is already covered, rather than
+  //      only catching PASSWORD_RECOVERY after the fact -- confirmed via instrumented replay
+  //      (2026-08-18) that INITIAL_SESSION really does arrive first and, unguarded, kicks off
+  //      init()'s async chain, which then unconditionally clears body.auth-pending once its own
+  //      fetches resolve -- yanking the user from the reset form to the live hub regardless of
+  //      what the form was doing, win-or-lose a race against how fast that fetch happens to be.
+  //   2. renderResetPasswordForm()'s own supabaseClient.auth.updateUser({password}) call fires a
+  //      USER_UPDATED event carrying a session, indistinguishable from a real sign-in, which was
+  //      separately calling showApp() out from under the form before its own success/error
+  //      message ever rendered (wiping #authCard, including the status note, mid-await).
+  // The form clears this itself and calls showApp() explicitly once it has shown its own
+  // confirmation; see renderResetPasswordForm()'s success handler.
+  let passwordRecoveryInProgress = /type=recovery/.test(location.hash);
+
   supabaseClient.auth.onAuthStateChange((event, session) => {
     if(event === 'PASSWORD_RECOVERY'){
+      passwordRecoveryInProgress = true;
       document.body.classList.add('auth-pending');
       renderResetPasswordForm();
       return;
     }
     if(session){
+      if(passwordRecoveryInProgress) return;
       knownSignedIn = true;
       showApp();
     } else if(knownSignedIn !== false){

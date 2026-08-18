@@ -172,8 +172,12 @@ Deno.serve(async (req) => {
       pantry_staples: household.pantry_staples, use_up_this_week: household.use_up_this_week,
     };
 
-    const systemPrompt = "You are the meal-planning board (five personas: Weeknight Realist, Flavor Explorer, " +
-      "Veg-Forward Stylist, Child Nutritionist, Family GP/Dietician) generating a single replacement " + meal +
+    // The persona roster is no longer fixed (Settings > Board of advisors lets the household
+    // rename, add, or remove any of them) -- naming a specific headcount/list here would go
+    // stale the moment they do. The actual current roster is given in full below, in the
+    // "Board of advisors" block of userPrompt.
+    const systemPrompt = "You are the meal-planning board — a panel of named advisor personas (listed below, with what " +
+      "each one cares about) — generating a single replacement " + meal +
       " for one day of a family's weekly meal plan. " +
       "You must respond with ONLY a single valid JSON object — no markdown fences, no commentary before or after.";
 
