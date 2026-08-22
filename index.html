@@ -1844,7 +1844,11 @@ body.auth-pending #hub{display:none;}
   // directly via Supabase rather than trusting one long-lived request/response.
   const REGEN_POLL_INTERVAL_MS = 3000;
   const REGEN_POLL_MAX_ATTEMPTS = 100; // ~5 minutes
-  async function pollForRegenerationDone(){
+  // regenerate-now writes one day's meals to the database as soon as that day is decided,
+  // rather than waiting for the whole week (see its 2026-08-22 day-by-day rewrite) -- onTick
+  // lets the caller re-fetch and re-render on every poll, not just once at the very end, so
+  // Monday can appear on screen well before Sunday has even started generating.
+  async function pollForRegenerationDone(onTick){
     for(let i = 0; i < REGEN_POLL_MAX_ATTEMPTS; i++){
       await new Promise(r => setTimeout(r, REGEN_POLL_INTERVAL_MS));
       const { data: weeks, error } = await supabaseClient
@@ -1855,6 +1859,7 @@ body.auth-pending #hub{display:none;}
       if(week.regeneration_status === 'idle'){
         return { error: week.regeneration_error || null, summary: week.regeneration_summary || '' };
       }
+      if(onTick) await onTick();
     }
     return { timedOut: true };
   }
@@ -1886,7 +1891,10 @@ body.auth-pending #hub{display:none;}
           }
         }
       }
-      const result = await pollForRegenerationDone();
+      const result = await pollForRegenerationDone(async () => {
+        await fetchShoppingState();
+        applyWeekPatch(await fetchCurrentWeekData());
+      });
       stopLoading();
       if(result.timedOut){
         note.textContent = "Still working — this is taking longer than expected. Reload in a bit to check.";

@@ -18,6 +18,17 @@
 // EdgeRuntime.waitUntil() instead of blocking the HTTP response -- see Deno.serve below. The
 // client polls weeks.regeneration_status/regeneration_error instead of waiting on one long
 // request; see index.html's runRegenerate().
+//
+// 2026-08-22 (later same day): the single 24000-token whole-week call was replaced with 7
+// smaller sequential per-day calls, each upserted to `meals` as soon as it completes. The point
+// isn't a shorter total run (7 calls each re-paying the household/board-of-advisors context and
+// their own network round-trip probably adds up to similar or slightly more wall-clock time than
+// one big call) -- it's that Monday can appear in the UI in roughly a call's worth of time
+// instead of the whole week's, since index.html's poll loop re-fetches and re-renders on every
+// tick rather than only once at the very end. Each day still knows every earlier day generated
+// so far this run (dinners-to-avoid-repeating, and the immediately-prior day's dinner for the
+// leftover-lunch rule), so continuity across the week is preserved despite being decided
+// incrementally rather than all at once.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 // Declared, not imported -- EdgeRuntime is a global the Supabase Edge Runtime injects at
@@ -229,104 +240,140 @@ async function regenerateWeek(supabaseClient: any, householdId: string, househol
     // The persona roster is no longer fixed (Settings > Board of advisors lets the household
     // rename, add, or remove any of them) -- naming a specific headcount/list here would go
     // stale the moment they do. The actual current roster is given in full below, in the
-    // "Board of advisors" block of userPrompt.
-    const systemPrompt = "You are the meal-planning board — a panel of named advisor personas (listed below, with what " +
-      "each one cares about) — drafting an entirely fresh weekly meal plan for a family, replacing their current one. " +
-      "You must respond with ONLY a single valid JSON object — no markdown fences, no commentary before or after.";
-
-    const userPrompt = "Household info:\n" + JSON.stringify(householdInfo, null, 2) +
-      "\n\nBoard of advisors (credit dinners to these personas):\n" + JSON.stringify(advisors, null, 2) +
-      `\n\nWeek being replaced (week_id: ${currentWeek.week_id}, date_range: ${currentWeek.date_range}) -- shown for ` +
-      "reference only, so you can avoid pointlessly repeating the exact same dinner on the exact same day and see " +
-      "which slots the family has intentionally left empty:\n" + JSON.stringify(currentWeek, null, 2) +
-      (combinedFeedback ? "\n\nNew family feedback to incorporate:\n" + combinedFeedback : "") +
-      (currentWeek.pantry_ingredients && currentWeek.pantry_ingredients.length ? "\n\nPrioritise building meals around these pantry ingredients the family wants used: " +
-        currentWeek.pantry_ingredients.join(", ") + ". If any of them conflicts with a stated allergy/dislike, don't force it in — mention the conflict in your board_note instead of silently including or dropping it." : "") +
-      (currentWeek.budget_saver_mode ? "\n\nBudget Saver Mode is on — where realistic, chain a shared base across two or more meals this week to shrink the shopping list (e.g. bolognese sauce Monday into lasagna Wednesday)." : "") +
-      (dishReputationLines.length ? '\n\nHistorical dish feedback (from every "Log" submission ever made, any week) — ' +
-        'prefer repeating a "proven" dish over a fresh idea when it fits, and avoid reintroducing ' +
-        'a poorly-received ("new" status with mostly "no") dish in the same format:\n' + dishReputationLines.join("\n") : "") +
-      (hasNewFeedback
-        ? "\n\nMake sure the feedback above (and/or the possibly-updated household principles above) is clearly " +
-          "reflected in the new plan — but you are not limited to only the specific day/meal it mentions: this is a " +
-          "full refresh of the whole week, not a targeted patch. "
-        : "\n\nThe family has not left any new feedback or principle changes since this plan was generated — they " +
-          "clicked Refresh simply wanting an entirely fresh take on the week. Use your own judgement for what to " +
-          "draft, guided by the household principles, historical dish reputation, and pantry/Budget Saver settings " +
-          "above. ") +
-      "Keep the leftover-lunch day-after rule intact (Tuesday lunch = Monday dinner leftovers, etc.). " +
-      'Never invent a method for a meal that has a "source" field (an externally-linked recipe the family added ' +
-      "themselves) — leave every one of those exactly as it is by simply not including it below at all. " +
-      'Give every meal you include below a structured "ingredients" array: [{"name":"...","quantity":<number>,"unit":"...",' +
+    // "Board of advisors" block of each day's prompt.
+    const feedbackBlock = hasNewFeedback
+      ? "\n\nNew family feedback to incorporate this refresh" + (combinedFeedback ? ":\n" + combinedFeedback : " (a household principles change, shown above).") +
+        " Make sure it's clearly reflected somewhere in the week, but every day still gets freshly reconsidered " +
+        "regardless of whether the feedback specifically mentions it. "
+      : "\n\nThe family has not left any new feedback or principle changes since this plan was generated — they " +
+        "clicked Refresh simply wanting an entirely fresh take on the week. Use your own judgement, guided by the " +
+        "household principles, historical dish reputation, and pantry/Budget Saver settings above. ";
+    const pantryBlock = currentWeek.pantry_ingredients && currentWeek.pantry_ingredients.length
+      ? "\n\nPrioritise building today's meals around these pantry ingredients the family wants used: " +
+        currentWeek.pantry_ingredients.join(", ") + ". Don't force one in against a stated allergy/dislike." : "";
+    const budgetBlock = currentWeek.budget_saver_mode
+      ? "\n\nBudget Saver Mode is on — where realistic, chain today's dinner's base off another dinner already " +
+        "decided this week (see the list below) to shrink the shopping list." : "";
+    const reputationBlock = dishReputationLines.length
+      ? '\n\nHistorical dish feedback (from every "Log" submission ever made, any week) — prefer repeating a ' +
+        '"proven" dish over a fresh idea when it fits, and avoid reintroducing a poorly-received dish in the same ' +
+        "format:\n" + dishReputationLines.join("\n") : "";
+    const mealShapeRules = 'Give every meal you decide a structured "ingredients" array: [{"name":"...","quantity":<number>,"unit":"...",' +
       '"category":"produce|meat_deli|dairy|pantry|frozen|other","display":"natural prose form, e.g. \'2 cloves garlic, minced\'"}] ' +
-      '— leftover-based lunches/snacks get "ingredients": []. Dinners also get a "method" array of prose steps. ' +
-      "Every ingredient named or implied anywhere in the method must appear in the ingredients array for that dinner, with a real quantity — nothing introduced mid-method that was not listed upfront, and no vague amounts. If a dinner needs a componentized or prep-ahead ingredient (something that itself needs advance prep, like cold cooked rice for a fried rice dish), give it its own early method step with explicit day-before timing rather than assuming it is ready to use, and set the prep_ahead_note field on that dinner to a short instruction describing that step (omit the field entirely when there is no such step). Give every dinner prep_time and cook_time as separate figures (e.g. \"15 min\"), plus hands_off_time only for a genuine passive period like marinating or resting (omit it, not an empty string, when there is not one). " +
-      "Original board-authored recipes only, no external recipe links. " +
-      "IMPORTANT — this is a full refresh, not an incremental edit: draft a freshly-considered dinner (and any " +
-      "lunch/snack affected by the leftover-day-after rule) for every day of the week and include ALL of them in " +
-      "your response below, even ones that happen to land close to what was there before. The only things to leave " +
-      "OUT of your response are: (a) any meal with a \"source\" field (external recipe link — never touch those), " +
-      "and (b) a slot that is empty on purpose and the family is not asking you to fill (leave those out too, " +
-      "rather than inventing something for them). Respond with this exact JSON shape:\n" +
-      "{\n" +
-      '  "changes": [ { "day": "Monday", "slot": "dinner", "meal": {"name": "...", "new": true, "authored_by": "...", "ingredients": [...], "method": ["..."], "prep_time": "...", "cook_time": "...", "hands_off_time": "... (omit if none)", "prep_ahead_note": "... (omit if none)"} }, { "day": "Wednesday", "slot": "lunch", "meal": null } ],\n' +
-      '  "board_note": "one or two sentences on what this fresh week is and why",\n' +
-      '  "commit_summary": "a short one-line summary suitable as a git commit message"\n' +
-      "}\n" +
-      '"slot" is one of "dinner"/"lunch"/"snack" and "day" is one of Monday..Sunday. "meal": null means that slot ' +
-      "should stay/become empty on purpose — only include a null entry if you are actively emptying a slot that " +
-      "currently has something in it because the feedback asked for that.";
+      '— leftover-based lunches/snacks get "ingredients": []. Dinners also get a "method" array of prose steps, with every ' +
+      "ingredient named or implied anywhere in the method appearing in the ingredients array with a real quantity — nothing " +
+      "introduced mid-method that wasn't listed upfront, no vague amounts. If the dinner needs a componentized or prep-ahead " +
+      "ingredient (something needing advance prep, like cold cooked rice for a fried rice dish), give it its own early method " +
+      "step with explicit day-before timing and set prep_ahead_note to a short instruction describing it (omit the field " +
+      'when there is no such step). Give prep_time and cook_time as separate figures (e.g. "15 min"), plus hands_off_time ' +
+      "only for a genuine passive period like marinating or resting (omit it, not an empty string, when there isn't one). " +
+      "Original board-authored recipes only, no external recipe links.";
 
-    // Full-week drafting (all ~21 slots, same shape as propose-week's from-scratch generation)
-    // needs the same real headroom propose-week was tuned to after a genuine truncation failure.
-    // This runs via waitUntil() (see Deno.serve below), so a slower full-week response no longer
-    // risks the platform's ~150s idle-response timeout the way it did when this call had to
-    // complete before the HTTP response could be sent.
-    const plan = await callClaude(systemPrompt, userPrompt, 24000);
-    if (!plan || !plan.changes || !Array.isArray(plan.changes)) {
-      throw new Error("The board did not return a usable plan — try again.");
-    }
+    // Decided incrementally, one day at a time, so each day can see (and avoid repeating) every
+    // earlier day already generated this run, and so the leftover-lunch rule has a real, just-
+    // decided dinner to point at rather than needing the whole week resolved up front.
+    const usedDinnerNames: string[] = [];
+    let prevDinnerName: string | null = null;
+    const daySummaries: string[] = [];
 
-    // Keyed by day|slot so a duplicate entry from the AI overwrites rather than producing two
-    // rows for the same conflict target in one upsert (Postgres errors on that, not just wastes
-    // effort). Anything the AI left out entirely (external-recipe meals, intentionally-empty
-    // slots) is simply never touched here.
-    const changesByKey = new Map<string, any>();
-    plan.changes.forEach((change: any) => {
-      if (!change || !DAY_NAMES.includes(change.day) || !SLOTS.includes(change.slot)) return;
-      changesByKey.set(`${change.day}|${change.slot}`, change);
-    });
+    for (const day of DAY_NAMES) {
+      const existingDay = currentWeek.days.find((d: any) => d.day === day) || {};
+      const existingDinner = existingDay.dinner;
+      const dinnerIsExternal = !!(existingDinner && existingDinner.source);
 
-    const upsertRows: any[] = [];
-    changesByKey.forEach(({ day, slot, meal: info }) => {
-      if (!info) {
-        upsertRows.push({
-          week_id: week.id, day, slot, name: null, ingredients: [], method: null, source: null,
+      const daySystemPrompt = "You are the meal-planning board — a panel of named advisor personas (listed below, " +
+        "with what each one cares about) — drafting one day's meals as part of an entirely fresh weekly plan " +
+        "replacing a family's current one. You must respond with ONLY a single valid JSON object — no markdown " +
+        "fences, no commentary before or after.";
+
+      const dayUserPrompt = "Household info:\n" + JSON.stringify(householdInfo, null, 2) +
+        "\n\nBoard of advisors (credit dinners to these personas):\n" + JSON.stringify(advisors, null, 2) +
+        `\n\nDrafting: ${day}, part of the week ${currentWeek.week_id} (${currentWeek.date_range}).` +
+        (dinnerIsExternal
+          ? `\n\nThis day's dinner is an externally-linked recipe the family added themselves ("${existingDinner.name}") ` +
+            "— it is kept exactly as-is automatically, don't invent a method or replacement for it. Only decide lunch and snack below."
+          : "") +
+        (usedDinnerNames.length ? "\n\nDinners already decided for earlier days this week (avoid repeating any of these): " + usedDinnerNames.join(", ") : "") +
+        (day === "Monday"
+          ? "\n\nMonday has no day-before dinner this week to draw lunch leftovers from — give it its own original lunch idea."
+          : prevDinnerName
+            ? `\n\nYesterday's dinner is "${prevDinnerName}" — today's lunch may be leftovers from it if that fits (Tuesday lunch = Monday dinner leftovers, etc.); otherwise give it its own idea.`
+            : "\n\nYesterday's dinner is an externally-linked recipe kept as-is — today's lunch may reference it as leftovers by name if that fits, or get its own idea.") +
+        (!existingDay.dinner && !dinnerIsExternal ? "\n\nThis dinner slot is currently empty on purpose (the family removed it) — leave it null unless the feedback below specifically asks you to fill it." : "") +
+        feedbackBlock + pantryBlock + budgetBlock + reputationBlock +
+        "\n\n" + mealShapeRules +
+        "\n\nRespond with this exact JSON shape:\n{\n" +
+        (dinnerIsExternal ? "" : '  "dinner": {"name": "...", "new": true, "authored_by": "...", "ingredients": [...], "method": ["..."], "prep_time": "...", "cook_time": "...", "hands_off_time": "... (omit if none)", "prep_ahead_note": "... (omit if none)"} — or null if intentionally left empty,\n') +
+        '  "lunch": {"name": "...", "ingredients": [...]} — or null if intentionally left empty,\n' +
+        '  "snack": {"name": "...", "ingredients": [...]} — or null if intentionally left empty\n' +
+        "}";
+
+      // A single day (up to 3 slots) is a fraction of what the old whole-week call needed, so
+      // this has real headroom without approaching a token budget tuned to a single dinner
+      // (regenerate-meal's own 6000 default) times three slots.
+      const dayPlan = await callClaude(daySystemPrompt, dayUserPrompt, 4000);
+      if (!dayPlan) throw new Error(`The board did not return usable meals for ${day} — try again.`);
+
+      const dayUpsertRows: any[] = [];
+      if (dinnerIsExternal) {
+        prevDinnerName = null; // signals "carry the external dinner's name forward as-is" to the next day's prompt
+      } else if (dayPlan.dinner) {
+        const trimmed = trimMeal(dayPlan.dinner, "dinner");
+        dayUpsertRows.push({
+          week_id: week.id, day, slot: "dinner",
+          name: trimmed.name, ingredients: trimmed.ingredients,
+          method: trimmed.method || null, source: trimmed.source || null,
+          new_or_repeat: trimmed.new_or_repeat || null, authored_by: trimmed.authored_by || null,
+          prep_time: trimmed.prep_time || null, cook_time: trimmed.cook_time || null,
+          hands_off_time: trimmed.hands_off_time || null, prep_ahead_note: trimmed.prep_ahead_note || null,
+        });
+        usedDinnerNames.push(trimmed.name);
+        prevDinnerName = trimmed.name;
+        daySummaries.push(trimmed.name);
+      } else {
+        dayUpsertRows.push({
+          week_id: week.id, day, slot: "dinner", name: null, ingredients: [], method: null, source: null,
           new_or_repeat: null, authored_by: null, prep_time: null, cook_time: null, hands_off_time: null, prep_ahead_note: null,
         });
-        return;
+        prevDinnerName = null;
       }
-      const trimmed = trimMeal(info, slot);
-      upsertRows.push({
-        week_id: week.id, day, slot,
-        name: trimmed.name, ingredients: trimmed.ingredients,
-        method: trimmed.method || null, source: trimmed.source || null,
-        new_or_repeat: trimmed.new_or_repeat || null, authored_by: trimmed.authored_by || null,
-        prep_time: trimmed.prep_time || null, cook_time: trimmed.cook_time || null,
-        hands_off_time: trimmed.hands_off_time || null, prep_ahead_note: trimmed.prep_ahead_note || null,
+
+      (["lunch", "snack"] as const).forEach((slot) => {
+        const info = dayPlan[slot];
+        if (!info) {
+          dayUpsertRows.push({
+            week_id: week.id, day, slot, name: null, ingredients: [], method: null, source: null,
+            new_or_repeat: null, authored_by: null, prep_time: null, cook_time: null, hands_off_time: null, prep_ahead_note: null,
+          });
+          return;
+        }
+        const trimmed = trimMeal(info, slot);
+        dayUpsertRows.push({
+          week_id: week.id, day, slot, name: trimmed.name, ingredients: trimmed.ingredients,
+          method: null, source: null, new_or_repeat: null, authored_by: null,
+          prep_time: null, cook_time: null, hands_off_time: null, prep_ahead_note: null,
+        });
       });
-    });
-    if (upsertRows.length) {
-      const { error: upsertErr } = await supabaseClient.from("meals").upsert(upsertRows, { onConflict: "week_id,day,slot" });
-      if (upsertErr) throw upsertErr;
+
+      // Written immediately, one day at a time -- index.html's poll loop re-fetches on every
+      // tick while regeneration_status is still "pending", so this is what actually makes
+      // Monday visible before Sunday has even started generating.
+      const { error: dayUpsertErr } = await supabaseClient.from("meals").upsert(dayUpsertRows, { onConflict: "week_id,day,slot" });
+      if (dayUpsertErr) throw dayUpsertErr;
     }
 
     const today = new Date().toLocaleDateString("en-AU", { timeZone: "Australia/Sydney", month: "short", day: "numeric" });
-    const newBoardNotes = (week.board_notes || "") + ` UPDATE (${today}): ` + (plan.board_note || "Refreshed via on-demand regenerate.");
+    // Built deterministically from the dinners actually decided above rather than asking the AI
+    // for its own whole-week summary -- no day's call has visibility into every other day, so
+    // none of them is in a position to write a coherent one.
+    const summaryText = daySummaries.length
+      ? "This week: " + daySummaries.join(", ") + "."
+      : "Refreshed via on-demand regenerate.";
+    const newBoardNotes = (week.board_notes || "") + ` UPDATE (${today}): ` + summaryText;
     const { error: weekUpdateErr } = await supabaseClient.from("weeks").update({
       pantry_ingredients: currentWeek.pantry_ingredients, budget_saver_mode: currentWeek.budget_saver_mode, board_notes: newBoardNotes,
       last_regenerated_at: new Date().toISOString(),
-      regeneration_status: "idle", regeneration_error: null, regeneration_summary: plan.board_note || null,
+      regeneration_status: "idle", regeneration_error: null, regeneration_summary: summaryText,
     }).eq("id", week.id);
     if (weekUpdateErr) throw weekUpdateErr;
   } catch (e) {
