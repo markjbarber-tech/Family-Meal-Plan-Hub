@@ -1836,28 +1836,70 @@ body.auth-pending #hub{display:none;}
     });
   }
 
+  // regenerate-now now drafts an entirely fresh week every call (not just the meals that
+  // changed) -- see its 2026-08-22 rewrite -- which can genuinely take well past what Supabase
+  // allows an Edge Function's HTTP response to sit idle waiting on. The function itself now
+  // kicks the work off in the background and responds almost immediately; real completion is
+  // signalled by weeks.regeneration_status flipping back to "idle", which this polls for
+  // directly via Supabase rather than trusting one long-lived request/response.
+  const REGEN_POLL_INTERVAL_MS = 3000;
+  const REGEN_POLL_MAX_ATTEMPTS = 100; // ~5 minutes
+  async function pollForRegenerationDone(){
+    for(let i = 0; i < REGEN_POLL_MAX_ATTEMPTS; i++){
+      await new Promise(r => setTimeout(r, REGEN_POLL_INTERVAL_MS));
+      const { data: weeks, error } = await supabaseClient
+        .from('weeks').select('regeneration_status, regeneration_error, regeneration_summary').eq('is_current', true).limit(1);
+      if(error) throw error;
+      const week = weeks && weeks[0];
+      if(!week) throw new Error('Current week disappeared while regenerating');
+      if(week.regeneration_status === 'idle'){
+        return { error: week.regeneration_error || null, summary: week.regeneration_summary || '' };
+      }
+    }
+    return { timedOut: true };
+  }
+
   // Shared by the top-level Refresh plan button and the review box's "Update plan with this"
   // button -- both trigger the exact same regenerate-now call and data refresh, just with
   // different button/note elements to update while it runs. Returns true on success so callers
   // (like the review box) know whether it's safe to collapse/reset their own UI afterward.
-  async function runRegenerate(btn, note, workingLabel){
+  // resumeOnly skips the callEdgeFunction kickoff and goes straight to polling -- used when a
+  // regeneration was already mid-flight on page load (see renderAppShellReady) rather than one
+  // this call is starting itself.
+  async function runRegenerate(btn, note, workingLabel, resumeOnly){
     if(btn.disabled) return false;
     btn.disabled = true;
     const originalLabel = btn.innerHTML;
     btn.innerHTML = workingLabel;
     const stopLoading = showLoadingIndicator(note, "Generating your plan…");
     try{
-      const result = await callEdgeFunction('regenerate-now', {});
+      if(!resumeOnly){
+        const startResult = await callEdgeFunction('regenerate-now', {});
+        if(startResult.status !== "ok"){
+          // A 409 "already in progress" isn't really a failure -- a regeneration genuinely is
+          // running (just not one this click started), so pick up its completion instead of
+          // just dead-ending with an error.
+          if(!/already in progress/i.test(startResult.message || "")){
+            stopLoading();
+            note.textContent = "Refresh failed: " + (startResult.message || "unknown error");
+            return false;
+          }
+        }
+      }
+      const result = await pollForRegenerationDone();
       stopLoading();
-      if(result.status === "ok"){
-        note.textContent = "Updated ✓" + (result.summary ? " — " + result.summary : "");
-        await fetchShoppingState();
-        applyWeekPatch(await fetchCurrentWeekData());
-        return true;
-      } else {
-        note.textContent = "Refresh failed: " + (result.message || "unknown error");
+      if(result.timedOut){
+        note.textContent = "Still working — this is taking longer than expected. Reload in a bit to check.";
         return false;
       }
+      if(result.error){
+        note.textContent = "Refresh failed: " + result.error;
+        return false;
+      }
+      note.textContent = "Updated ✓" + (result.summary ? " — " + result.summary : "");
+      await fetchShoppingState();
+      applyWeekPatch(await fetchCurrentWeekData());
+      return true;
     }catch(e){
       stopLoading();
       note.textContent = "Lost the connection while waiting — it may have still gone through. Reload in a moment to check before trying again.";
@@ -2033,6 +2075,20 @@ body.auth-pending #hub{display:none;}
     await Promise.all([fetchDishStats(), fetchShoppingState()]);
     renderPlan();
     renderShopping();
+
+    // If a regeneration was already mid-flight when this page loaded (e.g. the tab was closed
+    // and reopened while Refresh was still running elsewhere), resume polling for it instead of
+    // silently sitting on possibly-stale data with a Refresh button that looks idle. Not
+    // awaited -- the app shell above is already fully usable either way.
+    const { data: weeksNow } = await supabaseClient.from('weeks').select('regeneration_status').eq('is_current', true).limit(1);
+    if(weeksNow && weeksNow[0] && weeksNow[0].regeneration_status === 'pending'){
+      runRegenerate(
+        document.getElementById("refreshPlanBtn"),
+        document.getElementById("refreshStatusNote"),
+        '<i class="ti ti-refresh"></i>Refreshing… (up to a few minutes)',
+        true
+      );
+    }
   }
 
   // ---------------- Pull-to-refresh (app-code updates only, not a data refresh) ----------------

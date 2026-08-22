@@ -9,7 +9,22 @@
 // key_principles is also no longer re-derived from a feedback row's free text here, since
 // principles edits already write straight to households.key_principles when saved (see
 // index.html's Settings save handler) -- this function just reads the already-current value.
+//
+// 2026-08-22: switched from an incremental "only touch what changed" revision (fast, but not
+// what the family actually wanted -- they explicitly asked for an entirely fresh plan every
+// Refresh, not small patches) to a genuine full-week redraft. That reintroduces the large-output,
+// long-generation-time shape that previously caused slow responses and real "idle timeout (150s)"
+// failures, so the actual Claude call + DB write now run in the background via
+// EdgeRuntime.waitUntil() instead of blocking the HTTP response -- see Deno.serve below. The
+// client polls weeks.regeneration_status/regeneration_error instead of waiting on one long
+// request; see index.html's runRegenerate().
 import { createClient } from "jsr:@supabase/supabase-js@2";
+
+// Declared, not imported -- EdgeRuntime is a global the Supabase Edge Runtime injects at
+// execution time, not part of standard Deno types. waitUntil() lets this function return its
+// HTTP response immediately while a promise keeps running in the background afterward; it's
+// Supabase's documented pattern for exactly this "kick off long work, respond right away" case.
+declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void };
 
 const SUPABASE_URL = "https://jpofeslziyjbysotycfl.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_psBedalpZIlxs5DaGQPf1g_yJ49IdI8";
@@ -81,8 +96,8 @@ async function callClaude(systemPrompt: string, userPrompt: string, maxTokens = 
   });
   if (!resp.ok) throw new Error("Anthropic API error: " + (await resp.text()));
   const json = await resp.json();
-  // Left in place after the 2026-08-22 changes-only rewrite so a future slow/timed-out call can
-  // actually be diagnosed from Supabase's function logs instead of guessed at again.
+  // Left in place after the 2026-08-22 rewrite so a future slow call can actually be diagnosed
+  // from Supabase's function logs instead of guessed at again.
   console.log(`[callClaude] ${Date.now() - startedAt}ms, usage=${JSON.stringify(json.usage)}`);
   let text: string | null = null;
   for (const block of json.content || []) {
@@ -127,36 +142,19 @@ function computeDishStats(rows: any[]) {
   return stats;
 }
 
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-
+// Everything past the synchronous claim in Deno.serve below -- fetching context, calling Claude,
+// writing the result -- happens here, kicked off via EdgeRuntime.waitUntil() so it's free to take
+// as long as a genuine full-week redraft needs without the HTTP response waiting on it. Always
+// resolves regeneration_status back to "idle" (with regeneration_error set on failure) so the
+// client's poll in index.html has something to land on either way.
+async function regenerateWeek(supabaseClient: any, householdId: string, household: any, week: any) {
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) return jsonResponse({ status: "error", message: "Missing Authorization header" }, 401);
-
-    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) return jsonResponse({ status: "error", message: "Unauthorized" }, 401);
-    const householdId = user.id;
-
-    const { data: households, error: hErr } = await supabaseClient.from("households").select("*").limit(1);
-    if (hErr) throw hErr;
-    const household = households && households[0];
-    if (!household) return jsonResponse({ status: "error", message: "No household found" }, 404);
-
     const { data: advisorRows, error: aErr } = await supabaseClient.from("board_of_advisors").select("*");
     if (aErr) throw aErr;
     // Only {name, philosophy} -- matches the original prompt's shape exactly. Passing the extra
     // persona_key/is_customizable columns confused the model into using persona_key for
     // "authored_by" attribution instead of the human-readable name.
     const advisors = (advisorRows || []).map((a: any) => ({ name: a.name, philosophy: a.philosophy }));
-
-    const { data: weeks, error: wErr } = await supabaseClient.from("weeks").select("*").eq("is_current", true).limit(1);
-    if (wErr) throw wErr;
-    const week = weeks && weeks[0];
-    if (!week) return jsonResponse({ status: "error", message: "No current week found" }, 404);
 
     const { data: mealRows, error: mErr } = await supabaseClient.from("meals").select("*").eq("week_id", week.id);
     if (mErr) throw mErr;
@@ -197,10 +195,6 @@ Deno.serve(async (req) => {
 
     const newReviewFeedback = (newFeedback || []).filter((r: any) => r.type === "review_feedback" && r.week_id === week.week_id);
     const newPrinciplesUpdates = (newFeedback || []).filter((r: any) => r.type === "principles_update");
-    // Refresh plan always regenerates now, whether or not anything new was logged -- clicking it
-    // with no pending feedback means "give me a fresh alternative take on this week," not "do
-    // nothing." Whether there's real feedback to incorporate still matters for which instruction
-    // paragraph goes into the prompt below (revise-around-feedback vs. free-variety-swap).
     const hasNewFeedback = !!(newReviewFeedback.length || newPrinciplesUpdates.length);
 
     if (newReviewFeedback.length) {
@@ -237,68 +231,66 @@ Deno.serve(async (req) => {
     // stale the moment they do. The actual current roster is given in full below, in the
     // "Board of advisors" block of userPrompt.
     const systemPrompt = "You are the meal-planning board — a panel of named advisor personas (listed below, with what " +
-      "each one cares about) — revising a family's current weekly meal plan. " +
+      "each one cares about) — drafting an entirely fresh weekly meal plan for a family, replacing their current one. " +
       "You must respond with ONLY a single valid JSON object — no markdown fences, no commentary before or after.";
 
     const userPrompt = "Household info:\n" + JSON.stringify(householdInfo, null, 2) +
       "\n\nBoard of advisors (credit dinners to these personas):\n" + JSON.stringify(advisors, null, 2) +
-      `\n\nCurrent week being revised (week_id: ${currentWeek.week_id}, date_range: ${currentWeek.date_range}):\n` + JSON.stringify(currentWeek, null, 2) +
+      `\n\nWeek being replaced (week_id: ${currentWeek.week_id}, date_range: ${currentWeek.date_range}) -- shown for ` +
+      "reference only, so you can avoid pointlessly repeating the exact same dinner on the exact same day and see " +
+      "which slots the family has intentionally left empty:\n" + JSON.stringify(currentWeek, null, 2) +
       (combinedFeedback ? "\n\nNew family feedback to incorporate:\n" + combinedFeedback : "") +
       (currentWeek.pantry_ingredients && currentWeek.pantry_ingredients.length ? "\n\nPrioritise building meals around these pantry ingredients the family wants used: " +
         currentWeek.pantry_ingredients.join(", ") + ". If any of them conflicts with a stated allergy/dislike, don't force it in — mention the conflict in your board_note instead of silently including or dropping it." : "") +
       (currentWeek.budget_saver_mode ? "\n\nBudget Saver Mode is on — where realistic, chain a shared base across two or more meals this week to shrink the shopping list (e.g. bolognese sauce Monday into lasagna Wednesday)." : "") +
       (dishReputationLines.length ? '\n\nHistorical dish feedback (from every "Log" submission ever made, any week) — ' +
-        'if you touch a dinner below, prefer repeating a "proven" dish over a fresh idea when it fits, and avoid reintroducing ' +
+        'prefer repeating a "proven" dish over a fresh idea when it fits, and avoid reintroducing ' +
         'a poorly-received ("new" status with mostly "no") dish in the same format:\n' + dishReputationLines.join("\n") : "") +
       (hasNewFeedback
-        ? "\n\nRevise ONLY the days/meals that need to change to address the feedback above and/or the " +
-          "(possibly updated) household principles above — everything else must be left exactly as it was. "
+        ? "\n\nMake sure the feedback above (and/or the possibly-updated household principles above) is clearly " +
+          "reflected in the new plan — but you are not limited to only the specific day/meal it mentions: this is a " +
+          "full refresh of the whole week, not a targeted patch. "
         : "\n\nThe family has not left any new feedback or principle changes since this plan was generated — they " +
-          "clicked Refresh simply wanting a fresh alternative take on the week, not a fix for anything specific. Feel " +
-          "free to swap out a modest handful of board-authored meals for variety (roughly 1 to 3 dinners, not the " +
-          "whole week), even without a complaint driving the change, while still respecting the household " +
-          "principles, historical dish reputation, and pantry/Budget Saver settings above — everything else must " +
-          "be left exactly as it was. ") +
-      "Keep the leftover-lunch day-after rule intact (Tuesday lunch = Monday dinner leftovers, etc.) when deciding " +
-      "what needs to change as a knock-on effect. " +
+          "clicked Refresh simply wanting an entirely fresh take on the week. Use your own judgement for what to " +
+          "draft, guided by the household principles, historical dish reputation, and pantry/Budget Saver settings " +
+          "above. ") +
+      "Keep the leftover-lunch day-after rule intact (Tuesday lunch = Monday dinner leftovers, etc.). " +
       'Never invent a method for a meal that has a "source" field (an externally-linked recipe the family added ' +
-      "themselves) — leave every one of those exactly as it is (do not include it below unless you are actually " +
-      "replacing it). " +
+      "themselves) — leave every one of those exactly as it is by simply not including it below at all. " +
       'Give every meal you include below a structured "ingredients" array: [{"name":"...","quantity":<number>,"unit":"...",' +
       '"category":"produce|meat_deli|dairy|pantry|frozen|other","display":"natural prose form, e.g. \'2 cloves garlic, minced\'"}] ' +
       '— leftover-based lunches/snacks get "ingredients": []. Dinners also get a "method" array of prose steps. ' +
       "Every ingredient named or implied anywhere in the method must appear in the ingredients array for that dinner, with a real quantity — nothing introduced mid-method that was not listed upfront, and no vague amounts. If a dinner needs a componentized or prep-ahead ingredient (something that itself needs advance prep, like cold cooked rice for a fried rice dish), give it its own early method step with explicit day-before timing rather than assuming it is ready to use, and set the prep_ahead_note field on that dinner to a short instruction describing that step (omit the field entirely when there is no such step). Give every dinner prep_time and cook_time as separate figures (e.g. \"15 min\"), plus hands_off_time only for a genuine passive period like marinating or resting (omit it, not an empty string, when there is not one). " +
       "Original board-authored recipes only, no external recipe links. " +
-      "IMPORTANT — this is a revision, not a full rewrite: respond with ONLY the day/slot combinations that are " +
-      "actually changing (added, replaced, or intentionally emptied). Do NOT include any day/slot that is staying " +
-      "exactly as shown above — leaving it out of your response means \"keep this exactly as it currently is,\" " +
-      "which is far cheaper for you to produce than retyping every unchanged recipe. Respond with this exact JSON " +
-      "shape (do not include a shopping_list — it is computed separately):\n" +
+      "IMPORTANT — this is a full refresh, not an incremental edit: draft a freshly-considered dinner (and any " +
+      "lunch/snack affected by the leftover-day-after rule) for every day of the week and include ALL of them in " +
+      "your response below, even ones that happen to land close to what was there before. The only things to leave " +
+      "OUT of your response are: (a) any meal with a \"source\" field (external recipe link — never touch those), " +
+      "and (b) a slot that is empty on purpose and the family is not asking you to fill (leave those out too, " +
+      "rather than inventing something for them). Respond with this exact JSON shape:\n" +
       "{\n" +
       '  "changes": [ { "day": "Monday", "slot": "dinner", "meal": {"name": "...", "new": true, "authored_by": "...", "ingredients": [...], "method": ["..."], "prep_time": "...", "cook_time": "...", "hands_off_time": "... (omit if none)", "prep_ahead_note": "... (omit if none)"} }, { "day": "Wednesday", "slot": "lunch", "meal": null } ],\n' +
-      '  "board_note": "one or two sentences on what changed and why",\n' +
+      '  "board_note": "one or two sentences on what this fresh week is and why",\n' +
       '  "commit_summary": "a short one-line summary suitable as a git commit message"\n' +
       "}\n" +
       '"slot" is one of "dinner"/"lunch"/"snack" and "day" is one of Monday..Sunday. "meal": null means that slot ' +
-      "should become/stay empty (the family removed it on purpose) — only include a null entry if you are actively " +
-      "emptying a slot that currently has something in it; otherwise just leave it out entirely.";
+      "should stay/become empty on purpose — only include a null entry if you are actively emptying a slot that " +
+      "currently has something in it because the feedback asked for that.";
 
-    // Prior to 2026-08-22 this asked for all 7 days/21 slots back on every call, even ones the
-    // AI itself decided didn't need to change -- meaning a one-meal tweak still made it transcribe
-    // the entire week's recipes verbatim. That's what was actually driving both the slowness and
-    // the "not enough compute resources"/"idle timeout (150s)" failures the family hit: a typical
-    // revision now only needs to emit the handful of slots that actually changed, cutting output
-    // (and therefore generation time) by roughly the same ratio as changed-slots/21. 12000 is still
-    // generous headroom for a rare all-7-dinners-changed edge case, just no longer tuned to a
-    // budget that assumed every call was a full rewrite.
-    const plan = await callClaude(systemPrompt, userPrompt, 12000);
+    // Full-week drafting (all ~21 slots, same shape as propose-week's from-scratch generation)
+    // needs the same real headroom propose-week was tuned to after a genuine truncation failure.
+    // This runs via waitUntil() (see Deno.serve below), so a slower full-week response no longer
+    // risks the platform's ~150s idle-response timeout the way it did when this call had to
+    // complete before the HTTP response could be sent.
+    const plan = await callClaude(systemPrompt, userPrompt, 24000);
     if (!plan || !plan.changes || !Array.isArray(plan.changes)) {
-      return jsonResponse({ status: "error", message: "The board did not return a usable plan — try again." }, 502);
+      throw new Error("The board did not return a usable plan — try again.");
     }
 
     // Keyed by day|slot so a duplicate entry from the AI overwrites rather than producing two
     // rows for the same conflict target in one upsert (Postgres errors on that, not just wastes
-    // effort). Anything the AI left out entirely is simply never touched here.
+    // effort). Anything the AI left out entirely (external-recipe meals, intentionally-empty
+    // slots) is simply never touched here.
     const changesByKey = new Map<string, any>();
     plan.changes.forEach((change: any) => {
       if (!change || !DAY_NAMES.includes(change.day) || !SLOTS.includes(change.slot)) return;
@@ -334,10 +326,67 @@ Deno.serve(async (req) => {
     const { error: weekUpdateErr } = await supabaseClient.from("weeks").update({
       pantry_ingredients: currentWeek.pantry_ingredients, budget_saver_mode: currentWeek.budget_saver_mode, board_notes: newBoardNotes,
       last_regenerated_at: new Date().toISOString(),
+      regeneration_status: "idle", regeneration_error: null, regeneration_summary: plan.board_note || null,
     }).eq("id", week.id);
     if (weekUpdateErr) throw weekUpdateErr;
+  } catch (e) {
+    // Best-effort -- if even this update fails, the row is stuck on regeneration_status='pending'
+    // forever, which is why the client's poll in index.html also has its own give-up timeout
+    // rather than trusting this to always succeed.
+    try {
+      await supabaseClient.from("weeks").update({
+        regeneration_status: "idle", regeneration_error: (e as Error).message || "Unknown error",
+      }).eq("id", week.id);
+    } catch { /* nothing more we can do here */ }
+  }
+}
 
-    return jsonResponse({ status: "ok", summary: plan.board_note });
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  try {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) return jsonResponse({ status: "error", message: "Missing Authorization header" }, 401);
+
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) return jsonResponse({ status: "error", message: "Unauthorized" }, 401);
+    const householdId = user.id;
+
+    const { data: households, error: hErr } = await supabaseClient.from("households").select("*").limit(1);
+    if (hErr) throw hErr;
+    const household = households && households[0];
+    if (!household) return jsonResponse({ status: "error", message: "No household found" }, 404);
+
+    const { data: weeks, error: wErr } = await supabaseClient.from("weeks").select("*").eq("is_current", true).limit(1);
+    if (wErr) throw wErr;
+    const week = weeks && weeks[0];
+    if (!week) return jsonResponse({ status: "error", message: "No current week found" }, 404);
+
+    // Atomically claim the regeneration slot -- only proceeds if this week wasn't already
+    // mid-regeneration, so a duplicate Refresh click (or the review box's own call firing while
+    // the top button's call is still running) can't kick off two concurrent Claude calls against
+    // the same week and race each other on the final upsert.
+    const { data: claimed, error: claimErr } = await supabaseClient
+      .from("weeks")
+      .update({ regeneration_status: "pending", regeneration_error: null, regeneration_summary: null })
+      .eq("id", week.id).eq("regeneration_status", "idle")
+      .select();
+    if (claimErr) throw claimErr;
+    if (!claimed || !claimed.length) {
+      return jsonResponse({ status: "error", message: "A regeneration is already in progress for this week — hang tight, it'll pick up shortly." }, 409);
+    }
+
+    // Everything past this point can legitimately take well over Supabase's ~150s idle-response
+    // timeout now that a full week is drafted fresh every time rather than just the changed
+    // meals -- so it runs after the response below via waitUntil() instead of blocking it. The
+    // client polls weeks.regeneration_status/regeneration_error instead of waiting on this HTTP
+    // call directly; see index.html's runRegenerate().
+    EdgeRuntime.waitUntil(regenerateWeek(supabaseClient, householdId, household, week));
+
+    return jsonResponse({ status: "ok", message: "started" });
   } catch (e) {
     return jsonResponse({ status: "error", message: e.message }, 500);
   }
