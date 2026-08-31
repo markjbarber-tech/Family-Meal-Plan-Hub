@@ -304,7 +304,7 @@ async function regenerateWeek(supabaseClient: any, householdId: string, househol
         "\n\n" + mealShapeRules +
         "\n\nRespond with this exact JSON shape:\n{\n" +
         (dinnerIsExternal ? "" : '  "dinner": {"name": "...", "new": true, "authored_by": "...", "ingredients": [...], "method": ["..."], "prep_time": "...", "cook_time": "...", "hands_off_time": "... (omit if none)", "prep_ahead_note": "... (omit if none)"} — or null if intentionally left empty,\n') +
-        '  "lunch": {"name": "...", "ingredients": [...]} — or null if intentionally left empty,\n' +
+        '  "lunch": {"name": "...", "ingredients": [...], "is_leftover": true|false} — or null if intentionally left empty,\n' +
         '  "snack": {"name": "...", "ingredients": [...]} — or null if intentionally left empty\n' +
         "}";
 
@@ -326,6 +326,7 @@ async function regenerateWeek(supabaseClient: any, householdId: string, househol
           new_or_repeat: trimmed.new_or_repeat || null, authored_by: trimmed.authored_by || null,
           prep_time: trimmed.prep_time || null, cook_time: trimmed.cook_time || null,
           hands_off_time: trimmed.hands_off_time || null, prep_ahead_note: trimmed.prep_ahead_note || null,
+          is_leftover_lunch: false,
         });
         usedDinnerNames.push(trimmed.name);
         prevDinnerName = trimmed.name;
@@ -334,6 +335,7 @@ async function regenerateWeek(supabaseClient: any, householdId: string, househol
         dayUpsertRows.push({
           week_id: week.id, day, slot: "dinner", name: null, ingredients: [], method: null, source: null,
           new_or_repeat: null, authored_by: null, prep_time: null, cook_time: null, hands_off_time: null, prep_ahead_note: null,
+          is_leftover_lunch: false,
         });
         prevDinnerName = null;
       }
@@ -344,6 +346,7 @@ async function regenerateWeek(supabaseClient: any, householdId: string, househol
           dayUpsertRows.push({
             week_id: week.id, day, slot, name: null, ingredients: [], method: null, source: null,
             new_or_repeat: null, authored_by: null, prep_time: null, cook_time: null, hands_off_time: null, prep_ahead_note: null,
+            is_leftover_lunch: false,
           });
           return;
         }
@@ -352,6 +355,7 @@ async function regenerateWeek(supabaseClient: any, householdId: string, househol
           week_id: week.id, day, slot, name: trimmed.name, ingredients: trimmed.ingredients,
           method: null, source: null, new_or_repeat: null, authored_by: null,
           prep_time: null, cook_time: null, hands_off_time: null, prep_ahead_note: null,
+          is_leftover_lunch: slot === "lunch" ? !!info.is_leftover : false,
         });
       });
 

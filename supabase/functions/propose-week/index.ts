@@ -264,7 +264,8 @@ async function proposeForHousehold(supabase: any, household: any, todaySydney: D
       ? `\n\nLast week's Sunday dinner was "${outgoingSundayDinner.name}" — Monday's lunch this week may draw on it as leftovers if that fits the leftover-lunch rule below.`
       : "") +
     "\n\nKeep the leftover-lunch day-after rule (Tuesday's lunch uses Monday's dinner leftovers, etc. — Monday's lunch can draw on " +
-    "last week's Sunday dinner leftovers per the note above if given). Original board-authored recipes for every other dinner " +
+    "last week's Sunday dinner leftovers per the note above if given). Set a lunch's \"is_leftover\" field to true whenever it is " +
+    "leftovers from the preceding day's dinner this way, and false whenever it is its own original idea. Original board-authored recipes for every other dinner " +
     "(besides any requested favourites above), credited to advisor personas — no external recipe links. Respect all stated " +
     "allergies/dislikes. " +
     'Give every present meal a structured "ingredients" array: [{"name":"...","quantity":<number>,"unit":"...",' +
@@ -279,7 +280,7 @@ async function proposeForHousehold(supabase: any, household: any, todaySydney: D
     "period like marinating or resting (omit it, not an empty string, when there is not one). Respond with this exact JSON shape " +
     "(all 7 days, and do not include a shopping_list — it is computed separately):\n" +
     "{\n" +
-    '  "days": [ { "day": "Monday", "dinner": {"name": "...", "new": true, "authored_by": "...", "ingredients": [...], "method": ["..."], "prep_time": "...", "cook_time": "...", "hands_off_time": "... (omit if none)", "prep_ahead_note": "... (omit if none)"}, "lunch": {"name": "...", "ingredients": [...]}, "snack": {"name": "...", "ingredients": [...]} }, ... ],\n' +
+    '  "days": [ { "day": "Monday", "dinner": {"name": "...", "new": true, "authored_by": "...", "ingredients": [...], "method": ["..."], "prep_time": "...", "cook_time": "...", "hands_off_time": "... (omit if none)", "prep_ahead_note": "... (omit if none)"}, "lunch": {"name": "...", "ingredients": [...], "is_leftover": true|false}, "snack": {"name": "...", "ingredients": [...]} }, ... ],\n' +
     '  "board_note": "one or two sentences on what this week is and why (mention any included favourites)"\n' +
     "}";
 
@@ -314,6 +315,7 @@ async function proposeForHousehold(supabase: any, household: any, todaySydney: D
         mealRows.push({
           week_id: newWeek.id, day, slot, name: null, ingredients: [], method: null, source: null,
           new_or_repeat: null, authored_by: null, prep_time: null, cook_time: null, hands_off_time: null, prep_ahead_note: null,
+          is_leftover_lunch: false,
         });
         return;
       }
@@ -325,6 +327,7 @@ async function proposeForHousehold(supabase: any, household: any, todaySydney: D
         new_or_repeat: trimmed.new_or_repeat || null, authored_by: trimmed.authored_by || null,
         prep_time: trimmed.prep_time || null, cook_time: trimmed.cook_time || null,
         hands_off_time: trimmed.hands_off_time || null, prep_ahead_note: trimmed.prep_ahead_note || null,
+        is_leftover_lunch: slot === "lunch" ? !!info.is_leftover : false,
       });
     });
   });

@@ -998,9 +998,26 @@ body.auth-pending #hub{display:none;}
       try{
         const { error } = await supabaseClient.from('meals').update({
           name: null, ingredients: [], method: null, source: null, new_or_repeat: null,
-          authored_by: null, prep_time: null, cook_time: null, hands_off_time: null, prep_ahead_note: null
+          authored_by: null, prep_time: null, cook_time: null, hands_off_time: null, prep_ahead_note: null,
+          is_leftover_lunch: false
         }).eq('week_id', currentWeekRowId).eq('day', day).eq('slot', meal);
         if(error) throw error;
+
+        // A lunch flagged as leftovers from this dinner no longer means anything once the
+        // dinner itself is gone -- clear it too rather than leaving a stale "Leftover X"
+        // pointing at a dish that isn't in the plan anymore.
+        if(meal === 'dinner'){
+          const nextDay = nextDayName(day);
+          const nextDayData = nextDay && WEEK_DATA.days.find(d => d.day === nextDay);
+          if(nextDayData && nextDayData.lunch && nextDayData.lunch.is_leftover_lunch){
+            await supabaseClient.from('meals').update({
+              name: null, ingredients: [], method: null, source: null, new_or_repeat: null,
+              authored_by: null, prep_time: null, cook_time: null, hands_off_time: null, prep_ahead_note: null,
+              is_leftover_lunch: false
+            }).eq('week_id', currentWeekRowId).eq('day', nextDay).eq('slot', 'lunch');
+          }
+        }
+
         applyWeekPatch(await fetchCurrentWeekData());
         backdrop.remove();
       }catch(e){
@@ -1085,17 +1102,37 @@ body.auth-pending #hub{display:none;}
 
   async function regenerateMealFlow(day, meal, backdrop){
     const modal = backdrop.querySelector(".modal");
-    modal.innerHTML = `<h3>Generating…</h3><div class="meal-sub">${day} · ${meal}</div><div class="loadingSlot"></div>`;
+    modal.innerHTML = `<h3>Generating…</h3><div class="meal-sub" id="genMealSub">${day} · ${meal}</div><div class="loadingSlot"></div>`;
     const stopLoading = showLoadingIndicator(modal.querySelector(".loadingSlot"), "This can take up to two minutes — keep this tab open.");
     try{
       const result = await callEdgeFunction('regenerate-meal', {day, meal});
-      stopLoading();
-      if(result.status === "ok"){
-        applyWeekPatch(await fetchCurrentWeekData());
-        backdrop.remove();
-      } else {
+      if(result.status !== "ok"){
+        stopLoading();
         renderRegenerateRetry(day, meal, backdrop, result.message || "Unknown error");
+        return;
       }
+
+      // A freshly generated dinner may leave the next day's lunch pointing at nothing (it was
+      // just cleared along with the dinner it depended on, or was already empty) -- plug that
+      // gap with a matching leftover lunch before closing out, rather than leaving the family a
+      // visible hole to notice and fill themselves. Best-effort: the dinner above already
+      // succeeded regardless of how this part goes.
+      if(meal === 'dinner'){
+        const nextDay = nextDayName(day);
+        if(nextDay){
+          const { data: nextLunchRows } = await supabaseClient
+            .from('meals').select('name').eq('week_id', currentWeekRowId).eq('day', nextDay).eq('slot', 'lunch').limit(1);
+          const nextLunchEmpty = !nextLunchRows || !nextLunchRows[0] || !nextLunchRows[0].name;
+          if(nextLunchEmpty){
+            modal.querySelector("#genMealSub").textContent = `${nextDay} · lunch`;
+            try{ await callEdgeFunction('regenerate-meal', {day: nextDay, meal: 'lunch'}); }catch(e){ /* best-effort */ }
+          }
+        }
+      }
+
+      stopLoading();
+      applyWeekPatch(await fetchCurrentWeekData());
+      backdrop.remove();
     }catch(e){
       stopLoading();
       renderRegenerateRetry(day, meal, backdrop, "Lost the connection while waiting — it may have still gone through. Check the Plan tab before trying again.");
@@ -1178,6 +1215,26 @@ body.auth-pending #hub{display:none;}
         if(error) throw error;
         applyWeekPatch(await fetchCurrentWeekData());
         backdrop.remove();
+
+        // Same gap-fill as the AI-generate path, but fire-and-forget: adding from a link is
+        // normally near-instant, and blocking that on a ~2min AI lunch generation would tank
+        // the perceived speed of this flow for the (usually empty) common case.
+        if(meal === 'dinner'){
+          const nextDay = nextDayName(day);
+          if(nextDay){
+            (async () => {
+              try{
+                const { data: nextLunchRows } = await supabaseClient
+                  .from('meals').select('name').eq('week_id', currentWeekRowId).eq('day', nextDay).eq('slot', 'lunch').limit(1);
+                const nextLunchEmpty = !nextLunchRows || !nextLunchRows[0] || !nextLunchRows[0].name;
+                if(nextLunchEmpty){
+                  await callEdgeFunction('regenerate-meal', {day: nextDay, meal: 'lunch'});
+                  applyWeekPatch(await fetchCurrentWeekData());
+                }
+              }catch(e){ /* best-effort */ }
+            })();
+          }
+        }
       }catch(e){
         note.textContent = "Couldn't add: " + (e.message || "unknown error");
         btn.disabled = false; btn.textContent = "Add this recipe";
@@ -1953,8 +2010,11 @@ body.auth-pending #hub{display:none;}
   });
 
   const DAY_NAMES = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  // undefined for Sunday -- there's no day-8 dinner within this week for a leftover lunch to
+  // point at, so the leftover-lunch cascade (remove/regenerate) below is simply a no-op there.
+  function nextDayName(day){ return DAY_NAMES[DAY_NAMES.indexOf(day) + 1]; }
   const MEAL_FIELDS = ["name","ingredients","method","source","new_or_repeat","authored_by",
-    "prep_time","cook_time","hands_off_time","prep_ahead_note"];
+    "prep_time","cook_time","hands_off_time","prep_ahead_note","is_leftover_lunch"];
 
   // Fetches this signed-in household's own data (RLS scopes every query to auth.uid()
   // automatically — no household_id filter needed anywhere here) and populates

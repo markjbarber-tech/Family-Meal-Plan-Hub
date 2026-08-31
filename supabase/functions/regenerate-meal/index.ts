@@ -20,6 +20,7 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 const CATEGORY_KEYS = ["produce", "meat_deli", "dairy", "pantry", "frozen", "other"];
+const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 function trimIngredients(list: any[]) {
   if (!list || !list.length) return [];
@@ -155,6 +156,19 @@ Deno.serve(async (req) => {
       .filter((m: any) => m.name && !(m.day === day && m.slot === meal))
       .map((m: any) => m.name);
 
+    // For a lunch, the previous day's dinner (if any) is what a "leftovers" framing would point
+    // at -- used both to give the AI real context to decide from and, via is_leftover in its
+    // response, to set meals.is_leftover_lunch so index.html can reliably cascade-remove or
+    // cascade-regenerate this lunch when that dinner is later removed or regenerated (2026-08-27).
+    let prevDinnerName: string | null = null;
+    if (meal === "lunch") {
+      const dayIdx = DAY_NAMES.indexOf(day);
+      if (dayIdx > 0) {
+        const prevDinner = (meals || []).find((m: any) => m.day === DAY_NAMES[dayIdx - 1] && m.slot === "dinner");
+        if (prevDinner && prevDinner.name) prevDinnerName = prevDinner.name;
+      }
+    }
+
     const { data: feedbackRows, error: fErr } = await supabaseClient
       .from("feedback").select("meal_name, kids_ate_it, parent_rating").eq("household_id", householdId).eq("type", "meal_feedback");
     if (fErr) throw fErr;
@@ -191,9 +205,16 @@ Deno.serve(async (req) => {
         week.pantry_ingredients.join(", ") + ". If any conflicts with a stated allergy/dislike, don't force it in — mention the conflict in your board_note instead." : "") +
       (week.budget_saver_mode ? "\n\nBudget Saver Mode is on — if realistic, chain this meal's base off another meal already in the week to shrink the week's shopping list." : "") +
       (meal === "dinner" ? '\n\nEvery ingredient named or implied anywhere in the method must appear in the ingredients array with a real quantity — nothing introduced mid-method that was not listed upfront, and no vague amounts. If this dinner needs a componentized or prep-ahead ingredient (something that itself needs advance prep, like cold cooked rice for a fried rice dish), give it its own early method step with explicit day-before timing rather than assuming it is ready to use, and set prep_ahead_note to a short instruction describing that step (omit the field entirely when there is no such step). Give prep_time and cook_time as separate figures (e.g. "15 min"), plus hands_off_time only for a genuine passive period like marinating or resting (omit it, not an empty string, when there is not one).' : "") +
+      (meal === "lunch"
+        ? (prevDinnerName
+            ? `\n\n${day}'s preceding dinner is "${prevDinnerName}" — this lunch may be leftovers from it if that fits (set "is_leftover": true and "ingredients": [] if so); otherwise give it its own original idea and set "is_leftover": false.`
+            : "\n\nThere is no dinner the day before this one in the current plan to draw leftovers from — give this lunch its own original idea and set \"is_leftover\": false.")
+        : "") +
       "\n\nRespond with this exact JSON shape" + (meal === "dinner"
         ? ':\n{"name": "...", "new": true, "authored_by": "...", "ingredients": [{"name":"...","quantity":<number>,"unit":"...","category":"produce|meat_deli|dairy|pantry|frozen|other","display":"..."}], "method": ["...", "..."], "prep_time": "...", "cook_time": "...", "hands_off_time": "... (omit if none)", "prep_ahead_note": "... (omit if none)","board_note": "one sentence on what this is and why"}'
-        : ' (no method or authored_by needed for lunch/snack):\n{"name": "...", "ingredients": [{"name":"...","quantity":<number>,"unit":"...","category":"produce|meat_deli|dairy|pantry|frozen|other","display":"..."}], "board_note": "one sentence on what this is and why"}');
+        : meal === "lunch"
+          ? ' (no method or authored_by needed for lunch):\n{"name": "...", "ingredients": [{"name":"...","quantity":<number>,"unit":"...","category":"produce|meat_deli|dairy|pantry|frozen|other","display":"..."}], "is_leftover": true|false, "board_note": "one sentence on what this is and why"}'
+          : ' (no method or authored_by needed for snack):\n{"name": "...", "ingredients": [{"name":"...","quantity":<number>,"unit":"...","category":"produce|meat_deli|dairy|pantry|frozen|other","display":"..."}], "board_note": "one sentence on what this is and why"}');
 
     // 2000 (original Code.gs budget) then 3000 both proved too tight -- a live failure on
     // 2026-08-16 captured the raw response mid-truncation: every field was fully written
@@ -214,6 +235,7 @@ Deno.serve(async (req) => {
       new_or_repeat: trimmed.new_or_repeat || null, authored_by: trimmed.authored_by || null,
       prep_time: trimmed.prep_time || null, cook_time: trimmed.cook_time || null,
       hands_off_time: trimmed.hands_off_time || null, prep_ahead_note: trimmed.prep_ahead_note || null,
+      is_leftover_lunch: meal === "lunch" ? !!result.is_leftover : false,
     };
     const { error: upsertErr } = await supabaseClient.from("meals").upsert(upsertRow, { onConflict: "week_id,day,slot" });
     if (upsertErr) throw upsertErr;
