@@ -1036,12 +1036,14 @@ body.auth-pending #hub{display:none;}
         <div class="meal-sub">${day} · ${meal}</div>
         <button class="review-submit-btn" id="genMealBtn"><i class="ti ti-sparkles"></i> Generate a meal</button>
         <button class="favourite-btn add-link-btn" id="linkMealBtn"><i class="ti ti-link"></i> Add from a link</button>
+        <button class="favourite-btn add-link-btn" id="ideaMealBtn"><i class="ti ti-bulb"></i> I have an idea</button>
         <button class="cancel-link" id="cancelAddBtn">Cancel</button>
       </div>`;
     document.getElementById("hub").appendChild(backdrop);
     backdrop.querySelector("#cancelAddBtn").addEventListener("click", ()=> backdrop.remove());
     backdrop.querySelector("#genMealBtn").addEventListener("click", ()=> regenerateMealFlow(day, meal, backdrop));
     backdrop.querySelector("#linkMealBtn").addEventListener("click", ()=> showAddFromLinkForm(day, meal, backdrop));
+    backdrop.querySelector("#ideaMealBtn").addEventListener("click", ()=> showIdeaForm(day, meal, backdrop));
   }
 
   // Shared loading indicator (weekly-board-loading-animation-spec.md): a two-stage
@@ -1237,6 +1239,126 @@ body.auth-pending #hub{display:none;}
         }
       }catch(e){
         note.textContent = "Couldn't add: " + (e.message || "unknown error");
+        btn.disabled = false; btn.textContent = "Add this recipe";
+      }
+    });
+  }
+
+  function showIdeaForm(day, meal, backdrop){
+    const modal = backdrop.querySelector(".modal");
+    modal.innerHTML = `
+      <h3>I have an idea</h3>
+      <div class="meal-sub">${day} · ${meal}</div>
+      <label class="modal-label">What are you thinking?</label>
+      <textarea id="ideaInput" rows="3" placeholder="e.g. beef mince tacos, like a classic 90s crunchy taco dinner"></textarea>
+      <div class="modal-status-note" id="ideaNote"></div>
+      <button class="review-submit-btn" id="researchIdeaBtn"><i class="ti ti-bulb"></i> Research this</button>
+      <button class="cancel-link" id="cancelIdeaBtn">Cancel</button>`;
+    modal.querySelector("#cancelIdeaBtn").addEventListener("click", ()=> backdrop.remove());
+    modal.querySelector("#researchIdeaBtn").addEventListener("click", ()=>{
+      const idea = modal.querySelector("#ideaInput").value.trim();
+      if(!idea){ modal.querySelector("#ideaNote").textContent = "Describe your idea first"; return; }
+      researchMealIdea(day, meal, idea, backdrop);
+    });
+  }
+
+  // previous/feedback are only passed on a "Revise" round -- see showIdeaPreview() below.
+  async function researchMealIdea(day, meal, idea, backdrop, previous, feedback){
+    const modal = backdrop.querySelector(".modal");
+    modal.innerHTML = `<h3>Researching…</h3><div class="meal-sub">${day} · ${meal}</div><div class="loadingSlot"></div>`;
+    const stopLoading = showLoadingIndicator(modal.querySelector(".loadingSlot"), "This can take up to two minutes — keep this tab open.");
+    try{
+      const payload = { day, meal, idea };
+      if(previous){ payload.previous = previous; payload.feedback = feedback; }
+      const result = await callEdgeFunction('suggest-meal-idea', payload);
+      stopLoading();
+      if(result.status === "ok"){
+        showIdeaPreview(day, meal, backdrop, idea, result.meal, result.note);
+      } else {
+        renderIdeaRetry(day, meal, idea, backdrop, result.message || "Unknown error");
+      }
+    }catch(e){
+      stopLoading();
+      renderIdeaRetry(day, meal, idea, backdrop, "Lost the connection while researching — try again.");
+    }
+  }
+
+  function renderIdeaRetry(day, meal, idea, backdrop, message){
+    const modal = backdrop.querySelector(".modal");
+    modal.innerHTML = `
+      <h3>Couldn't research that idea</h3>
+      <div class="meal-sub">${day} · ${meal}</div>
+      <div class="modal-status-note"><i class="ti ti-alert-triangle"></i> ${message}</div>
+      <button class="review-submit-btn" id="retryIdeaBtn">Try again</button>
+      <button class="cancel-link" id="cancelIdeaBtn2">Cancel</button>`;
+    modal.querySelector("#cancelIdeaBtn2").addEventListener("click", ()=> backdrop.remove());
+    modal.querySelector("#retryIdeaBtn").addEventListener("click", ()=> researchMealIdea(day, meal, idea, backdrop));
+  }
+
+  function showIdeaPreview(day, meal, backdrop, idea, proposedMeal, note){
+    const modal = backdrop.querySelector(".modal");
+    modal.innerHTML = `
+      <h3>${proposedMeal.name}</h3>
+      <div class="meal-sub">${day} · ${meal}</div>
+      ${note ? `<p class="confirm-text">${note}</p>` : ''}
+      ${timeEstimateHtml(proposedMeal)}
+      <div class="modal-label">Ingredients</div>
+      <ul class="preview-ingredients">${proposedMeal.ingredients.map(i => `<li>${i.display || i.name}</li>`).join('')}</ul>
+      <div class="modal-status-note" id="ideaConfirmNote"></div>
+      <button class="review-submit-btn" id="confirmIdeaBtn">Add this recipe</button>
+      <label class="modal-label" style="margin-top:12px;">Not quite right? Give feedback and revise</label>
+      <textarea id="ideaFeedbackInput" rows="2" placeholder="e.g. make it spicier, or use chicken instead"></textarea>
+      <button class="favourite-btn add-link-btn" id="reviseIdeaBtn"><i class="ti ti-refresh"></i> Revise</button>
+      <button class="cancel-link" id="cancelIdeaBtn3">Cancel</button>`;
+    modal.querySelector("#cancelIdeaBtn3").addEventListener("click", ()=> backdrop.remove());
+
+    modal.querySelector("#reviseIdeaBtn").addEventListener("click", ()=>{
+      const feedback = modal.querySelector("#ideaFeedbackInput").value.trim();
+      if(!feedback){ modal.querySelector("#ideaConfirmNote").textContent = "Add a note on what to change first"; return; }
+      researchMealIdea(day, meal, idea, backdrop, proposedMeal, feedback);
+    });
+
+    modal.querySelector("#confirmIdeaBtn").addEventListener("click", async ()=>{
+      const btn = modal.querySelector("#confirmIdeaBtn");
+      const confirmNote = modal.querySelector("#ideaConfirmNote");
+      btn.disabled = true; btn.textContent = "Adding…";
+      try{
+        // Mechanical write, no further AI call needed -- suggest-meal-idea already did the
+        // research. Same shape as the external-link confirm handler, except method/authored_by/
+        // prep_ahead_note come from the AI proposal instead of being null, and there's no
+        // source URL since this was synthesized from research rather than one page.
+        const { error } = await supabaseClient.from('meals').update({
+          name: proposedMeal.name, ingredients: proposedMeal.ingredients,
+          method: proposedMeal.method || null, source: null,
+          new_or_repeat: proposedMeal.new_or_repeat || null, authored_by: proposedMeal.authored_by || null,
+          prep_time: proposedMeal.prep_time || null, cook_time: proposedMeal.cook_time || null,
+          hands_off_time: proposedMeal.hands_off_time || null, prep_ahead_note: proposedMeal.prep_ahead_note || null,
+          is_leftover_lunch: meal === 'lunch' ? !!proposedMeal.is_leftover : false
+        }).eq('week_id', currentWeekRowId).eq('day', day).eq('slot', meal);
+        if(error) throw error;
+        applyWeekPatch(await fetchCurrentWeekData());
+        backdrop.remove();
+
+        // Same gap-fill as the other two add-a-meal paths, fire-and-forget like the external-link
+        // flow since this confirm step is itself just a mechanical write.
+        if(meal === 'dinner'){
+          const nextDay = nextDayName(day);
+          if(nextDay){
+            (async () => {
+              try{
+                const { data: nextLunchRows } = await supabaseClient
+                  .from('meals').select('name').eq('week_id', currentWeekRowId).eq('day', nextDay).eq('slot', 'lunch').limit(1);
+                const nextLunchEmpty = !nextLunchRows || !nextLunchRows[0] || !nextLunchRows[0].name;
+                if(nextLunchEmpty){
+                  await callEdgeFunction('regenerate-meal', {day: nextDay, meal: 'lunch'});
+                  applyWeekPatch(await fetchCurrentWeekData());
+                }
+              }catch(e){ /* best-effort */ }
+            })();
+          }
+        }
+      }catch(e){
+        confirmNote.textContent = "Couldn't add: " + (e.message || "unknown error");
         btn.disabled = false; btn.textContent = "Add this recipe";
       }
     });
