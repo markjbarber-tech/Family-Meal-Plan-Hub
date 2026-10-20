@@ -1082,11 +1082,29 @@ body.auth-pending #hub{display:none;}
     return startLoadingAnimation(container.querySelector(".loading-stage"), container.querySelector(".loading-label"), labelText);
   }
 
+  // labelText is either a plain string (shown for the whole wait, original behavior) or an
+  // array of {text, afterMs} stages that advance one at a time -- the last stage's afterMs is
+  // ignored and it just stays put, so a wait that runs long never looks like it's lying/looping.
   function startLoadingAnimation(stageEl, labelEl, labelText){
-    labelEl.textContent = labelText;
     const BAR_MS = 2400;
     const GEAR_MS = 6400;
     let cancelled = false;
+    let labelTimer = null;
+
+    if(Array.isArray(labelText)){
+      let i = 0;
+      const advanceLabel = () => {
+        if(cancelled) return;
+        labelEl.textContent = labelText[i].text;
+        if(i < labelText.length - 1){
+          labelTimer = setTimeout(() => { i++; advanceLabel(); }, labelText[i].afterMs);
+        }
+      };
+      advanceLabel();
+    } else {
+      labelEl.textContent = labelText;
+    }
+
     function loop(){
       if(cancelled) return;
       stageEl.classList.remove('show-gear');
@@ -1099,13 +1117,27 @@ body.auth-pending #hub{display:none;}
       }, BAR_MS);
     }
     loop();
-    return () => { cancelled = true; };
+    return () => { cancelled = true; if(labelTimer) clearTimeout(labelTimer); };
   }
+
+  // Narrates the real steps regenerate-meal takes server-side -- checking the current plan,
+  // household info, and dish history all happen before the single Claude call, which is the
+  // long pole, so the later stages span most of the wait and the last one just holds until the
+  // request resolves rather than claiming a false precise step.
+  const GENERATE_MEAL_STAGES = [
+    { text: "Checking what's already in the plan this week…", afterMs: 2500 },
+    { text: "Reviewing your household's preferences and allergies…", afterMs: 3500 },
+    { text: "Checking past feedback on similar dishes…", afterMs: 4000 },
+    { text: "Asking the board of advisors for ideas…", afterMs: 12000 },
+    { text: "Drafting the recipe and ingredient list…", afterMs: 20000 },
+    { text: "Double-checking quantities and timings…", afterMs: 30000 },
+    { text: "Still working — almost there…", afterMs: 0 },
+  ];
 
   async function regenerateMealFlow(day, meal, backdrop){
     const modal = backdrop.querySelector(".modal");
     modal.innerHTML = `<h3>Generating…</h3><div class="meal-sub" id="genMealSub">${day} · ${meal}</div><div class="loadingSlot"></div>`;
-    const stopLoading = showLoadingIndicator(modal.querySelector(".loadingSlot"), "This can take up to two minutes — keep this tab open.");
+    const stopLoading = showLoadingIndicator(modal.querySelector(".loadingSlot"), GENERATE_MEAL_STAGES);
     try{
       const result = await callEdgeFunction('regenerate-meal', {day, meal});
       if(result.status !== "ok"){
